@@ -1,7 +1,4 @@
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
-import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
+import com.android.aaptcompiler.android.stringToInt
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -16,14 +13,14 @@ apply(from = "$rootDir/gradle/buildVariants.gradle")
 kotlin {
     cocoapods {
         summary = "Shared Module"
-        homepage = ""
+        homepage = "https://github.com/marcinsiwak/BaseKMP"
         version = "1.0"
         ios.deploymentTarget = "16.0"
         framework {
             baseName = "shared-frontend"
         }
     }
-    
+
     sourceSets {
         commonMain.dependencies {
             // put your Multiplatform dependencies here

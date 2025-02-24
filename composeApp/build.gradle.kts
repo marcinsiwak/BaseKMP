@@ -16,6 +16,9 @@ apply(from = "$rootDir/gradle/buildVariants.gradle")
 kotlin {
     cocoapods {
         version = "1.0.0"
+        summary = "Shared Module"
+        homepage = "https://github.com/marcinsiwak/BaseKMP"
+        version = "1.0"
         framework {
             baseName = "ComposeApp"
         }
