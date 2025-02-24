@@ -7,43 +7,18 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.kotlinCocoapods)
+    id("pl.msiwak.convention.android.config")
+    id("pl.msiwak.convention.target.config")
 }
 
 kotlin {
     cocoapods {
-        version = "1.0.0"
+        summary = "Shared Module"
+        homepage = ""
+        version = "1.0"
+        ios.deploymentTarget = "16.0"
         framework {
             baseName = "shared"
-        }
-    }
-
-    androidTarget {
-        @OptIn(ExperimentalKotlinGradlePluginApi::class)
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_11)
-        }
-    }
-    
-    iosX64()
-    iosArm64()
-    iosSimulatorArm64()
-    
-    jvm()
-    
-    @OptIn(ExperimentalWasmDsl::class)
-    wasmJs {
-        browser {
-            val rootDirPath = project.rootDir.path
-            val projectDirPath = project.projectDir.path
-            commonWebpackConfig {
-                devServer = (devServer ?: KotlinWebpackConfig.DevServer()).apply {
-                    static = (static ?: mutableListOf()).apply {
-                        // Serve sources to debug inside browser
-                        add(rootDirPath)
-                        add(projectDirPath)
-                    }
-                }
-            }
         }
     }
     
@@ -56,12 +31,4 @@ kotlin {
 
 android {
     namespace = "pl.msiwak.basekmp.shared"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-    defaultConfig {
-        minSdk = libs.versions.android.minSdk.get().toInt()
-    }
 }

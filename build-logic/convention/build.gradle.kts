@@ -9,7 +9,18 @@ repositories {
 
 gradlePlugin {
     plugins {
-        // todo create and register plugings
+        register("AndroidConfigPlugin") {
+            id = "pl.msiwak.convention.android.config"
+            implementationClass = "pl.msiwak.convention.config.AndroidConfigPlugin"
+        }
+        register("TargetConfigPlugin") {
+            id = "pl.msiwak.convention.target.config"
+            implementationClass = "pl.msiwak.convention.config.TargetConfigPlugin"
+        }
+        register("ReleaseOnlyBuildVariantPlugin ") {
+            id = "pl.msiwak.convention.releaseonly.config"
+            implementationClass = "pl.msiwak.convention.config.ReleaseOnlyBuildVariantPlugin"
+        }
     }
 }
 
