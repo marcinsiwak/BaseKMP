@@ -8,11 +8,11 @@ plugins {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            // put your Multiplatform dependencies here
+            // add libs
         }
     }
 }
 
 android {
-    namespace = "pl.msiwak.basekmp.shared"
+    namespace = "pl.msiwak.basekmp.shared.model"
 }
