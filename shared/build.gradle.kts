@@ -6,9 +6,17 @@ import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.kotlinCocoapods)
 }
 
 kotlin {
+    cocoapods {
+        version = "1.0.0"
+        framework {
+            baseName = "shared"
+        }
+    }
+
     androidTarget {
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
