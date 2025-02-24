@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.androidLibrary)
     id("pl.msiwak.convention.android.config")
     id("pl.msiwak.convention.target.config")
+    id("pl.msiwak.convention.releaseonly.config")
 }
 
 kotlin {

@@ -11,6 +11,8 @@ plugins {
     alias(libs.plugins.kotlinCocoapods)
 }
 
+apply(from = "$rootDir/gradle/buildVariants.gradle")
+
 kotlin {
     cocoapods {
         version = "1.0.0"
