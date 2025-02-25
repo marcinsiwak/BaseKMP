@@ -1,4 +1,4 @@
-import com.android.aaptcompiler.android.stringToInt
+import pl.msiwak.convention.config.baseSetup
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -12,10 +12,7 @@ apply(from = "$rootDir/gradle/buildVariants.gradle")
 
 kotlin {
     cocoapods {
-        summary = "Shared Module"
-        homepage = "https://github.com/marcinsiwak/BaseKMP"
-        version = "1.0"
-        ios.deploymentTarget = "16.0"
+        baseSetup()
         framework {
             baseName = "shared-frontend"
         }

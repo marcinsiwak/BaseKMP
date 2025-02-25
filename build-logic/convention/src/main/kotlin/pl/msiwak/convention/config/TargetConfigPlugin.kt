@@ -47,7 +47,7 @@ fun CocoapodsExtension.baseSetup() {
     summary = "Shared Module"
     homepage = "https://github.com/marcinsiwak/multiplatform"
     version = "1.0"
-    ios.deploymentTarget = "16.0"
+    ios.deploymentTarget = "16.2"
     xcodeConfigurationToNativeBuildType["productionRelease"] =
         org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType.RELEASE
     xcodeConfigurationToNativeBuildType["productionDebug"] =

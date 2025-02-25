@@ -19,9 +19,16 @@ kotlin {
         summary = "Shared Module"
         homepage = "https://github.com/marcinsiwak/BaseKMP"
         version = "1.0"
+        ios.deploymentTarget = "16.2"
         framework {
             baseName = "ComposeApp"
         }
+        xcodeConfigurationToNativeBuildType["productionRelease"] =
+            org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType.RELEASE
+        xcodeConfigurationToNativeBuildType["productionDebug"] =
+            org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType.DEBUG
+        xcodeConfigurationToNativeBuildType["stagingDebug"] =
+            org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType.DEBUG
     }
 
     androidTarget {
