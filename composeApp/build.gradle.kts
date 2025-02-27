@@ -1,6 +1,5 @@
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
+import pl.msiwak.convention.config.baseSetup
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -8,59 +7,25 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinCocoapods)
+    id("pl.msiwak.convention.target.config")
+    id("pl.msiwak.convention.android.config")
+
 }
 
 apply(from = "$rootDir/gradle/buildVariants.gradle")
 
 kotlin {
     cocoapods {
-        version = "1.0.0"
-        summary = "Shared Module"
-        homepage = "https://github.com/marcinsiwak/BaseKMP"
-        version = "1.0"
-        ios.deploymentTarget = "16.2"
-
+        baseSetup()
         podfile = project.file("../iosApp/Podfile")
 
         framework {
             baseName = "ComposeApp"
         }
-        xcodeConfigurationToNativeBuildType["productionRelease"] =
-            org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType.RELEASE
-        xcodeConfigurationToNativeBuildType["productionDebug"] =
-            org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType.DEBUG
-        xcodeConfigurationToNativeBuildType["stagingDebug"] =
-            org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType.DEBUG
     }
-
-    androidTarget {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_17)
-        }
-    }
-
-
-    iosX64()
-    iosArm64()
-    iosSimulatorArm64()
 
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
-        moduleName = "composeApp"
-        browser {
-            val rootDirPath = project.rootDir.path
-            val projectDirPath = project.projectDir.path
-            commonWebpackConfig {
-                outputFileName = "composeApp.js"
-                devServer = (devServer ?: KotlinWebpackConfig.DevServer()).apply {
-                    static = (static ?: mutableListOf()).apply {
-                        // Serve sources to debug inside browser
-                        add(rootDirPath)
-                        add(projectDirPath)
-                    }
-                }
-            }
-        }
         binaries.executable()
     }
 
@@ -86,28 +51,16 @@ kotlin {
 
 android {
     namespace = "pl.msiwak.basekmp"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     defaultConfig {
         applicationId = "pl.msiwak.basekmp"
-        minSdk = libs.versions.android.minSdk.get().toInt()
-        targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
         versionName = "1.0"
-    }
-    packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
     }
     buildTypes {
         getByName("release") {
             isMinifyEnabled = false
         }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
     }
 }
 

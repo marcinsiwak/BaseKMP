@@ -22,12 +22,18 @@ class TargetConfigPlugin : Plugin<Project> {
             iosArm64()
             iosSimulatorArm64()
             jvm()
-//            jvmToolchain(17)
+            jvmToolchain(17)
             wasmJs {
+                if (moduleName.isNullOrEmpty()) {
+                    moduleName = "composeApp"
+                }
                 browser {
                     val rootDirPath = project.rootDir.path
                     val projectDirPath = project.projectDir.path
                     commonWebpackConfig {
+                        if (outputFileName.isNullOrEmpty()) {
+                            outputFileName = "composeApp.js"
+                        }
                         devServer = (devServer ?: KotlinWebpackConfig.DevServer()).apply {
                             static = (static ?: mutableListOf()).apply {
                                 // Serve sources to debug inside browser
@@ -40,12 +46,11 @@ class TargetConfigPlugin : Plugin<Project> {
             }
         }
     }
-
 }
 
 fun CocoapodsExtension.baseSetup() {
     summary = "Shared Module"
-    homepage = "https://github.com/marcinsiwak/multiplatform"
+    homepage = "https://github.com/marcinsiwak/BaseKMP"
     version = "1.0"
     ios.deploymentTarget = "16.2"
     xcodeConfigurationToNativeBuildType["productionRelease"] =
