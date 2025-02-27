@@ -9,7 +9,6 @@ plugins {
     alias(libs.plugins.kotlinCocoapods)
     id("pl.msiwak.convention.target.config")
     id("pl.msiwak.convention.android.config")
-
 }
 
 apply(from = "$rootDir/gradle/buildVariants.gradle")
