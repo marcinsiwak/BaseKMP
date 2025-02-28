@@ -13,7 +13,7 @@ class AndroidConfigPlugin : Plugin<Project> {
         val javaVersion = JavaVersion.VERSION_17
 
         with(project.extensions.getByType<BaseExtension>()) {
-            compileSdkVersion(34)
+            compileSdkVersion(35)
 
             packagingOptions {
                 resources {
@@ -23,7 +23,7 @@ class AndroidConfigPlugin : Plugin<Project> {
 
             with(defaultConfig) {
                 minSdk = 24
-                targetSdk = 34
+                targetSdk = 35
             }
 
             with(compileOptions) {
