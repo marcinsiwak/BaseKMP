@@ -16,6 +16,7 @@ ktor = "3.0.3"
 logback = "1.5.16"
 ksp = "2.0.21-1.0.25"
 buildKonfig = "0.17.0"
+koin = "4.1.0-Beta1"
 compose-navigation = "2.8.0-alpha10"
 
 [libraries]
@@ -35,6 +36,11 @@ ktor-server-netty = { module = "io.ktor:ktor-server-netty-jvm", version.ref = "k
 
 compose-navigation = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "compose-navigation" }
 kotlinx-serialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
+
+koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
+koin-test = { module = "io.insert-koin:koin-test", version.ref = "koin" }
+koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
+koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koin" }
 
 # Gradle scripts depdendecies
 gradle-ksp = { module = "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin", version.ref = "ksp" }

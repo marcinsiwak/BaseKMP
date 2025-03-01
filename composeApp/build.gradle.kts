@@ -35,6 +35,11 @@ kotlin {
             implementation(libs.androidx.activity.compose)
         }
         commonMain.dependencies {
+            implementation(projects.sharedFrontend)
+            implementation(projects.sharedFrontend.navigation)
+
+            implementation(libs.koin.core)
+            implementation(libs.koin.compose)
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material)
@@ -42,8 +47,6 @@ kotlin {
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
             implementation(libs.compose.navigation)
-            implementation(projects.sharedFrontend)
-            implementation(projects.sharedFrontend.navigation)
         }
     }
 }
