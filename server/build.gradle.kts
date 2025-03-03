@@ -14,9 +14,12 @@ application {
 dependencies {
     implementation(projects.shared)
     implementation(projects.shared.model)
+    implementation(projects.server.domain)
+    implementation(projects.server.data)
     implementation(projects.server.database)
     implementation(projects.server.routing)
 
     implementation(libs.ktor.server.core)
     implementation(libs.ktor.server.netty)
+    implementation(libs.koin.ktor)
 }
