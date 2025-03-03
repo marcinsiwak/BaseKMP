@@ -17,6 +17,9 @@ ksp = "2.0.21-1.0.25"
 buildKonfig = "0.17.0"
 koin = "4.1.0-Beta1"
 compose-navigation = "2.8.0-alpha13"
+exposed = "0.53.0"
+postgresql_driver_version = "42.7.2"
+flyway_version = "8.5.4"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -32,6 +35,12 @@ androidx-activity-compose = { module = "androidx.activity:activity-compose", ver
 logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 ktor-server-core = { module = "io.ktor:ktor-server-core-jvm", version.ref = "ktor" }
 ktor-server-netty = { module = "io.ktor:ktor-server-netty-jvm", version.ref = "ktor" }
+exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed" }
+exposed-dao = { module = "org.jetbrains.exposed:exposed-dao", version.ref = "exposed" }
+exposed-kotlin-datetime = { module = "org.jetbrains.exposed:exposed-kotlin-datetime", version.ref = "exposed" }
+exposed-jdbc = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "exposed" }
+postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql_driver_version" }
+flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway_version" }
 
 compose-navigation = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "compose-navigation" }
 kotlinx-serialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }

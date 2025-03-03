@@ -30,9 +30,13 @@ dependencyResolutionManagement {
 }
 
 include(":composeApp")
-include(":server")
 include(":shared")
 include(":shared:model")
 include(":shared-frontend")
 include(":shared-frontend:buildConfig")
 include(":shared-frontend:navigation")
+include(":server")
+include(":server:data")
+include(":server:domain")
+include(":server:database")
+include(":server:routing")

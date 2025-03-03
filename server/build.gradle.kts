@@ -13,8 +13,10 @@ application {
 
 dependencies {
     implementation(projects.shared)
-    implementation(libs.logback)
+    implementation(projects.shared.model)
+    implementation(projects.server.database)
+    implementation(projects.server.routing)
+
     implementation(libs.ktor.server.core)
     implementation(libs.ktor.server.netty)
-    testImplementation(libs.kotlin.test.junit)
 }
