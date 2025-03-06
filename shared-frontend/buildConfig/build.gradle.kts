@@ -28,7 +28,7 @@ kotlin {
 }
 
 buildkonfig {
-    packageName = "pl.msiwak.basekmp.buildConfig"
+    packageName = "pl.msiwak.fantasyleague.buildConfig"
 
     defaultConfigs {
         buildConfigField(STRING, "BUILD_FLAVOUR", "productionDebug")
@@ -94,7 +94,7 @@ tasks.create("setupBuildKonfig") {
 tasks.preBuild.dependsOn("setupBuildKonfig")
 
 android {
-    namespace = "pl.msiwak.basekmp.buildConfig"
+    namespace = "pl.msiwak.fantasyleague.buildConfig"
 }
 
 private fun BuildKonfigExtension.setupProductionReleaseTargets() {

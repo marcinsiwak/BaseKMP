@@ -26,5 +26,5 @@ kotlin {
 }
 
 android {
-    namespace = "pl.msiwak.basekmp.shared"
+    namespace = "pl.msiwak.fantasyleague.shared"
 }

@@ -52,10 +52,10 @@ kotlin {
 }
 
 android {
-    namespace = "pl.msiwak.basekmp"
+    namespace = "pl.msiwak.fantasyleague"
 
     defaultConfig {
-        applicationId = "pl.msiwak.basekmp"
+        applicationId = "pl.msiwak.fantasyleague"
         versionCode = 1
         versionName = "1.0"
     }

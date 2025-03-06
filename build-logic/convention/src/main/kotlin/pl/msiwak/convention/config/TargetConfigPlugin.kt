@@ -50,7 +50,7 @@ class TargetConfigPlugin : Plugin<Project> {
 
 fun CocoapodsExtension.baseSetup() {
     summary = "Shared Module"
-    homepage = "https://github.com/marcinsiwak/BaseKMP"
+    homepage = "https://github.com/marcinsiwak/FantasyLeague"
     version = "1.0"
     ios.deploymentTarget = "16.2"
     xcodeConfigurationToNativeBuildType["productionRelease"] =

@@ -4,10 +4,10 @@ plugins {
     application
 }
 
-group = "pl.msiwak.basekmp"
+group = "pl.msiwak.fantasyleague"
 version = "1.0.0"
 application {
-    mainClass.set("pl.msiwak.basekmp.ApplicationKt")
+    mainClass.set("pl.msiwak.fantasyleague.ApplicationKt")
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=${extra["io.ktor.development"] ?: "false"}")
 }
 

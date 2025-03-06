@@ -1,4 +1,4 @@
-rootProject.name = "KMPBaseProject"
+rootProject.name = "FantasyLeague"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
