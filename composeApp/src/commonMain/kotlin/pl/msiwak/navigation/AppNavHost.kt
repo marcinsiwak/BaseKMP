@@ -18,6 +18,7 @@ fun AppNavHost(
         with(navigationProvider) {
             screenA.create(navController, this@NavHost)
             screenB.create(navController, this@NavHost)
+            createTypeGraph.create(navController, this@NavHost)
         }
     }
 }

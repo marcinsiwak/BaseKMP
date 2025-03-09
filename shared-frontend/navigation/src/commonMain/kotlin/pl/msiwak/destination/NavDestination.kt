@@ -21,4 +21,13 @@ sealed class NavDestination {
         @Serializable
         data class Screen(val name: String = "") : ScreenBDestination()
     }
+
+    @Serializable
+    sealed class CreateTypeDestination : NavDestination() {
+        @Serializable
+        data object Graph : ScreenBDestination()
+
+        @Serializable
+        data object Screen : ScreenBDestination()
+    }
 }

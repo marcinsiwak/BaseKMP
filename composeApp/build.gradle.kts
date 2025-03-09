@@ -37,9 +37,11 @@ kotlin {
         commonMain.dependencies {
             implementation(projects.sharedFrontend)
             implementation(projects.sharedFrontend.navigation)
+            implementation(projects.sharedFrontend.uiCreateType)
 
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
+            implementation(libs.koin.compose.viewModel)
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material)
