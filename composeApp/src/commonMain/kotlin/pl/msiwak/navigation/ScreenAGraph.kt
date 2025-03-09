@@ -16,8 +16,8 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import fantasyleague.composeapp.generated.resources.Res
-import fantasyleague.composeapp.generated.resources.compose_multiplatform
+import fantasyleague.shared_frontend.common_resources.generated.resources.Res
+import fantasyleague.shared_frontend.common_resources.generated.resources.compose_multiplatform
 import org.jetbrains.compose.resources.painterResource
 import pl.msiwak.Greeting
 import pl.msiwak.destination.NavDestination

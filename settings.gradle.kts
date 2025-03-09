@@ -37,6 +37,7 @@ include(":shared-frontend:buildConfig")
 include(":shared-frontend:navigation")
 include(":shared-frontend:ui-create-type")
 include(":shared-frontend:common-model")
+include(":shared-frontend:common-resources")
 
 include(":server")
 include(":server:data")

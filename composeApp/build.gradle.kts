@@ -38,6 +38,7 @@ kotlin {
             implementation(projects.sharedFrontend)
             implementation(projects.sharedFrontend.navigation)
             implementation(projects.sharedFrontend.uiCreateType)
+            implementation(projects.sharedFrontend.commonResources)
 
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
