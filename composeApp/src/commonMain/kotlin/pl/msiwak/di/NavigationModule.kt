@@ -4,7 +4,7 @@ import org.koin.dsl.module
 import pl.msiwak.navigation.NavigationProvider
 import pl.msiwak.navigation.ScreenAGraph
 import pl.msiwak.navigation.ScreenBGraph
-import pl.msiwak.ui.createtype.graph.CreateTypeGraph
+import pl.msiwak.ui.createprediction.graph.CreateTypeGraph
 
 internal val navigationModule = module {
     single { ScreenAGraph() } // remove during development

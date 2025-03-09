@@ -24,6 +24,7 @@ kotlin {
         commonMain.dependencies {
             implementation(projects.sharedFrontend.navigation)
             implementation(projects.sharedFrontend.commonModel)
+            implementation(projects.sharedFrontend.commonResources)
 
             implementation(compose.runtime)
             implementation(compose.foundation)

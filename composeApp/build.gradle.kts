@@ -37,7 +37,7 @@ kotlin {
         commonMain.dependencies {
             implementation(projects.sharedFrontend)
             implementation(projects.sharedFrontend.navigation)
-            implementation(projects.sharedFrontend.uiCreateType)
+            implementation(projects.sharedFrontend.uiCreatePrediction)
             implementation(projects.sharedFrontend.commonResources)
 
             implementation(libs.koin.core)

@@ -35,7 +35,7 @@ include(":shared:model")
 include(":shared-frontend")
 include(":shared-frontend:buildConfig")
 include(":shared-frontend:navigation")
-include(":shared-frontend:ui-create-type")
+include(":shared-frontend:ui-create-prediction")
 include(":shared-frontend:common-model")
 include(":shared-frontend:common-resources")
 

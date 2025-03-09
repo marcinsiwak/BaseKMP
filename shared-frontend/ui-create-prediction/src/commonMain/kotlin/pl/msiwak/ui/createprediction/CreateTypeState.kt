@@ -1,4 +1,4 @@
-package pl.msiwak.ui.createtype
+package pl.msiwak.ui.createprediction
 
 import pl.msiwak.common.model.Player
 

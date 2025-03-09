@@ -1,4 +1,4 @@
-package pl.msiwak.ui.createtype
+package pl.msiwak.ui.createprediction
 
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,13 +39,20 @@ class CreateTypeViewModel() : ViewModel() {
     fun onUiAction(action: CreateTypeUiAction) {
         when (action) {
             is CreateTypeUiAction.PlayerPicked -> onPlayerPicked(action.pos)
+            CreateTypeUiAction.CreatePrediction -> Unit
         }
     }
 
     private fun onPlayerPicked(pos: Int) {
-        viewState.value.players.mapIndexed() { index, item ->
+        val isPickedList = viewState.value.players.filter { it.isPicked }
+        viewState.value.players.mapIndexed { index, item ->
             if (index == pos) {
-                item.copy(isPicked = true)
+                if (item.isPicked) {
+                    item.copy(isPicked = false)
+                } else {
+                    if (isPickedList.size == 5) return
+                    item.copy(isPicked = true)
+                }
             } else {
                 item.copy()
             }

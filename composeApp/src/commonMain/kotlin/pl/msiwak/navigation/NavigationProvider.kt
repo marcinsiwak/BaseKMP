@@ -1,6 +1,6 @@
 package pl.msiwak.navigation
 
-import pl.msiwak.ui.createtype.graph.CreateTypeGraph
+import pl.msiwak.ui.createprediction.graph.CreateTypeGraph
 
 data class NavigationProvider(
     val screenA: ScreenAGraph,
