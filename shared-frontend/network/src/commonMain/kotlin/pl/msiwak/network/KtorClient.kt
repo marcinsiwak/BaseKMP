@@ -27,6 +27,7 @@ class KtorClient(engine: EngineProvider) {
                 logger = object : Logger {
                     override fun log(message: String) {
 //                        KermitLogger.i("HTTP Client: $message")
+                        println("OUTPUT: $message")
                     }
                 }
                 sanitizeHeader { header -> header == HttpHeaders.Authorization }

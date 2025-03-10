@@ -4,11 +4,13 @@ plugins {
     application
 }
 
-group = "pl.msiwak.fantasyleague"
+group = "pl.msiwak"
 version = "1.0.0"
 application {
-    mainClass.set("pl.msiwak.fantasyleague.ApplicationKt")
-    applicationDefaultJvmArgs = listOf("-Dio.ktor.development=${extra["io.ktor.development"] ?: "false"}")
+    mainClass.set("pl.msiwak.ApplicationKt")
+
+    val isDevelopment: Boolean = project.ext.has("development")
+    applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
 }
 
 dependencies {
@@ -22,5 +24,9 @@ dependencies {
 
     implementation(libs.ktor.server.core)
     implementation(libs.ktor.server.netty)
+    implementation(libs.ktor.server.config.yaml)
+    implementation(libs.ktor.server.contentNegotiation)
+    implementation(libs.ktor.server.json)
+    implementation(libs.koin.logger.slf4j)
     implementation(libs.koin.ktor)
 }

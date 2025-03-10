@@ -16,7 +16,7 @@ class CreateTypeViewModel(private val getPlayersUseCase: GetPlayersUseCase) : Vi
                 val players = getPlayersUseCase.invoke()
                 _viewState.update { it.copy(players = players) }
             }.onFailure {
-                println("OUTPUT: ${it.message}")
+                println("OUTPUT: ${it.cause} ${it.message}")
             }
         }
     }
