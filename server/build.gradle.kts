@@ -18,6 +18,7 @@ dependencies {
     implementation(projects.server.data)
     implementation(projects.server.database)
     implementation(projects.server.routing)
+    implementation(projects.server.network)
 
     implementation(libs.ktor.server.core)
     implementation(libs.ktor.server.netty)

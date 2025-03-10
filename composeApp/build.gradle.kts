@@ -39,6 +39,11 @@ kotlin {
             implementation(projects.sharedFrontend.navigation)
             implementation(projects.sharedFrontend.uiCreatePrediction)
             implementation(projects.sharedFrontend.commonResources)
+            implementation(projects.sharedFrontend.commonModel)
+            implementation(projects.sharedFrontend.data)
+            implementation(projects.sharedFrontend.domain)
+            implementation(projects.sharedFrontend.domainImpl)
+            implementation(projects.sharedFrontend.network)
 
             implementation(libs.koin.core)
             implementation(libs.koin.compose)

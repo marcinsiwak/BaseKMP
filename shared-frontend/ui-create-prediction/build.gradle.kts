@@ -25,6 +25,7 @@ kotlin {
             implementation(projects.sharedFrontend.navigation)
             implementation(projects.sharedFrontend.commonModel)
             implementation(projects.sharedFrontend.commonResources)
+            implementation(projects.sharedFrontend.domain)
 
             implementation(compose.runtime)
             implementation(compose.foundation)

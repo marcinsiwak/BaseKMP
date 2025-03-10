@@ -5,5 +5,5 @@ import org.koin.dsl.module
 import pl.msiwak.ui.createprediction.CreateTypeViewModel
 
 internal val viewModelModule = module {
-    viewModel { CreateTypeViewModel() }
+    viewModel { CreateTypeViewModel(get()) }
 }
