@@ -7,7 +7,6 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 object DatabaseFactory {
     fun init(url: String, user: String, password: String) {
-
         Flyway.configure().baselineOnMigrate(true).dataSource(url, user, password).load().also {
             it.migrate()
         }

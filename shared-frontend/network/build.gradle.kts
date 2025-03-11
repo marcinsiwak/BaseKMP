@@ -23,7 +23,6 @@ kotlin {
             androidMain.dependencies {
                 implementation(libs.ktor.android)
                 implementation(libs.ktor.cio)
-
             }
             commonMain.dependencies {
                 implementation(projects.shared.model)

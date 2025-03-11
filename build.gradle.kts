@@ -12,6 +12,8 @@ plugins {
     alias(libs.plugins.detekt)
 }
 
+private val detektFormattingLib = libs.detekt.formatting
+
 subprojects {
     apply(plugin = "org.jlleitschuh.gradle.ktlint")
     apply(plugin = "io.gitlab.arturbosch.detekt")
@@ -36,13 +38,17 @@ subprojects {
                 element.file.path.contains("Buildkonfig/")
             }
             exclude { element ->
-                element.file.name.contains("**/main.kt")
+                element.file.path.endsWith("main.kt")
             }
             include("**/kotlin/**")
         }
     }
+
+    dependencies {
+        detektPlugins(detektFormattingLib)
+    }
 }
 
-dependencies {
-    detektPlugins(libs.detekt.formatting)
+dependencyLocking {
+    lockAllConfigurations()
 }

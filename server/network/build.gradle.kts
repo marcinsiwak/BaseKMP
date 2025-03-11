@@ -3,6 +3,5 @@ plugins {
 }
 
 dependencies {
-
-
+    // add dependencies
 }

@@ -25,7 +25,6 @@ kotlin {
             implementation(projects.shared.model)
 
             implementation(libs.kotlinx.coroutines)
-
         }
     }
 }

@@ -33,7 +33,6 @@ import pl.msiwak.common.model.Player
 
 @Composable
 fun CreatePredictionScreen(viewModel: CreatePredictionViewModel = koinInject()) {
-
     CreatePredictionScreenContent(
         viewState = viewModel.viewState.collectAsState().value,
         onUiAction = viewModel::onUiAction
@@ -72,7 +71,6 @@ fun CreatePredictionScreenContent(viewState: CreatePredictionState, onUiAction: 
         }
     )
 }
-
 
 @Composable
 private fun PlayerItem(player: Player, onPlayerPicked: (Player) -> Unit) {

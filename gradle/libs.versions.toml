@@ -22,7 +22,7 @@ postgresql_driver_version = "42.7.2"
 flyway_version = "8.5.4"
 kotlinx-coroutines = "1.10.1"
 ktlint = "11.5.1"
-detekt = "1.23.7"
+detekt = "1.23.8"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }

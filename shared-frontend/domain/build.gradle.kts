@@ -22,7 +22,6 @@ kotlin {
         commonMain.dependencies {
             implementation(projects.sharedFrontend.data)
             implementation(projects.sharedFrontend.commonModel)
-
         }
     }
 }

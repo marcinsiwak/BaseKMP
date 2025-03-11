@@ -3,7 +3,7 @@ package pl.msiwak.data.player
 import pl.msiwak.network.player.PlayersService
 import pl.msiwak.shared.model.player.ApiPlayer
 
-
+@Suppress("UnusedPrivateProperty")
 class PlayerRepository(private val playerService: PlayersService) {
 
     fun getPlayers(): List<ApiPlayer> {
