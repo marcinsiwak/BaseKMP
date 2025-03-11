@@ -7,7 +7,6 @@ import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import kotlinx.serialization.json.Json
 import org.koin.ktor.plugin.Koin
 import org.koin.logger.slf4jLogger
-import pl.msiwak.database.DatabaseFactory
 import pl.msiwak.di.databaseModule
 import pl.msiwak.di.domainModule
 import pl.msiwak.di.networkModule

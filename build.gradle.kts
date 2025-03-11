@@ -8,4 +8,41 @@ plugins {
     alias(libs.plugins.kotlinJvm) apply false
     alias(libs.plugins.kotlinMultiplatform) apply false
     alias(libs.plugins.kotlinCocoapods) apply false
+    alias(libs.plugins.ktlint)
+    alias(libs.plugins.detekt)
+}
+
+subprojects {
+    apply(plugin = "org.jlleitschuh.gradle.ktlint")
+    apply(plugin = "io.gitlab.arturbosch.detekt")
+
+    detekt {
+        buildUponDefaultConfig = true
+        allRules = false
+        ignoreFailures = false
+        parallel = true
+        config.setFrom(file("$rootDir/config/detekt/detekt.yml"))
+    }
+
+    configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
+        filter {
+            exclude { element ->
+                element.file.path.contains("generated/")
+            }
+            exclude { element ->
+                element.file.path.contains("buildkonfig/")
+            }
+            exclude { element ->
+                element.file.path.contains("Buildkonfig/")
+            }
+            exclude { element ->
+                element.file.name.contains("**/main.kt")
+            }
+            include("**/kotlin/**")
+        }
+    }
+}
+
+dependencies {
+    detektPlugins(libs.detekt.formatting)
 }

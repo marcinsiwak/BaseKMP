@@ -1,7 +1,6 @@
 package pl.msiwak
 
 import android.os.Build
-import pl.msiwak.Platform
 
 class AndroidPlatform : Platform {
     override val name: String = "Android ${Build.VERSION.SDK_INT}"
