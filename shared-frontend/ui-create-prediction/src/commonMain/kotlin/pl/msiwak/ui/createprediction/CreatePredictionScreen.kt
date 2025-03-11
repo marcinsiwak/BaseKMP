@@ -32,16 +32,16 @@ import org.koin.compose.koinInject
 import pl.msiwak.common.model.Player
 
 @Composable
-fun CreateTypeScreen(viewModel: CreateTypeViewModel = koinInject()) {
+fun CreatePredictionScreen(viewModel: CreatePredictionViewModel = koinInject()) {
 
-    CreateTypeScreenContent(
+    CreatePredictionScreenContent(
         viewState = viewModel.viewState.collectAsState().value,
         onUiAction = viewModel::onUiAction
     )
 }
 
 @Composable
-fun CreateTypeScreenContent(viewState: CreateTypeState, onUiAction: (CreateTypeUiAction) -> Unit) {
+fun CreatePredictionScreenContent(viewState: CreatePredictionState, onUiAction: (CreatePredictionUiAction) -> Unit) {
     Scaffold(
         content = {
             Column(
@@ -56,14 +56,14 @@ fun CreateTypeScreenContent(viewState: CreateTypeState, onUiAction: (CreateTypeU
                         PlayerItem(
                             player = player,
                             onPlayerPicked = {
-                                onUiAction(CreateTypeUiAction.PlayerPicked(index))
+                                onUiAction(CreatePredictionUiAction.PlayerPicked(index))
                             }
                         )
                     }
                 }
                 Button(
                     onClick = {
-                        onUiAction(CreateTypeUiAction.CreatePrediction)
+                        onUiAction(CreatePredictionUiAction.CreatePrediction)
                     }
                 ) {
                     Text("Create")

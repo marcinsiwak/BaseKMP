@@ -6,17 +6,17 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import pl.msiwak.destination.NavDestination
 import pl.msiwak.graph.NavigationGraph
-import pl.msiwak.ui.createprediction.CreateTypeScreen
+import pl.msiwak.ui.createprediction.CreatePredictionScreen
 
-class CreateTypeGraph : NavigationGraph {
+class CreatePredictionGraph : NavigationGraph {
 
     override fun create(
         navController: NavHostController,
         navGraphBuilder: NavGraphBuilder
     ) {
-        navGraphBuilder.navigation<NavDestination.CreateTypeDestination.Graph>(startDestination = NavDestination.CreateTypeDestination.Screen) {
-            composable<NavDestination.CreateTypeDestination.Screen> {
-                CreateTypeScreen()
+        navGraphBuilder.navigation<NavDestination.CreatePredictionDestination.Graph>(startDestination = NavDestination.CreatePredictionDestination.Screen) {
+            composable<NavDestination.CreatePredictionDestination.Screen> {
+                CreatePredictionScreen()
             }
         }
     }

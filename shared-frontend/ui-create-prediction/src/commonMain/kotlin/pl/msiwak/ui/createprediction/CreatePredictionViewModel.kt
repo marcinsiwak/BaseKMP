@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import pl.msiwak.domain.player.GetPlayersUseCase
 
-class CreateTypeViewModel(private val getPlayersUseCase: GetPlayersUseCase) : ViewModel() {
+class CreatePredictionViewModel(private val getPlayersUseCase: GetPlayersUseCase) : ViewModel() {
 
     init {
         viewModelScope.launch {
@@ -21,13 +21,13 @@ class CreateTypeViewModel(private val getPlayersUseCase: GetPlayersUseCase) : Vi
         }
     }
 
-    private val _viewState = MutableStateFlow(CreateTypeState())
+    private val _viewState = MutableStateFlow(CreatePredictionState())
     val viewState = _viewState.asStateFlow()
 
-    fun onUiAction(action: CreateTypeUiAction) {
+    fun onUiAction(action: CreatePredictionUiAction) {
         when (action) {
-            is CreateTypeUiAction.PlayerPicked -> onPlayerPicked(action.pos)
-            CreateTypeUiAction.CreatePrediction -> Unit
+            is CreatePredictionUiAction.PlayerPicked -> onPlayerPicked(action.pos)
+            CreatePredictionUiAction.CreatePrediction -> Unit
         }
     }
 
