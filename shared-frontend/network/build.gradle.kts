@@ -40,5 +40,5 @@ kotlin {
 }
 
 android {
-    namespace = "pl.msiwak.fantasyleague.network"
+    namespace = "pl.msiwak.baseKMP.network"
 }

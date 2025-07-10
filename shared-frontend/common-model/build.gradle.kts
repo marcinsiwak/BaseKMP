@@ -36,5 +36,5 @@ kotlin {
 }
 
 android {
-    namespace = "pl.msiwak.fantasyleague.common.model"
+    namespace = "pl.msiwak.baseKMP.common.model"
 }

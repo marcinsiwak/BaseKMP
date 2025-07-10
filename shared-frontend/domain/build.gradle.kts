@@ -27,5 +27,5 @@ kotlin {
 }
 
 android {
-    namespace = "pl.msiwak.fantasyleague.domain"
+    namespace = "pl.msiwak.baseKMP.domain"
 }

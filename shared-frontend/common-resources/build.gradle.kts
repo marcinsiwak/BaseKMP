@@ -38,5 +38,5 @@ compose.resources {
 }
 
 android {
-    namespace = "pl.msiwak.fantasyleague.common.resources"
+    namespace = "pl.msiwak.baseKMP.common.resources"
 }

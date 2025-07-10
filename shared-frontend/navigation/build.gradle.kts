@@ -28,5 +28,5 @@ kotlin {
 }
 
 android {
-    namespace = "pl.msiwak.fantasyleague.navigation"
+    namespace = "pl.msiwak.baseKMP.navigation"
 }

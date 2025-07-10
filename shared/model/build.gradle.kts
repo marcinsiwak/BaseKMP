@@ -16,5 +16,5 @@ kotlin {
 }
 
 android {
-    namespace = "pl.msiwak.fantasyleague.shared.model"
+    namespace = "pl.msiwak.baseKMP.shared.model"
 }

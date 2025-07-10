@@ -25,8 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEachIndexed
-import fantasyleague.shared_frontend.common_resources.generated.resources.Res
-import fantasyleague.shared_frontend.common_resources.generated.resources.ic_check
+import basekmp.shared_frontend.common_resources.generated.resources.Res
+import basekmp.shared_frontend.common_resources.generated.resources.ic_check
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
 import pl.msiwak.common.model.Player

@@ -40,5 +40,5 @@ kotlin {
 }
 
 android {
-    namespace = "pl.msiwak.fantasyleague.ui.createprediction"
+    namespace = "pl.msiwak.baseKMP.ui.createprediction"
 }
