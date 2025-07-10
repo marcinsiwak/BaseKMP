@@ -1,0 +1,6 @@
+# Mobile Presentation Architecture Example (MVI Pattern)
+
+- ViewModel - CreatePredictionViewModel
+- Screen - CreatePredictionScreen
+- ViewState - CreatePredictionViewState
+- UiAction - CreatePredictionUiAction

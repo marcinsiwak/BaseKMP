@@ -1,0 +1,19 @@
+# Project Architecture Example
+
+shared-frontend/ui (UI Modules)
+└── CreatePredictionViewModel
+      │
+      ▼
+shared-frontend/domain
+└── GetPlayersUseCase
+      │
+      ▼
+shared-frontend/data
+└── PlayerRepository
+      │
+      ▼
+shared-frontend/network
+└── PlayerService
+      │
+      ▼
+└── PlayerApi
