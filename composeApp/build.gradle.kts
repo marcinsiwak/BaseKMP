@@ -37,7 +37,7 @@ kotlin {
         commonMain.dependencies {
             implementation(projects.sharedFrontend)
             implementation(projects.sharedFrontend.navigation)
-            implementation(projects.sharedFrontend.uiCreatePrediction)
+            implementation(projects.sharedFrontend.uiExample)
             implementation(projects.sharedFrontend.commonResources)
             implementation(projects.sharedFrontend.commonModel)
             implementation(projects.sharedFrontend.data)

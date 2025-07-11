@@ -18,7 +18,7 @@ fun AppNavHost(
         with(navigationProvider) {
             screenA.create(navController, this@NavHost)
             screenB.create(navController, this@NavHost)
-            createPredictionGraph.create(navController, this@NavHost)
+            exampleGraph.create(navController, this@NavHost)
         }
     }
 }

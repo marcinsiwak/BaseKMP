@@ -23,11 +23,11 @@ sealed class NavDestination {
     }
 
     @Serializable
-    sealed class CreatePredictionDestination : NavDestination() {
+    sealed class ExampleDestination : NavDestination() {
         @Serializable
-        data object Graph : CreatePredictionDestination()
+        data object Graph : ExampleDestination()
 
         @Serializable
-        data object Screen : CreatePredictionDestination()
+        data object Screen : ExampleDestination()
     }
 }

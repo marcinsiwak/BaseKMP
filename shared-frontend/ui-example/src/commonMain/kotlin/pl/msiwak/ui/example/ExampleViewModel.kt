@@ -1,4 +1,4 @@
-package pl.msiwak.ui.createprediction
+package pl.msiwak.ui.example
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import pl.msiwak.domain.player.GetPlayersUseCase
 
-class CreatePredictionViewModel(private val getPlayersUseCase: GetPlayersUseCase) : ViewModel() {
+class ExampleViewModel(private val getPlayersUseCase: GetPlayersUseCase) : ViewModel() {
 
     init {
         viewModelScope.launch {
@@ -21,13 +21,13 @@ class CreatePredictionViewModel(private val getPlayersUseCase: GetPlayersUseCase
         }
     }
 
-    private val _viewState = MutableStateFlow(CreatePredictionState())
+    private val _viewState = MutableStateFlow(ExampleState())
     val viewState = _viewState.asStateFlow()
 
-    fun onUiAction(action: CreatePredictionUiAction) {
+    fun onUiAction(action: ExampleUiAction) {
         when (action) {
-            is CreatePredictionUiAction.PlayerPicked -> onPlayerPicked(action.pos)
-            CreatePredictionUiAction.CreatePrediction -> Unit
+            is ExampleUiAction.PlayerPicked -> onPlayerPicked(action.pos)
+            ExampleUiAction.CreateExample -> Unit
         }
     }
 

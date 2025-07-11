@@ -1,4 +1,4 @@
-package pl.msiwak.ui.createprediction
+package pl.msiwak.ui.example
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -32,15 +32,15 @@ import org.koin.compose.koinInject
 import pl.msiwak.common.model.Player
 
 @Composable
-fun CreatePredictionScreen(viewModel: CreatePredictionViewModel = koinInject()) {
-    CreatePredictionScreenContent(
+fun ExampleScreen(viewModel: ExampleViewModel = koinInject()) {
+    ExampleScreenContent(
         viewState = viewModel.viewState.collectAsState().value,
         onUiAction = viewModel::onUiAction
     )
 }
 
 @Composable
-fun CreatePredictionScreenContent(viewState: CreatePredictionState, onUiAction: (CreatePredictionUiAction) -> Unit) {
+fun ExampleScreenContent(viewState: ExampleState, onUiAction: (ExampleUiAction) -> Unit) {
     Scaffold(
         content = {
             Column(
@@ -55,14 +55,14 @@ fun CreatePredictionScreenContent(viewState: CreatePredictionState, onUiAction: 
                         PlayerItem(
                             player = player,
                             onPlayerPicked = {
-                                onUiAction(CreatePredictionUiAction.PlayerPicked(index))
+                                onUiAction(ExampleUiAction.PlayerPicked(index))
                             }
                         )
                     }
                 }
                 Button(
                     onClick = {
-                        onUiAction(CreatePredictionUiAction.CreatePrediction)
+                        onUiAction(ExampleUiAction.CreateExample)
                     }
                 ) {
                     Text("Create")

@@ -16,7 +16,7 @@ kotlin {
     cocoapods {
         baseSetup()
         framework {
-            baseName = "ui-create-type"
+            baseName = "ui-example"
         }
     }
 
@@ -40,5 +40,5 @@ kotlin {
 }
 
 android {
-    namespace = "pl.msiwak.baseKMP.ui.createprediction"
+    namespace = "pl.msiwak.baseKMP.ui.example"
 }

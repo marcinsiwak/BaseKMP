@@ -40,7 +40,7 @@ class ScreenAGraph : NavigationGraph {
                             Text("Click me!")
                         }
                         Button(onClick = {
-                            navController.navigate(NavDestination.CreatePredictionDestination.Screen)
+                            navController.navigate(NavDestination.ExampleDestination.Screen)
                         }) {
                             Text("Navigate to Screen B")
                         }
