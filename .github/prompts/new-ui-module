@@ -1,0 +1,7 @@
+# Create new UI module
+- Follow the implementation of ui-example module and create a new module with the same structure.
+- Add build.gradle and update it with necessary dependencies which are already used in project
+- Update composeApp/src/commonMain/kotlin/pl/msiwak/di/ViewModelModule.kt with new ViewModel
+- Update shared-frontend/navigation/src/commonMain/kotlin/pl/msiwak/destination/NavDestination.kt basing on ExampleDestination
+- Update composeApp/src/commonMain/kotlin/pl/msiwak/navigation/NavigationGraphs.kt with new NavigationGraph
+- Update composeApp module's build.gradle with missing dependencies
