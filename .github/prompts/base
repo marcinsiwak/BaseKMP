@@ -1,3 +1,4 @@
 - Follow instructions, add only what asked for and what is necessary to complete project
 - Never add any migrations, only add code to the files
-- After all steps build the project and offer to fix errors if any
+- Analyze build.gradle files in modules where changes were made and add necessary dependencies
+- After all steps sync (if necessary), build the project (use gradle build task) and offer to fix errors if any

@@ -1,7 +1,7 @@
 # Project Architecture Example
 
 shared-frontend/ui (UI Modules)
-└── CreatePredictionViewModel
+└── ExampleViewModel
       │
       ▼
 shared-frontend/domain

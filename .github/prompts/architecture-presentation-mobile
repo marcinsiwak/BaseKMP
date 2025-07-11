@@ -1,6 +1,12 @@
 # Mobile Presentation Architecture Example (MVI Pattern)
-
-- ViewModel - CreatePredictionViewModel
-- Screen - CreatePredictionScreen
-- ViewState - CreatePredictionViewState
-- UiAction - CreatePredictionUiAction
+- Follow the implementation of ui-example and usage of it's ViewModel, Screen, ViewState, UiAction, and NavigationGraph.
+- Create:
+    - ViewModel - ExampleViewModel
+    - Screen - ExampleScreen
+    - ViewState - ExampleViewState (if needed)
+    - UiAction - ExampleUiAction (if needed)
+    - build.gradle - add necessary dependencies which are already used in project
+    - NavigationGraph - ExampleNavGraph - put in graph package
+- Update:
+    - shared-frontend/navigation/src/commonMain/kotlin/pl/msiwak/destination/NavDestination.kt - ExampleDestination should be created under NavDestination sealed class in navigation module
+    - composeApp/src/commonMain/kotlin/pl/msiwak/navigation/NavigationGraphs.kt with new NavigationGraph

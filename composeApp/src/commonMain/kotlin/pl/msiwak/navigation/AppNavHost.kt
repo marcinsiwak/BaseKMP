@@ -1,6 +1,7 @@
 package pl.msiwak.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.util.fastForEach
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import org.koin.compose.koinInject
@@ -9,16 +10,14 @@ import pl.msiwak.destination.NavDestination
 @Composable
 fun AppNavHost(
     navController: NavHostController,
-    navigationProvider: NavigationProvider = koinInject()
+    navigationGraphs: NavigationGraphs = koinInject()
 ) {
     NavHost(
         navController = navController,
         startDestination = NavDestination.ScreenADestination.Graph
     ) {
-        with(navigationProvider) {
-            screenA.create(navController, this@NavHost)
-            screenB.create(navController, this@NavHost)
-            exampleGraph.create(navController, this@NavHost)
+        navigationGraphs.fastForEach {
+            it.create(navController, this@NavHost)
         }
     }
 }
