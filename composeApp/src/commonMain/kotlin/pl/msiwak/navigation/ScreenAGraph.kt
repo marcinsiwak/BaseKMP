@@ -44,6 +44,11 @@ class ScreenAGraph : NavigationGraph {
                         }) {
                             Text("Navigate to Screen B")
                         }
+                        Button(onClick = {
+                            navController.navigate(NavDestination.AiGeneratedDestination.Screen)
+                        }) {
+                            Text("Navigate to AI Generated Screen")
+                        }
                         AnimatedVisibility(showContent) {
                             val greeting = remember { Greeting().greet() }
                             Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {

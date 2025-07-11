@@ -30,4 +30,13 @@ sealed class NavDestination {
         @Serializable
         data object Screen : ExampleDestination()
     }
+
+    @Serializable
+    sealed class AiGeneratedDestination : NavDestination() {
+        @Serializable
+        data object Graph : AiGeneratedDestination()
+
+        @Serializable
+        data object Screen : AiGeneratedDestination()
+    }
 }
