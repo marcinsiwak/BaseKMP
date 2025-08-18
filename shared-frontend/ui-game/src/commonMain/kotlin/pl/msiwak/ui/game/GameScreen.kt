@@ -1,6 +1,7 @@
 package pl.msiwak.ui.game
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
@@ -27,17 +28,19 @@ fun GameScreen(
                 .padding(16.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text("Game Screen")
+            Column {
+                Text("Game Screen")
 
-            Button(onClick = {
-                viewModel.onUiAction(GameUiAction.StartSession)
-            }) {
-                Text("Start Game")
-            }
-            Button(onClick = {
-                viewModel.onUiAction(GameUiAction.StartSession)
-            }) {
-                Text("Stop Game")
+                Button(onClick = {
+                    viewModel.onUiAction(GameUiAction.StartSession)
+                }) {
+                    Text("Start Game")
+                }
+                Button(onClick = {
+                    viewModel.onUiAction(GameUiAction.StopSession)
+                }) {
+                    Text("Stop Game")
+                }
             }
         }
     }
