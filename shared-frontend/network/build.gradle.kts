@@ -23,6 +23,10 @@ kotlin {
             androidMain.dependencies {
                 implementation(libs.ktor.android)
                 implementation(libs.ktor.cio)
+                implementation(libs.ktor.server.core)
+                implementation(libs.ktor.server.cio)
+                implementation(libs.ktor.server.websocket)
+                implementation(libs.ktor.server.contentNegotiation)
             }
             commonMain.dependencies {
                 implementation(projects.shared.model)
@@ -31,6 +35,7 @@ kotlin {
                 implementation(libs.ktor.contentNegation)
                 implementation(libs.ktor.logger)
                 implementation(libs.ktor.serialization)
+                implementation(libs.kotlinx.serialization)
             }
             iosMain.dependencies {
                 implementation(libs.ktor.ios)
