@@ -2,14 +2,14 @@ package pl.msiwak.di
 
 import org.koin.dsl.module
 import pl.msiwak.domain.player.GetPlayersUseCase
-import pl.msiwak.domain.session.StartSessionUseCase
-import pl.msiwak.domain.session.StopSessionUseCase
+import pl.msiwak.domain.game.StartGameUseCase
+import pl.msiwak.domain.game.StopGameUseCase
 import pl.msiwak.domainimpl.player.GetPlayersUseCaseImpl
-import pl.msiwak.domainimpl.session.StartSessionUseCaseImpl
-import pl.msiwak.domainimpl.session.StopSessionUseCaseImpl
+import pl.msiwak.domainimpl.game.StartGameUseCaseImpl
+import pl.msiwak.domainimpl.game.StopGameUseCaseImpl
 
 internal val useCaseModule = module {
     single<GetPlayersUseCase> { GetPlayersUseCaseImpl(get()) }
-    single<StartSessionUseCase> { StartSessionUseCaseImpl(get()) }
-    single<StopSessionUseCase> { StopSessionUseCaseImpl(get()) }
+    single<StartGameUseCase> { StartGameUseCaseImpl(get()) }
+    single<StopGameUseCase> { StopGameUseCaseImpl(get()) }
 }

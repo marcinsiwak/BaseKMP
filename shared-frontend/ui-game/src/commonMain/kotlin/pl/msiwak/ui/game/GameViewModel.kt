@@ -6,12 +6,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import pl.msiwak.domain.session.StartSessionUseCase
-import pl.msiwak.domain.session.StopSessionUseCase
+import pl.msiwak.domain.game.StartGameUseCase
+import pl.msiwak.domain.game.StopGameUseCase
 
 class GameViewModel(
-    private val startSessionUseCase: StartSessionUseCase,
-    private val stopSessionUseCase: StopSessionUseCase
+    private val startGameUseCase: StartGameUseCase,
+    private val stopGameUseCase: StopGameUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(GameState())
@@ -23,8 +23,8 @@ class GameViewModel(
                 // Handle back navigation
             }
 
-            is GameUiAction.StartSession -> viewModelScope.launch { startSessionUseCase() }
-            is GameUiAction.StopSession -> viewModelScope.launch { stopSessionUseCase() }
+            is GameUiAction.StartSession -> viewModelScope.launch { startGameUseCase() }
+            is GameUiAction.StopSession -> viewModelScope.launch { stopGameUseCase() }
         }
     }
 }

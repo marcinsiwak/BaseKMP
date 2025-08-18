@@ -2,11 +2,11 @@ package pl.msiwak.network.service
 
 import pl.msiwak.network.KtorServer
 
-class SessionService(private val ktorServer: KtorServer) {
-    suspend fun startSession() {
+class GameService(private val ktorServer: KtorServer) {
+    suspend fun startGame() {
         ktorServer.startServer()
     }
-    suspend fun stopSession() {
+    suspend fun stopGame() {
         ktorServer.stopServer()
     }
 }
