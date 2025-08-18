@@ -39,6 +39,7 @@ kotlin {
             implementation(projects.sharedFrontend.navigation)
             implementation(projects.sharedFrontend.uiExample)
             implementation(projects.sharedFrontend.uiAiGenerated)
+            implementation(projects.sharedFrontend.uiGame)
             implementation(projects.sharedFrontend.commonResources)
             implementation(projects.sharedFrontend.commonModel)
             implementation(projects.sharedFrontend.data)

@@ -39,4 +39,13 @@ sealed class NavDestination {
         @Serializable
         data object Screen : AiGeneratedDestination()
     }
+
+    @Serializable
+    sealed class GameDestination : NavDestination() {
+        @Serializable
+        data object Graph : GameDestination()
+
+        @Serializable
+        data object Screen : GameDestination()
+    }
 }
