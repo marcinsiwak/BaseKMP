@@ -28,7 +28,7 @@ kotlin {
 }
 
 buildkonfig {
-    packageName = "pl.msiwak.baseKMP.buildConfig"
+    packageName = "pl.msiwak.cardsthegame.buildConfig"
 
     defaultConfigs {
         buildConfigField(STRING, "BUILD_FLAVOUR", "productionDebug")
@@ -94,7 +94,7 @@ tasks.create("setupBuildKonfig") {
 tasks.preBuild.dependsOn("setupBuildKonfig")
 
 android {
-    namespace = "pl.msiwak.baseKMP.buildConfig"
+    namespace = "pl.msiwak.cardsthegame.buildConfig"
 }
 
 private fun BuildKonfigExtension.setupProductionReleaseTargets() {

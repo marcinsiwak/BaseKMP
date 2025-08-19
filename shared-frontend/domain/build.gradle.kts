@@ -22,10 +22,11 @@ kotlin {
         commonMain.dependencies {
             implementation(projects.sharedFrontend.data)
             implementation(projects.sharedFrontend.commonModel)
+            implementation(libs.kotlinx.coroutines)
         }
     }
 }
 
 android {
-    namespace = "pl.msiwak.baseKMP.domain"
+    namespace = "pl.msiwak.cardsthegame.domain"
 }

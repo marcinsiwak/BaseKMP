@@ -1,6 +1,7 @@
 package pl.msiwak.di
 
 import org.koin.dsl.module
+import pl.msiwak.network.ConnectionManager
 import pl.msiwak.network.KtorClient
 import pl.msiwak.network.KtorServer
 import pl.msiwak.network.api.PlayerApi
@@ -13,6 +14,7 @@ internal val networkModule = module {
     single { KtorClient(get()) }
     single { PlayerApi(get()) }
     single { PlayerService(get()) }
-    single { GameService(get()) }
+    single { GameService(get(), get()) }
     single { KtorServer() }
+    single { ConnectionManager() }
 }

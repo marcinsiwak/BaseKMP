@@ -6,5 +6,5 @@ import pl.msiwak.data.game.GameRepository
 
 internal val repositoryModule = module {
     single { PlayerRepository(get()) }
-    single { GameRepository(get()) }
+    single { GameRepository(get(), get()) }
 }

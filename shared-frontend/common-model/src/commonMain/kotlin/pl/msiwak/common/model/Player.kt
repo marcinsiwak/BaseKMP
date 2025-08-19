@@ -1,9 +1,8 @@
 package pl.msiwak.common.model
 
 data class Player(
-    val number: String,
+    val id: String = "",
     val name: String,
-    val surname: String,
-    val points: String,
-    val isPicked: Boolean = false
+    val isConnected: Boolean = false,
+    val connectionTime: Long = 0L
 )

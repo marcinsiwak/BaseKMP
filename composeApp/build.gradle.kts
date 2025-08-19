@@ -62,10 +62,10 @@ kotlin {
 }
 
 android {
-    namespace = "pl.msiwak.baseKMP"
+    namespace = "pl.msiwak.cardsthegame"
 
     defaultConfig {
-        applicationId = "pl.msiwak.baseKMP"
+        applicationId = "pl.msiwak.cardsthegame"
         versionCode = 1
         versionName = "1.0"
     }

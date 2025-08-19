@@ -32,20 +32,6 @@ class ExampleViewModel(private val getPlayersUseCase: GetPlayersUseCase) : ViewM
     }
 
     private fun onPlayerPicked(pos: Int) {
-        val isPickedList = viewState.value.players.filter { it.isPicked }
-        viewState.value.players.mapIndexed { index, item ->
-            if (index == pos) {
-                if (item.isPicked) {
-                    item.copy(isPicked = false)
-                } else {
-                    if (isPickedList.size == 5) return
-                    item.copy(isPicked = true)
-                }
-            } else {
-                item.copy()
-            }
-        }.run {
-            _viewState.update { it.copy(players = this) }
-        }
+
     }
 }

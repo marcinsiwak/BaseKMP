@@ -1,37 +1,50 @@
 package pl.msiwak.network
 
+import io.ktor.serialization.kotlinx.json.json
+import io.ktor.server.application.Application
+import io.ktor.server.application.install
+import io.ktor.server.cio.CIO
+import io.ktor.server.engine.EmbeddedServer
+import io.ktor.server.engine.embeddedServer
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.serialization.kotlinx.json.*
-import io.ktor.server.application.*
-import io.ktor.server.cio.*
-import io.ktor.server.engine.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
-import io.ktor.server.websocket.*
+import io.ktor.server.routing.routing
+import io.ktor.server.websocket.WebSockets
+import io.ktor.server.websocket.webSocket
+import io.ktor.websocket.Frame
+import io.ktor.websocket.readText
+import io.ktor.websocket.send
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
+import pl.msiwak.common.model.WebSocketEvent
 
 actual class KtorServer {
-    private var server: EmbeddedServer<*,*>? = null
+    private var server: EmbeddedServer<*, *>? = null
+    private val json = Json { ignoreUnknownKeys = true }
     private val scope = CoroutineScope(Dispatchers.IO)
+
+    private val playersList = mutableListOf<String>()
 
     actual fun startServer() {
         scope.launch {
-            server = embeddedServer(CIO, port = 8080, host = "0.0.0.0") {
+            server = embeddedServer(CIO, port = 8080, host = "192.168.0.62") {
                 configureServer()
             }.start(wait = false)
-
-            println("Server started at http://8080:0.0.0.0")
         }
     }
 
     actual fun stopServer() {
         server?.stop(1000, 2000)
         server = null
-        println("Server stopped")
+        println("OUTPUT: Server stopped")
     }
+
+    val messageResponseFlow = MutableSharedFlow<WebSocketEvent>()
+    val sharedFlow = messageResponseFlow.asSharedFlow()
 
     private fun Application.configureServer() {
         install(ContentNegotiation) {
@@ -46,40 +59,34 @@ actual class KtorServer {
 
         install(WebSockets)
 
-        // Configure routing
         routing {
-            get("/") {
-                call.respondText("Cards Game Server is running!")
-            }
-
-            route("/api") {
-                get("/health") {
-                    call.respondText("Server is healthy")
-                }
-
-                route("/players") {
-                    get {
-                        call.respondText("Get all players")
-                    }
-
-                    post {
-                        call.respondText("Create new player")
+            webSocket("/ws") {
+                val job = launch {
+                    sharedFlow.collect { message ->
+                        val event = WebSocketEvent.PlayerConnection.PlayerConnected(playersList)
+                        send(json.encodeToString(WebSocketEvent.PlayerConnection.PlayerConnected.serializer(), event))
                     }
                 }
 
-                route("/game") {
-                    get {
-                        call.respondText("Get game state")
-                    }
+                val playerName = call.request.queryParameters["name"] ?: "Guest"
 
-                    post("/start") {
-                        call.respondText("Start new game")
-                    }
+                playersList.add(playerName)
+                messageResponseFlow.emit(WebSocketEvent.PlayerConnection.PlayerConnected(playersList))
 
-                    post("/join") {
-                        call.respondText("Join game")
+                runCatching {
+                    incoming.consumeEach { frame ->
+                        if (frame is Frame.Text) {
+                            val receivedText = frame.readText()
+//                            val messageResponse = MessageResponse(receivedText)
+//                            messageResponseFlow.emit(messageResponse)
+                        }
                     }
+                }.onFailure { exception ->
+                    println("WebSocket exception: ${exception.localizedMessage}")
+                }.also {
+                    job.cancel()
                 }
+
             }
         }
     }

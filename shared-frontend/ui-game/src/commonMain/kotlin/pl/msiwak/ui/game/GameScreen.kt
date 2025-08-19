@@ -29,7 +29,7 @@ fun GameScreen(
             contentAlignment = Alignment.Center
         ) {
             Column {
-                Text("Game Screen")
+                Text("Connected Players: ${state.value.players.joinToString(", ")}")
 
                 Button(onClick = {
                     viewModel.onUiAction(GameUiAction.StartSession)
@@ -40,6 +40,11 @@ fun GameScreen(
                     viewModel.onUiAction(GameUiAction.StopSession)
                 }) {
                     Text("Stop Game")
+                }
+                Button(onClick = {
+                    viewModel.onUiAction(GameUiAction.Connect)
+                }) {
+                    Text("Connect to game")
                 }
             }
         }

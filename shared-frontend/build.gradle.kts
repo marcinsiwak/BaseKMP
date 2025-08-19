@@ -26,5 +26,5 @@ kotlin {
 }
 
 android {
-    namespace = "pl.msiwak.baseKMP.shared"
+    namespace = "pl.msiwak.cardsthegame.shared"
 }
