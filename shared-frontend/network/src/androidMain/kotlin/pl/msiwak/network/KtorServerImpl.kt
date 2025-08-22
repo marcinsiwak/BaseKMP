@@ -22,14 +22,14 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import pl.msiwak.common.model.WebSocketEvent
 
-actual class KtorServer {
+class KtorServerImpl: KtorServer {
     private var server: EmbeddedServer<*, *>? = null
     private val json = Json { ignoreUnknownKeys = true }
     private val scope = CoroutineScope(Dispatchers.IO)
 
     private val playersList = mutableListOf<String>()
 
-    actual fun startServer() {
+    override fun startServer() {
         scope.launch {
             server = embeddedServer(CIO, port = 8080, host = "192.168.0.62") {
                 configureServer()
@@ -37,7 +37,7 @@ actual class KtorServer {
         }
     }
 
-    actual fun stopServer() {
+    override fun stopServer() {
         server?.stop(1000, 2000)
         server = null
         println("OUTPUT: Server stopped")

@@ -1,6 +1,6 @@
 package pl.msiwak.network
 
-interface KtorServer {
+interface KtorServerTwo {
     fun startServer()
     fun stopServer()
 }

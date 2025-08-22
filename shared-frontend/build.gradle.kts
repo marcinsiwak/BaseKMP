@@ -15,6 +15,8 @@ kotlin {
         baseSetup()
         framework {
             baseName = "shared-frontend"
+
+//            export(projects.sharedFrontend.network)
         }
     }
 
