@@ -1,7 +1,7 @@
 target 'iosApp' do
   use_frameworks!
   platform :ios, '16.2'
-  pod 'shared_frontend', :path => '../shared-frontend'
+  pod 'sharedFrontend', :path => '../sharedFrontend'
   pod 'composeApp', :path => '../composeApp'
 end
 

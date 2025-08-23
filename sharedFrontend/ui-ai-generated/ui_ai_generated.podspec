@@ -17,7 +17,7 @@ Pod::Spec.new do |spec|
         Kotlin framework 'ui_ai_generated' doesn't exist yet, so a proper Xcode project can't be generated.
         'pod install' should be executed after running ':generateDummyFramework' Gradle task:
 
-            ./gradlew :shared-frontend:ui-ai-generated:generateDummyFramework
+            ./gradlew :sharedFrontend:ui-ai-generated:generateDummyFramework
 
         Alternatively, proper pod installation is performed during Gradle sync in the IDE (if Podfile location is set)"
     end
@@ -27,7 +27,7 @@ Pod::Spec.new do |spec|
     }
                 
     spec.pod_target_xcconfig = {
-        'KOTLIN_PROJECT_PATH' => ':shared-frontend:ui-ai-generated',
+        'KOTLIN_PROJECT_PATH' => ':sharedFrontend:ui-ai-generated',
         'PRODUCT_MODULE_NAME' => 'ui_ai_generated',
     }
                 

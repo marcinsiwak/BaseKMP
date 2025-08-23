@@ -14,7 +14,7 @@ kotlin {
     cocoapods {
         baseSetup()
         framework {
-            baseName = "shared-frontend"
+            baseName = "sharedFrontend"
 
 //            export(projects.sharedFrontend.network)
         }
