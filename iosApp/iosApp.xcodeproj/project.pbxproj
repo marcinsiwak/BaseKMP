@@ -12,6 +12,7 @@
 		2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2152FB032600AC8F00CF470E /* iOSApp.swift */; };
 		71267EEE2E589CCB00487AD4 /* KtorServerImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71267EED2E589CC500487AD4 /* KtorServerImpl.swift */; };
 		713FBE042E5B179400B48463 /* Telegraph in Frameworks */ = {isa = PBXBuildFile; productRef = 713FBE032E5B179400B48463 /* Telegraph */; };
+		713FBE092E5B1D0200B48463 /* DIProviderImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 713FBE082E5B1CFF00B48463 /* DIProviderImpl.swift */; };
 		71C9523D2D73872A00FD747F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71C9523C2D73872A00FD747F /* AppDelegate.swift */; };
 		7210AC8F7D93AA48340A8B70 /* Pods_iosApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2C6B8C082C159677DC580601 /* Pods_iosApp.framework */; };
 		7555FF83242A565900829871 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7555FF82242A565900829871 /* ContentView.swift */; };
@@ -25,6 +26,7 @@
 		2C6B8C082C159677DC580601 /* Pods_iosApp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_iosApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		56099CAF66749FB4ABF36789 /* Pods-iosApp.stagingdebug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iosApp.stagingdebug.xcconfig"; path = "Target Support Files/Pods-iosApp/Pods-iosApp.stagingdebug.xcconfig"; sourceTree = "<group>"; };
 		71267EED2E589CC500487AD4 /* KtorServerImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KtorServerImpl.swift; sourceTree = "<group>"; };
+		713FBE082E5B1CFF00B48463 /* DIProviderImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DIProviderImpl.swift; sourceTree = "<group>"; };
 		71C9523C2D73872A00FD747F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7555FF7B242A565900829871 /* iosApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iosApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7555FF82242A565900829871 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -70,6 +72,14 @@
 			path = server;
 			sourceTree = "<group>";
 		};
+		713FBE052E5B1CE600B48463 /* di */ = {
+			isa = PBXGroup;
+			children = (
+				713FBE082E5B1CFF00B48463 /* DIProviderImpl.swift */,
+			);
+			path = di;
+			sourceTree = "<group>";
+		};
 		7555FF72242A565900829871 = {
 			isa = PBXGroup;
 			children = (
@@ -92,6 +102,7 @@
 		7555FF7D242A565900829871 /* iosApp */ = {
 			isa = PBXGroup;
 			children = (
+				713FBE052E5B1CE600B48463 /* di */,
 				71267EEC2E589CB500487AD4 /* server */,
 				058557BA273AAA24004C7B11 /* Assets.xcassets */,
 				7555FF82242A565900829871 /* ContentView.swift */,
@@ -261,6 +272,7 @@
 				71C9523D2D73872A00FD747F /* AppDelegate.swift in Sources */,
 				2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */,
 				7555FF83242A565900829871 /* ContentView.swift in Sources */,
+				713FBE092E5B1D0200B48463 /* DIProviderImpl.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

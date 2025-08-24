@@ -8,6 +8,7 @@
 
 import Foundation
 import sharedFrontend
+import ComposeApp
 import Telegraph
 
 class KtorServerImpl: KtorServer {

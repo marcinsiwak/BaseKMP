@@ -34,6 +34,7 @@ kotlin {
                 implementation(projects.shared.model)
                 implementation(projects.sharedFrontend.commonModel)
 
+                implementation(libs.koin.core)
                 implementation(libs.ktor.core)
                 implementation(libs.ktor.contentNegation)
                 implementation(libs.ktor.websockets)

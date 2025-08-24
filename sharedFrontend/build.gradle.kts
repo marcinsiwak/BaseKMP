@@ -15,8 +15,6 @@ kotlin {
         baseSetup()
         framework {
             baseName = "sharedFrontend"
-
-            export(projects.sharedFrontend.network)
         }
     }
 

@@ -20,6 +20,8 @@ kotlin {
 
         framework {
             baseName = "ComposeApp"
+
+            export(projects.sharedFrontend.network)
         }
     }
 
@@ -45,7 +47,7 @@ kotlin {
             implementation(projects.sharedFrontend.data)
             implementation(projects.sharedFrontend.domain)
             implementation(projects.sharedFrontend.domainImpl)
-            implementation(projects.sharedFrontend.network)
+            api(projects.sharedFrontend.network)
 
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
