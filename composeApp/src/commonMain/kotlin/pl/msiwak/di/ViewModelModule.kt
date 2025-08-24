@@ -7,7 +7,7 @@ import pl.msiwak.ui.example.ExampleViewModel
 import pl.msiwak.ui.game.GameViewModel
 
 internal val viewModelModule = module {
-    viewModel { ExampleViewModel(get()) }
+    viewModel { ExampleViewModel() }
     viewModel { AiGeneratedViewModel() }
     viewModel { GameViewModel(get(), get(), get(), get()) }
 }

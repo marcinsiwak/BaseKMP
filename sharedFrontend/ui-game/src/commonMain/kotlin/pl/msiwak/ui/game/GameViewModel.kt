@@ -50,7 +50,12 @@ class GameViewModel(
 
             is GameUiAction.StartSession -> viewModelScope.launch { startGameUseCase() }
             is GameUiAction.StopSession -> viewModelScope.launch { stopGameUseCase() }
-            is GameUiAction.Connect -> viewModelScope.launch { addPlayerToGameUseCase(Player(name = "Marcin")) }
+            is GameUiAction.Connect -> viewModelScope.launch {
+                addPlayerToGameUseCase(
+                    host = "",
+                    Player(name = "Marcin")
+                )
+            }
         }
     }
 }

@@ -19,6 +19,14 @@ class GameService(
         ktorClient.observeWebSocketEvents().filterIsInstance<WebSocketEvent.PlayerConnection>()
     }
 
+    suspend fun findGame(): String = withContext(Dispatchers.IO) {
+        connectionManager.findGame(port = 53287)
+    }
+
+    suspend fun connectPlayer(host: String, name: String) {
+        return ktorClient.connect(host = host, port = 53287, playerName = name)
+    }
+
     suspend fun startGame() {
         val ipAddress = connectionManager.getLocalIpAddress() ?: throw Exception("Cannot get local IP address")
         ktorServer.startServer(ipAddress, 53287)

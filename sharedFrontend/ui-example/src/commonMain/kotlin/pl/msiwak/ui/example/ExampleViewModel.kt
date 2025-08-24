@@ -4,17 +4,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import pl.msiwak.domain.player.GetPlayersUseCase
 
-class ExampleViewModel(private val getPlayersUseCase: GetPlayersUseCase) : ViewModel() {
+class ExampleViewModel() : ViewModel() {
 
     init {
         viewModelScope.launch {
             runCatching {
-                val players = getPlayersUseCase.invoke()
-                _viewState.update { it.copy(players = players) }
+                // todo remove
             }.onFailure {
                 println("OUTPUT: ${it.cause} ${it.message}")
             }

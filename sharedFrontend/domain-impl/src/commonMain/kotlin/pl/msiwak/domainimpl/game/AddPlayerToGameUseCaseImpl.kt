@@ -5,7 +5,7 @@ import pl.msiwak.data.game.GameRepository
 import pl.msiwak.domain.game.AddPlayerToGameUseCase
 
 class AddPlayerToGameUseCaseImpl(private val gameRepository: GameRepository) : AddPlayerToGameUseCase {
-    override suspend fun invoke(player: Player): Player {
-        return gameRepository.addPlayerToGame(player)
+    override suspend fun invoke(host: String, player: Player) {
+        return gameRepository.addPlayerToGame(host, player.name)
     }
 }

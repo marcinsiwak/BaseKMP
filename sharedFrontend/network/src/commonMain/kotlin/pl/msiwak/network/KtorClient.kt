@@ -48,13 +48,13 @@ class KtorClient(engine: EngineProvider) {
         }
     }
 
-    fun connect(playerName: String) {
+    fun connect(host: String, port: Int, playerName: String) {
         scope.launch {
             runCatching {
                 client.webSocket(
                     method = HttpMethod.Get,
-                    host = "192.168.0.62",
-                    port = 8080,
+                    host = host,
+                    port = port,
                     path = "/ws?name=$playerName"
                 ) {
                     session = this

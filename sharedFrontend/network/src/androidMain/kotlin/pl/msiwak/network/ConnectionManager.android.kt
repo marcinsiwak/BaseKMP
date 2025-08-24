@@ -3,9 +3,13 @@ package pl.msiwak.network
 import android.Manifest
 import android.content.Context
 import android.net.ConnectivityManager
+import android.util.Log
 import androidx.annotation.RequiresPermission
 import pl.msiwak.common.AppContext
 import java.net.Inet4Address
+import java.net.InetAddress
+import java.net.InetSocketAddress
+import java.net.Socket
 
 actual class ConnectionManager {
 
@@ -23,5 +27,25 @@ actual class ConnectionManager {
             }
         }
         return null
+    }
+
+    @RequiresPermission(Manifest.permission.ACCESS_NETWORK_STATE)
+    actual suspend fun findGame(port: Int): String {
+        val ownIp = getLocalIpAddress() ?: throw Exception("Connect to network")
+        val subnet = ownIp.substringBeforeLast(".")
+
+        for (i in 1..254) {
+            val host = "$subnet.$i"
+            runCatching {
+                if (InetAddress.getByName(host).isReachable(100)) {
+                    val socket = Socket()
+                    socket.connect(InetSocketAddress(host, port), 200)
+                    socket.close()
+                    Log.d("NetworkScan", "Device with open port $port found: $host")
+                    return host
+                }
+            }
+        }
+        return ""
     }
 }
