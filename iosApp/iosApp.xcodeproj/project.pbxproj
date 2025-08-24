@@ -11,6 +11,7 @@
 		058557D9273AAEEB004C7B11 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 058557D8273AAEEB004C7B11 /* Preview Assets.xcassets */; };
 		2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2152FB032600AC8F00CF470E /* iOSApp.swift */; };
 		71267EEE2E589CCB00487AD4 /* KtorServerImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71267EED2E589CC500487AD4 /* KtorServerImpl.swift */; };
+		713FBE042E5B179400B48463 /* Telegraph in Frameworks */ = {isa = PBXBuildFile; productRef = 713FBE032E5B179400B48463 /* Telegraph */; };
 		71C9523D2D73872A00FD747F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71C9523C2D73872A00FD747F /* AppDelegate.swift */; };
 		7210AC8F7D93AA48340A8B70 /* Pods_iosApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2C6B8C082C159677DC580601 /* Pods_iosApp.framework */; };
 		7555FF83242A565900829871 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7555FF82242A565900829871 /* ContentView.swift */; };
@@ -38,6 +39,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7210AC8F7D93AA48340A8B70 /* Pods_iosApp.framework in Frameworks */,
+				713FBE042E5B179400B48463 /* Telegraph in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -108,7 +110,6 @@
 				CAD5DB8F707E282443B79FE2 /* Pods-iosApp.productiondebug.xcconfig */,
 				27057075D07B8ED40C9C83A9 /* Pods-iosApp.productionrelease.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -168,6 +169,9 @@
 				Base,
 			);
 			mainGroup = 7555FF72242A565900829871;
+			packageReferences = (
+				713FBE022E5B179400B48463 /* XCRemoteSwiftPackageReference "Telegraph" */,
+			);
 			productRefGroup = 7555FF7C242A565900829871 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -560,6 +564,25 @@
 			defaultConfigurationName = productionDebug;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		713FBE022E5B179400B48463 /* XCRemoteSwiftPackageReference "Telegraph" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Building42/Telegraph.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.40.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		713FBE032E5B179400B48463 /* Telegraph */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 713FBE022E5B179400B48463 /* XCRemoteSwiftPackageReference "Telegraph" */;
+			productName = Telegraph;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 7555FF73242A565900829871 /* Project object */;
 }

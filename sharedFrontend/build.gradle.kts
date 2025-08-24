@@ -16,13 +16,12 @@ kotlin {
         framework {
             baseName = "sharedFrontend"
 
-//            export(projects.sharedFrontend.network)
+            export(projects.sharedFrontend.network)
         }
     }
 
     sourceSets {
         commonMain.dependencies {
-            // put your Multiplatform dependencies here
         }
     }
 }
