@@ -1,6 +1,6 @@
 package pl.msiwak.network
 
 interface KtorServer {
-    fun startServer()
+    fun startServer(host: String, port: Int)
     fun stopServer()
 }

@@ -13,6 +13,6 @@ internal val networkModule = module {
     single { KtorClient(get()) }
     single { PlayerApi(get()) }
     single { PlayerService(get()) }
-    single { GameService(get(), get()) }
+    single { GameService(get(), get(), get()) }
     single { ConnectionManager() }
 }

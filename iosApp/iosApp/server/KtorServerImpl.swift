@@ -15,15 +15,13 @@ class KtorServerImpl: KtorServer {
 
     var httpServer: HttpServer = HttpServer()
 
-    func startServer() {
-        httpServer.start()
+    func startServer(host: String, port: Int32) {
+        httpServer.start(host: host, port: port)
     }
     
     func stopServer() {
         httpServer.server.stop()
     }
-    
-
 }
 
 public class HttpServer: NSObject {
@@ -35,13 +33,13 @@ public class HttpServer: NSObject {
 
 public extension HttpServer {
     
-    func start(){
+    func start(host: String, port: Int32) {
         DispatchQueue.global().async {
-            self.setupServer()
+            self.setupServer(port: port)
         }
     }
     
-    func setupServer(){
+    func setupServer(port: Int32){
         
         self.server = Server()
         
@@ -51,7 +49,7 @@ public extension HttpServer {
         server.concurrency = 5
         
         do {
-            try server.start(port:self.PORT)
+            try server.start(port: Int(port))
         } catch {
             print("Error when starting error:" ,error.localizedDescription)
         }

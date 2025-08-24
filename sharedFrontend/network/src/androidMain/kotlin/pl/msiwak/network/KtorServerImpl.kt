@@ -29,7 +29,7 @@ class KtorServerImpl: KtorServer {
 
     private val playersList = mutableListOf<String>()
 
-    override fun startServer() {
+    override fun startServer(host: String, port: Int) {
         scope.launch {
             server = embeddedServer(CIO, port = 8080, host = "192.168.0.62") {
                 configureServer()
