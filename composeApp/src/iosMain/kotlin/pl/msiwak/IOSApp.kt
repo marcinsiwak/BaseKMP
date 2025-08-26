@@ -7,6 +7,7 @@ import org.koin.dsl.module
 import pl.msiwak.di.appModule
 import pl.msiwak.network.KtorServer
 import pl.msiwak.di.DIProvider
+import pl.msiwak.network.ConnectionManager
 
 fun initKoin(onKoinStart: KoinApplication.() -> Unit) {
     startKoin {
@@ -20,4 +21,5 @@ fun KoinApplication.provideNetworkSwiftLibDependencyProvider(diProvider: DIProvi
 
 fun networkSwiftLibDIProviderModule(diProvider: DIProvider): Module = module {
     single<KtorServer> { diProvider.provideKtorServerImpl() }
+    single<ConnectionManager> { diProvider.provideConnectionManager() }
 }

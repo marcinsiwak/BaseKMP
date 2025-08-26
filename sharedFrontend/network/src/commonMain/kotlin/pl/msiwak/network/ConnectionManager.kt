@@ -1,6 +1,6 @@
 package pl.msiwak.network
 
-expect class ConnectionManager() {
+interface ConnectionManager {
 
     fun getLocalIpAddress(): String?
 

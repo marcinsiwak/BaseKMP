@@ -11,10 +11,10 @@ import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.Socket
 
-actual class ConnectionManager {
+class ConnectionManagerImpl : ConnectionManager {
 
     @RequiresPermission(Manifest.permission.ACCESS_NETWORK_STATE)
-    actual fun getLocalIpAddress(): String? {
+    override fun getLocalIpAddress(): String? {
         val context = AppContext.get()
         val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val network = connectivityManager.activeNetwork ?: return null
@@ -30,7 +30,7 @@ actual class ConnectionManager {
     }
 
     @RequiresPermission(Manifest.permission.ACCESS_NETWORK_STATE)
-    actual suspend fun findGame(port: Int): String? {
+    override suspend fun findGame(port: Int): String? {
         val ownIp = getLocalIpAddress() ?: throw Exception("Connect to network")
         val subnet = ownIp.substringBeforeLast(".")
 

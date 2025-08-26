@@ -10,15 +10,14 @@ import Foundation
 import ComposeApp
 
 class DIProviderImpl: DIProvider {
+    func provideConnectionManager() -> any ConnectionManager {
+        return ConnectionManagerImpl()
+    }
+    
     
     static var shared = DIProviderImpl()
 
     func provideKtorServerImpl() -> any KtorServer {
         return KtorServerImpl()
     }
-    
-    
-//    func provideKtorServerImpl() -> KtorServer {
-//        return KtorServerImpl()
-//    }
 }
