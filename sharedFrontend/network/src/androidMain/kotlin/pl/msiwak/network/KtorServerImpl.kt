@@ -31,7 +31,7 @@ class KtorServerImpl: KtorServer {
 
     override fun startServer(host: String, port: Int) {
         scope.launch {
-            server = embeddedServer(CIO, port = 8080, host = "192.168.0.62") {
+            server = embeddedServer(CIO, port = port, host = host) {
                 configureServer()
             }.start(wait = false)
         }

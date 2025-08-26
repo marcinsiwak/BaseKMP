@@ -19,7 +19,21 @@ class GameService(
         ktorClient.observeWebSocketEvents().filterIsInstance<WebSocketEvent.PlayerConnection>()
     }
 
-    suspend fun findGame(): String = withContext(Dispatchers.IO) {
+    suspend fun findGame(): String? = withContext(Dispatchers.IO) {
+        val ownIp = connectionManager.getLocalIpAddress() ?: throw Exception("Connect to network")
+        val subnet = ownIp.substringBeforeLast(".")
+//        for (i in 1..254) {
+//            val host = "$subnet.$i"
+//
+//            println("current host: $host")
+//            if (ktorClient.isServerReachable("http://$host:53287")) {
+//                println("Device with reachable $host")
+//                return@withContext host
+//            } else {
+//                println("Device $host not reachable")
+//            }
+//        }
+//        ""
         connectionManager.findGame(port = 53287)
     }
 

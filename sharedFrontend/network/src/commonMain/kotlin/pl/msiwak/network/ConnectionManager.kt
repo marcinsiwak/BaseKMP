@@ -4,5 +4,5 @@ expect class ConnectionManager() {
 
     fun getLocalIpAddress(): String?
 
-    suspend fun findGame(port: Int): String
+    suspend fun findGame(port: Int): String?
 }

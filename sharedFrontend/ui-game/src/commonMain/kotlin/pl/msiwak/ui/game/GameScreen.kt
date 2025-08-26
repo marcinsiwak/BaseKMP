@@ -29,6 +29,8 @@ fun GameScreen(
             contentAlignment = Alignment.Center
         ) {
             Column {
+                Text("EXISTING GAME IP: ${state.value.gameIpAddress}")
+
                 Text("Connected Players: ${state.value.players.joinToString(", ")}")
 
                 Button(onClick = {

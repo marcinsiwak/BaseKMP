@@ -8,7 +8,7 @@ class GameRepository(
 ) {
     suspend fun observePlayersConnection() = gameService.observePlayersConnection()
 
-    suspend fun findGame(): String {
+    suspend fun findGame(): String? {
         return gameService.findGame()
     }
 

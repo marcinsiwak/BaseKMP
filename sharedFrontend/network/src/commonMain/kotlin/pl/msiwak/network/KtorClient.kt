@@ -1,10 +1,13 @@
 package pl.msiwak.network
 
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.client.plugins.websocket.webSocket
+import io.ktor.client.request.get
 import io.ktor.http.HttpMethod
+import io.ktor.http.isSuccess
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.websocket.Frame
 import io.ktor.websocket.WebSocketSession
@@ -63,6 +66,24 @@ class KtorClient(engine: EngineProvider) {
             }.onFailure { exception ->
                 println("OUTPUT: Failed to connect: $exception")
             }
+        }
+    }
+
+    val pingClient = HttpClient(engine.getEngine()) {
+        install(HttpTimeout) {
+            requestTimeoutMillis = 1000
+        }
+    }
+
+    suspend fun isServerReachable(host: String): Boolean {
+        return try {
+            val response = pingClient.get(host)
+            pingClient.close()
+            response.status.isSuccess()
+        } catch (e: Exception) {
+            pingClient.close()
+            println("OUTPUT: Server unreachable: $e")
+            false
         }
     }
 
