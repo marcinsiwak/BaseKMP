@@ -1,26 +1,25 @@
 package pl.msiwak.network
 
 import io.ktor.client.HttpClient
-import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.client.plugins.websocket.webSocket
-import io.ktor.client.request.get
 import io.ktor.http.HttpMethod
-import io.ktor.http.isSuccess
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.websocket.Frame
 import io.ktor.websocket.WebSocketSession
-import io.ktor.websocket.close
 import io.ktor.websocket.readText
+import io.ktor.websocket.send
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
+import pl.msiwak.common.model.Player
 import pl.msiwak.common.model.WebSocketEvent
 import pl.msiwak.network.engine.EngineProvider
 
@@ -29,10 +28,13 @@ class KtorClient(engine: EngineProvider) {
     private var session: WebSocketSession? = null
     private val json = Json { ignoreUnknownKeys = true }
 
-    private val scope = CoroutineScope(Dispatchers.Main)
+    private var scope = CoroutineScope(Dispatchers.Main)
 
-    private val _webSocketEvents = MutableSharedFlow<WebSocketEvent>()
-    fun observeWebSocketEvents(): SharedFlow<WebSocketEvent> = _webSocketEvents.asSharedFlow()
+    private val _webSocketEvent = MutableSharedFlow<WebSocketEvent>()
+    val webSocketEvent: SharedFlow<WebSocketEvent> = _webSocketEvent.asSharedFlow()
+
+    private val _webSocketClientEvent = MutableSharedFlow<WebSocketEvent.ClientEvents>()
+    private val webSocketClientEvent: SharedFlow<WebSocketEvent.ClientEvents> = _webSocketClientEvent.asSharedFlow()
 
     val client = HttpClient(engine.getEngine()) {
         install(WebSockets) {
@@ -51,15 +53,35 @@ class KtorClient(engine: EngineProvider) {
         }
     }
 
-    fun connect(host: String, port: Int, playerName: String) {
+    suspend fun connect(host: String, port: Int, player: Player) {
+        if (!scope.isActive) {
+            scope = CoroutineScope(Dispatchers.Main)
+        }
         scope.launch {
             runCatching {
                 client.webSocket(
                     method = HttpMethod.Get,
                     host = host,
                     port = port,
-                    path = "/ws?name=$playerName"
+                    path = "/ws?id=${player.id}"
                 ) {
+                    launch {
+                        webSocketClientEvent.collect { message ->
+                            when (message) {
+                                is WebSocketEvent.ClientEvents.PlayerDisconnected -> {
+                                    send(
+                                        json.encodeToString(
+                                            WebSocketEvent.ClientEvents.PlayerDisconnected.serializer(),
+                                            message
+                                        )
+                                    )
+                                }
+
+                                else -> Unit
+                            }
+
+                        }
+                    }
                     session = this
                     listenForResponse()
                 }
@@ -69,31 +91,14 @@ class KtorClient(engine: EngineProvider) {
         }
     }
 
-    val pingClient = HttpClient(engine.getEngine()) {
-        install(HttpTimeout) {
-            requestTimeoutMillis = 1000
-        }
-    }
-
-    suspend fun isServerReachable(host: String): Boolean {
-        return try {
-            val response = pingClient.get(host)
-            pingClient.close()
-            response.status.isSuccess()
-        } catch (e: Exception) {
-            pingClient.close()
-            println("OUTPUT: Server unreachable: $e")
-            false
-        }
-    }
-
     private suspend fun WebSocketSession.listenForResponse() {
         incoming.consumeEach { frame ->
             when (frame) {
                 is Frame.Text -> {
                     val text = frame.readText()
-                    val event = json.decodeFromString<WebSocketEvent.PlayerConnection.PlayerConnected>(text)
-                    _webSocketEvents.emit(event)
+                    print("OUTPUT: Received text: $text")
+                    val event = json.decodeFromString(WebSocketEvent.ServerEvents.PlayerConnected.serializer(), text)
+                    _webSocketEvent.emit(event)
                 }
 
                 else -> {}
@@ -101,10 +106,9 @@ class KtorClient(engine: EngineProvider) {
         }
     }
 
-    fun disconnect() {
-        scope.launch {
-            session?.close()
-            client.close()
-        }
+    suspend fun disconnect(playerId: String) {
+        _webSocketClientEvent.emit(WebSocketEvent.ClientEvents.PlayerDisconnected(playerId))
+//        scope.cancel()
+        session = null
     }
 }

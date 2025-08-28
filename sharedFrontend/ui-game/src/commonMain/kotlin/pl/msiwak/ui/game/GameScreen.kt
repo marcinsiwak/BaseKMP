@@ -34,6 +34,12 @@ fun GameScreen(
                 Text("Connected Players: ${state.value.players.joinToString(", ")}")
 
                 Button(onClick = {
+                    viewModel.onUiAction(GameUiAction.Refresh)
+                }) {
+                    Text("Refresh")
+                }
+
+                Button(onClick = {
                     viewModel.onUiAction(GameUiAction.StartSession)
                 }) {
                     Text("Start Game")
@@ -47,6 +53,11 @@ fun GameScreen(
                     viewModel.onUiAction(GameUiAction.Connect)
                 }) {
                     Text("Connect to game")
+                }
+                Button(onClick = {
+                    viewModel.onUiAction(GameUiAction.Disconnect)
+                }) {
+                    Text("Disconnect from game")
                 }
             }
         }

@@ -5,4 +5,6 @@ sealed class GameUiAction {
     data object StartSession : GameUiAction()
     data object StopSession : GameUiAction()
     data object Connect : GameUiAction()
+    data object Disconnect : GameUiAction()
+    data object Refresh : GameUiAction()
 }

@@ -5,10 +5,18 @@ import kotlinx.serialization.Serializable
 sealed class WebSocketEvent {
 
     @Serializable
-    sealed class PlayerConnection : WebSocketEvent() {
+    sealed class ServerEvents : WebSocketEvent() {
         @Serializable
-        data class PlayerConnected(val currentPlayers: List<String>) : PlayerConnection()
+        data class PlayerConnected(val currentPlayers: List<String>) : ServerEvents()
         @Serializable
-        data class PlayerDisconnected(val currentPlayers: List<String>) : PlayerConnection()
+        data class PlayerDisconnected(val currentPlayers: List<String>) : ServerEvents()
+    }
+
+    @Serializable
+    sealed class ClientEvents : WebSocketEvent() {
+        @Serializable
+        data class PlayerConnected(val player: String) : ClientEvents()
+        @Serializable
+        data class PlayerDisconnected(val player: String) : ClientEvents()
     }
 }

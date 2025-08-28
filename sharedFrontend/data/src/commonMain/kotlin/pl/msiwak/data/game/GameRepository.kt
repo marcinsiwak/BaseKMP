@@ -18,24 +18,18 @@ class GameRepository(
 
     suspend fun stopGame() {
         gameService.stopGame()
-        // Disconnect all players when game stops
-//        val connectedPlayers = playerRepository.getConnectedPlayers()
-//        connectedPlayers.forEach { player ->
-//            playerRepository.disconnectPlayer(player.id)
-//        }
     }
 
-    suspend fun addPlayerToGame(host: String, name: String) {
-        return gameService.connectPlayer(host, name)
+    suspend fun addPlayerToGame(host: String, playerName: String) {
+        return gameService.connectPlayer(host, playerName)
+    }
+
+    suspend fun disconnectPlayer() {
+        return gameService.disconnectPlayer()
     }
 
     suspend fun removePlayerFromGame(playerId: String): Boolean {
 //        return playerRepository.disconnectPlayer(playerId)
         return true
-    }
-
-    suspend fun getGamePlayers(): List<Player> {
-//        return playerRepository.getConnectedPlayers()
-        return emptyList()
     }
 }

@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import pl.msiwak.common.model.Player
 import pl.msiwak.common.model.WebSocketEvent
 import pl.msiwak.domain.game.AddPlayerToGameUseCase
+import pl.msiwak.domain.game.DisconnectUseCase
 import pl.msiwak.domain.game.FindGameIPAddressUseCase
 import pl.msiwak.domain.game.ObservePlayersConnectionUseCase
 import pl.msiwak.domain.game.StartGameUseCase
@@ -22,7 +23,8 @@ class GameViewModel(
     private val stopGameUseCase: StopGameUseCase,
     private val addPlayerToGameUseCase: AddPlayerToGameUseCase,
     private val observePlayersConnectionUseCase: ObservePlayersConnectionUseCase,
-    private val findGameIPAddressUseCase: FindGameIPAddressUseCase
+    private val findGameIPAddressUseCase: FindGameIPAddressUseCase,
+    private val disconnectUseCase: DisconnectUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(GameState())
@@ -36,6 +38,7 @@ class GameViewModel(
         viewModelScope.launch(errorHandler) {
             val existingGameIpAddress = findGameIPAddressUseCase()
             _uiState.update { it.copy(gameIpAddress = existingGameIpAddress) }
+            observeWebSocketEvents()
         }
     }
 
@@ -49,9 +52,14 @@ class GameViewModel(
             is GameUiAction.StopSession -> viewModelScope.launch(errorHandler) { stopGameUseCase() }
             is GameUiAction.Connect -> viewModelScope.launch(errorHandler) {
                 addPlayerToGameUseCase(
-                    host = uiState.value.gameIpAddress ?: "192.168.0.62" ?: throw Exception("Game IP address not found"),
-                    Player(name = "Marcin")
+                    host = uiState.value.gameIpAddress ?: throw Exception("Game IP address not found"),
+                    playerName = "Marcin"
                 )
+            }
+            is GameUiAction.Disconnect -> viewModelScope.launch(errorHandler) { disconnectUseCase() }
+            is GameUiAction.Refresh -> viewModelScope.launch(errorHandler) {
+                val existingGameIpAddress = findGameIPAddressUseCase()
+                _uiState.update { it.copy(gameIpAddress = existingGameIpAddress) }
             }
         }
     }
@@ -59,18 +67,17 @@ class GameViewModel(
     private fun onStartSession() {
         viewModelScope.launch(errorHandler) {
             startGameUseCase()
-            observeWebSocketEvents()
         }
     }
 
     private suspend fun observeWebSocketEvents() {
         observePlayersConnectionUseCase().collectLatest { event ->
             when (event) {
-                is WebSocketEvent.PlayerConnection.PlayerConnected -> {
+                is WebSocketEvent.ServerEvents.PlayerConnected -> {
                     _uiState.update { it.copy(players = event.currentPlayers) }
                 }
 
-                is WebSocketEvent.PlayerConnection.PlayerDisconnected -> {
+                is WebSocketEvent.ServerEvents.PlayerDisconnected -> {
                     _uiState.update { it.copy(players = event.currentPlayers) }
 
                 }
