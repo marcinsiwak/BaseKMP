@@ -1,14 +1,15 @@
 package pl.msiwak.network
 
-import io.ktor.serialization.kotlinx.json.json
+import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
 import io.ktor.server.cio.CIO
 import io.ktor.server.engine.EmbeddedServer
 import io.ktor.server.engine.embeddedServer
-import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.routing.routing
 import io.ktor.server.websocket.WebSockets
+import io.ktor.server.websocket.receiveDeserialized
+import io.ktor.server.websocket.sendSerialized
 import io.ktor.server.websocket.webSocket
 import io.ktor.websocket.CloseReason
 import io.ktor.websocket.Frame
@@ -56,17 +57,9 @@ class KtorServerImpl : KtorServer {
     }
 
     private fun Application.configureServer() {
-        install(ContentNegotiation) {
-            json(
-                json = Json {
-                    prettyPrint = true
-                    isLenient = true
-                    ignoreUnknownKeys = true
-                }
-            )
+        install(WebSockets) {
+            contentConverter = KotlinxWebsocketSerializationConverter(json)
         }
-
-        install(WebSockets)
 
         routing {
             webSocket("/ws") {

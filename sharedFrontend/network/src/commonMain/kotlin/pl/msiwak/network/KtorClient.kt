@@ -1,11 +1,11 @@
 package pl.msiwak.network
 
 import io.ktor.client.HttpClient
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.websocket.DefaultClientWebSocketSession
 import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.client.plugins.websocket.webSocket
 import io.ktor.http.HttpMethod
-import io.ktor.serialization.kotlinx.json.json
+import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
 import io.ktor.websocket.Frame
 import io.ktor.websocket.WebSocketSession
 import io.ktor.websocket.readText
@@ -39,17 +39,7 @@ class KtorClient(engine: EngineProvider) {
     val client = HttpClient(engine.getEngine()) {
         install(WebSockets) {
             pingIntervalMillis = 20_000
-        }
-
-        install(ContentNegotiation) {
-            json(
-                Json {
-                    prettyPrint = true
-                    isLenient = true
-                    encodeDefaults = true
-                    ignoreUnknownKeys = true
-                }
-            )
+            contentConverter = KotlinxWebsocketSerializationConverter(json)
         }
     }
 
@@ -91,7 +81,7 @@ class KtorClient(engine: EngineProvider) {
         }
     }
 
-    private suspend fun WebSocketSession.listenForResponse() {
+    private suspend fun DefaultClientWebSocketSession.listenForResponse() {
         incoming.consumeEach { frame ->
             when (frame) {
                 is Frame.Text -> {
