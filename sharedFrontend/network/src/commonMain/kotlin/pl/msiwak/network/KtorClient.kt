@@ -25,9 +25,7 @@ import pl.msiwak.network.engine.EngineProvider
 class KtorClient(engine: EngineProvider) {
 
     private var session: WebSocketSession? = null
-    private val json = Json {
-        classDiscriminator = "type"
-    }
+    private val json = Json { ignoreUnknownKeys = true }
 
     private var scope = CoroutineScope(Dispatchers.Main)
 

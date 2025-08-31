@@ -27,9 +27,7 @@ import pl.msiwak.common.model.WebSocketEvent
 
 class KtorServerImpl : KtorServer {
     private var server: EmbeddedServer<*, *>? = null
-    private val json = Json {
-        classDiscriminator = "type"
-    }
+    private val json = Json { ignoreUnknownKeys = true }
     private var scope = CoroutineScope(Dispatchers.IO)
 
     private val _messageResponseFlow = MutableSharedFlow<WebSocketEvent>()
