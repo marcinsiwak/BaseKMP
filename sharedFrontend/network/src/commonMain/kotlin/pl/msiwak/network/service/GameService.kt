@@ -18,8 +18,8 @@ class GameService(
     private val connectionManager: ConnectionManager
 ) {
 
-    suspend fun observePlayersConnection(): Flow<WebSocketEvent.ServerEvents> = withContext(Dispatchers.IO) {
-        ktorClient.webSocketEvent.filterIsInstance<WebSocketEvent.ServerEvents>()
+    suspend fun observePlayersConnection(): Flow<WebSocketEvent> = withContext(Dispatchers.IO) {
+        ktorClient.webSocketEvent.filterIsInstance<WebSocketEvent>()
     }
 
     suspend fun findGame(): String? = withContext(Dispatchers.IO) {

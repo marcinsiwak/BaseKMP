@@ -73,14 +73,15 @@ class GameViewModel(
     private suspend fun observeWebSocketEvents() {
         observePlayersConnectionUseCase().collectLatest { event ->
             when (event) {
-                is WebSocketEvent.ServerEvents.PlayerConnected -> {
+                is WebSocketEvent.PlayerConnected -> {
                     _uiState.update { it.copy(players = event.currentPlayers) }
                 }
 
-                is WebSocketEvent.ServerEvents.PlayerDisconnected -> {
+                is WebSocketEvent.PlayerDisconnected -> {
                     _uiState.update { it.copy(players = event.currentPlayers) }
 
                 }
+                else -> Unit
             }
         }
     }

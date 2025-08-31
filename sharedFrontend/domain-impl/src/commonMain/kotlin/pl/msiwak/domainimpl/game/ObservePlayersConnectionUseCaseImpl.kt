@@ -8,5 +8,5 @@ import pl.msiwak.domain.game.ObservePlayersConnectionUseCase
 class ObservePlayersConnectionUseCaseImpl(
     private val gameRepository: GameRepository
 ) : ObservePlayersConnectionUseCase {
-    override suspend fun invoke(): Flow<WebSocketEvent.ServerEvents> = gameRepository.observePlayersConnection()
+    override suspend fun invoke(): Flow<WebSocketEvent> = gameRepository.observePlayersConnection()
 }

@@ -19,6 +19,8 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.polymorphic
 import pl.msiwak.common.model.Player
 import pl.msiwak.common.model.WebSocketEvent
 import pl.msiwak.network.engine.EngineProvider
@@ -26,15 +28,24 @@ import pl.msiwak.network.engine.EngineProvider
 class KtorClient(engine: EngineProvider) {
 
     private var session: WebSocketSession? = null
-    private val json = Json { ignoreUnknownKeys = true }
+    private val json = Json {
+        ignoreUnknownKeys = true
+        serializersModule = SerializersModule {
+            polymorphic(WebSocketEvent::class) {
+                subclass(WebSocketEvent.PlayerConnected::class, WebSocketEvent.PlayerConnected.serializer())
+                subclass(WebSocketEvent.PlayerDisconnected::class, WebSocketEvent.PlayerDisconnected.serializer())
+                subclass(WebSocketEvent.PlayerClientDisconnected::class, WebSocketEvent.PlayerClientDisconnected.serializer())
+            }
+        }
+    }
 
     private var scope = CoroutineScope(Dispatchers.Main)
 
     private val _webSocketEvent = MutableSharedFlow<WebSocketEvent>()
     val webSocketEvent: SharedFlow<WebSocketEvent> = _webSocketEvent.asSharedFlow()
 
-    private val _webSocketClientEvent = MutableSharedFlow<WebSocketEvent.ClientEvents>()
-    private val webSocketClientEvent: SharedFlow<WebSocketEvent.ClientEvents> = _webSocketClientEvent.asSharedFlow()
+    private val _webSocketClientEvent = MutableSharedFlow<WebSocketEvent>()
+    private val webSocketClientEvent: SharedFlow<WebSocketEvent> = _webSocketClientEvent.asSharedFlow()
 
     val client = HttpClient(engine.getEngine()) {
         install(WebSockets) {
@@ -58,10 +69,10 @@ class KtorClient(engine: EngineProvider) {
                     launch {
                         webSocketClientEvent.collect { message ->
                             when (message) {
-                                is WebSocketEvent.ClientEvents.PlayerDisconnected -> {
+                                is WebSocketEvent.PlayerClientDisconnected -> {
                                     send(
                                         json.encodeToString(
-                                            WebSocketEvent.ClientEvents.PlayerDisconnected.serializer(),
+                                            WebSocketEvent.PlayerClientDisconnected.serializer(),
                                             message
                                         )
                                     )
@@ -87,7 +98,7 @@ class KtorClient(engine: EngineProvider) {
                 is Frame.Text -> {
                     val text = frame.readText()
                     print("OUTPUT: Received text: $text")
-                    val event = json.decodeFromString(WebSocketEvent.ServerEvents.PlayerConnected.serializer(), text)
+                    val event = json.decodeFromString(WebSocketEvent.PlayerConnected.serializer(), text)
                     _webSocketEvent.emit(event)
                 }
 
@@ -97,7 +108,7 @@ class KtorClient(engine: EngineProvider) {
     }
 
     suspend fun disconnect(playerId: String) {
-        _webSocketClientEvent.emit(WebSocketEvent.ClientEvents.PlayerDisconnected(playerId))
+        _webSocketClientEvent.emit(WebSocketEvent.PlayerClientDisconnected(playerId))
 //        scope.cancel()
         session = null
     }
