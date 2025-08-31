@@ -2,7 +2,7 @@ package pl.msiwak.common.model
 
 import kotlinx.serialization.Serializable
 
-@Serializable
+@Serializable()
 sealed class WebSocketEvent {
 
     @Serializable
