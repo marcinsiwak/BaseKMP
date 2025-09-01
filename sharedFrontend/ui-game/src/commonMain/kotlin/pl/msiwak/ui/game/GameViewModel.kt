@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import pl.msiwak.common.model.Player
 import pl.msiwak.common.model.WebSocketEvent
 import pl.msiwak.domain.game.AddPlayerToGameUseCase
 import pl.msiwak.domain.game.DisconnectUseCase
@@ -56,6 +55,7 @@ class GameViewModel(
                     playerName = "Marcin"
                 )
             }
+
             is GameUiAction.Disconnect -> viewModelScope.launch(errorHandler) { disconnectUseCase() }
             is GameUiAction.Refresh -> viewModelScope.launch(errorHandler) {
                 val existingGameIpAddress = findGameIPAddressUseCase()
@@ -73,14 +73,10 @@ class GameViewModel(
     private suspend fun observeWebSocketEvents() {
         observePlayersConnectionUseCase().collectLatest { event ->
             when (event) {
-                is WebSocketEvent.PlayerConnected -> {
+                is WebSocketEvent.DisplayCurrentUsers -> {
                     _uiState.update { it.copy(players = event.currentPlayers) }
                 }
 
-                is WebSocketEvent.PlayerDisconnected -> {
-                    _uiState.update { it.copy(players = event.currentPlayers) }
-
-                }
                 else -> Unit
             }
         }

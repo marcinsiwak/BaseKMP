@@ -14,40 +14,26 @@ import io.ktor.websocket.WebSocketSession
 import io.ktor.websocket.close
 import io.ktor.websocket.readText
 import io.ktor.websocket.send
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
-import pl.msiwak.common.model.WebSocketEvent
 
 class KtorServerImpl : KtorServer {
     private var server: EmbeddedServer<*, *>? = null
-    private val json = Json { ignoreUnknownKeys = true }
-    private var scope = CoroutineScope(Dispatchers.IO)
-
-    private val _messageResponseFlow = MutableSharedFlow<WebSocketEvent>()
-    private val messageResponseFlow = _messageResponseFlow.asSharedFlow()
+    private val _messages = MutableSharedFlow<String>()
+    override val messages: Flow<String> = _messages.asSharedFlow()
 
     private var activeSessions = mutableMapOf<String, WebSocketSession>()
 
     override fun startServer(host: String, port: Int) {
-        if (!scope.isActive) {
-            scope = CoroutineScope(Dispatchers.IO)
-        }
-        scope.launch {
-            server = embeddedServer(CIO, port = port, host = host) {
-                configureServer()
-            }.start(wait = false)
-        }
+        server = embeddedServer(CIO, port = port, host = host) {
+            configureServer()
+        }.start(wait = false)
+
     }
 
     override fun stopServer() {
-        scope.cancel()
         server?.stop(1000, 2000)
         server = null
         println("OUTPUT: Server stopped")
@@ -62,50 +48,35 @@ class KtorServerImpl : KtorServer {
 
                 activeSessions[userId]?.close(
                     CloseReason(CloseReason.Codes.NORMAL, "Another session opened")
-                )
+                ) ?: _messages.emit("Player connected: $userId")
 
                 activeSessions[userId] = this
-
-                val job = launch {
-                    messageResponseFlow.collect { message ->
-                        when (message) {
-                            is WebSocketEvent.PlayerConnected -> send(json.encodeToString<WebSocketEvent>(message))
-
-                            is WebSocketEvent.PlayerClientDisconnected -> {
-                                activeSessions.remove(message.player)
-                                send(
-                                    json.encodeToString<WebSocketEvent>(
-                                        WebSocketEvent.PlayerDisconnected(
-                                            activeSessions.keys.toList()
-                                        )
-                                    )
-                                )
-                                activeSessions[message.player]?.close()
-                            }
-
-                            else -> Unit
-                        }
-
-                    }
-                }
-
-                _messageResponseFlow.emit(WebSocketEvent.PlayerConnected(activeSessions.keys.toList()))
 
                 runCatching {
                     incoming.consumeEach { frame ->
                         if (frame is Frame.Text) {
                             val receivedText = frame.readText()
-                            val event = json.decodeFromString<WebSocketEvent>(receivedText)
-                            _messageResponseFlow.emit(event)
+                            _messages.emit(receivedText)
                         }
                     }
                 }.onFailure { exception ->
                     println("OUTPUT: WebSocket exception: ${exception.localizedMessage}")
-                }.also {
-                    job.cancel()
                 }
             }
         }
+    }
+
+    override suspend fun sendMessage(userId: String, message: String) {
+        activeSessions[userId]?.send(message)
+    }
+
+    override suspend fun sendMessageToAll(message: String) {
+        activeSessions.values.forEach { it.send(message) }
+    }
+
+    override suspend fun closeSocker(userId: String) {
+        activeSessions[userId]?.close(CloseReason(CloseReason.Codes.NORMAL, "Closed by server"))
+        activeSessions.remove(userId)
     }
 
     fun isRunning(): Boolean = server != null

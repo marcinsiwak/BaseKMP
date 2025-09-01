@@ -10,10 +10,19 @@ import Foundation
 import sharedFrontend
 import ComposeApp
 import Telegraph
+import Combine
 
 class KtorServerImpl: KtorServer {
 
-    var httpServer: HttpServer = HttpServer()
+    private let subject = PassthroughSubject<String, Never>()
+
+    lazy var messages: Kotlinx_coroutines_coreFlow = {
+           subject.asFlow()
+       }()
+
+    lazy var httpServer: HttpServer = {
+        HttpServer(subject: subject)
+    }()
 
     func startServer(host: String, port: Int32) {
         httpServer.start(host: host, port: port)
@@ -21,6 +30,18 @@ class KtorServerImpl: KtorServer {
     
     func stopServer() {
         httpServer.server.stop()
+    }
+    
+    func sendMessage(userId: String, message: String) async throws {
+        httpServer.sendMessage(userId: userId, message: message)
+    }
+
+    func closeSocker(userId: String) async throws {
+        httpServer.closeSocket(userId: userId)
+    }
+
+    func sendMessageToAll(message: String) async throws {
+        httpServer.sendMessageToAll(message: message)
     }
 }
 
@@ -31,6 +52,12 @@ public class HttpServer: NSObject {
     var server: Server!
     var websocketClient: WebSocketClient!
     let PORT:Int = 3000
+
+    var subject: PassthroughSubject<String, Never>?
+
+    init(subject: PassthroughSubject<String, Never>? = nil) {
+        self.subject = subject
+    }
 }
 
 public extension HttpServer {
@@ -62,6 +89,15 @@ public extension HttpServer {
         sockets[userId]?.send(text: message)
     }
     
+    func sendMessageToAll(message: String) {
+        sockets.values.forEach { socket in
+            socket.send(text: message)
+        }
+    }
+
+    func closeSocket(userId: String) {
+        sockets[userId]?.close(immediately: true)
+    }
 }
 
 
@@ -75,28 +111,63 @@ extension HttpServer: ServerWebSocketDelegate {
     
     public func server(_ server: Telegraph.Server, webSocketDidDisconnect webSocket: any Telegraph.WebSocket, error: (any Error)?) {
         print("Websocket client disconnected")
-//        sockets.removeAll { $0 === webSocket }
+        if let key = sockets.first(where: { $0.value === webSocket })?.key {
+            sockets.removeValue(forKey: key)
+        }
     }
     
     public func server(_ server: Telegraph.Server, webSocketDidConnect webSocket: any Telegraph.WebSocket, handshake: Telegraph.HTTPRequest) {
         let id = handshake.uri.queryItems?.first(where: { item in
             item.name == "id"
         })?.value
-        print("Websocket client connected:", id ?? "Unknown")
-//        sockets.append(webSocket)
+
+        let userId = id ?? "0.0.0.0"
         
+        if sockets[userId] == nil {
+            print("Websocket client connected:", id ?? "Unknown")
+            subject?.send("Player connected: \(userId)")
+            sockets[userId] = webSocket
+        }
         
+
     }
     
     
     public func server(_ server: Server, webSocket: WebSocket, didReceiveMessage message: WebSocketMessage) {
       print("WebSocket message received:", message)
+        let payload = message.payload
+        if case let .text(message) = payload {
+            subject?.send(message)
+        }
     }
 
     
     public func server(_ server: Server, webSocket: WebSocket, didSendMessage message: WebSocketMessage) {
-      webSocket.send(text: "Hello from websocket!")
       print("WebSocket message sent:", message)
     }
     
+}
+
+
+
+
+extension Publisher {
+    func asFlow<T>() -> Kotlinx_coroutines_coreFlow where Output == T, Failure == Never {
+        return Kotlinx_coroutines_coreFlowAdapter(publisher: self)
+    }
+}
+
+class Kotlinx_coroutines_coreFlowAdapter<T>: Kotlinx_coroutines_coreFlow {
+    private var cancellable: AnyCancellable?
+    private let publisher: AnyPublisher<T, Never>
+
+    init<P: Publisher>(publisher: P) where P.Output == T, P.Failure == Never {
+        self.publisher = publisher.eraseToAnyPublisher()
+    }
+
+    func collect(collector: Kotlinx_coroutines_coreFlowCollector, completionHandler: @escaping (Error?) -> Void) {
+        cancellable = publisher.sink { value in
+            collector.emit(value: value) { _ in }
+        }
+    }
 }

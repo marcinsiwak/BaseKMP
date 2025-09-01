@@ -88,9 +88,8 @@ class KtorClient(engine: EngineProvider) {
     }
 
     suspend fun disconnect(playerId: String) {
-        val event: WebSocketEvent = WebSocketEvent.PlayerClientDisconnected(playerId)
+        val event: WebSocketEvent = WebSocketEvent. PlayerClientDisconnected(playerId)
         _webSocketClientEvent.emit(event)
-//        scope.cancel()
         session = null
     }
 }

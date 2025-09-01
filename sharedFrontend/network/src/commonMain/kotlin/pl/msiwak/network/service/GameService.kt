@@ -13,14 +13,16 @@ import pl.msiwak.common.model.dispatcher.Dispatchers
 import pl.msiwak.network.ConnectionManager
 import pl.msiwak.network.KtorClient
 import pl.msiwak.network.KtorServer
+import pl.msiwak.network.ServerManager
 
 private const val PORT = 53287
 
 class GameService(
-    private val ktorServer: KtorServer,
+    private val serverManager: ServerManager,
     private val ktorClient: KtorClient,
     private val connectionManager: ConnectionManager
 ) {
+    private var scope = CoroutineScope(Dispatchers.IO)
 
     suspend fun observePlayersConnection(): Flow<WebSocketEvent> = withContext(Dispatchers.IO) {
         ktorClient.webSocketEvent.filterIsInstance<WebSocketEvent>()
@@ -45,11 +47,18 @@ class GameService(
     }
 
     suspend fun startGame() = withContext(Dispatchers.IO) {
-        val ipAddress = connectionManager.getLocalIpAddress() ?: throw Exception("Cannot get local IP address")
-        ktorServer.startServer(ipAddress, PORT)
+        if (!scope.isActive) {
+            scope = CoroutineScope(Dispatchers.IO)
+        }
+        scope.launch {
+            val ipAddress = connectionManager.getLocalIpAddress() ?: throw Exception("Cannot get local IP address")
+            serverManager.startServer(ipAddress, PORT)
+            serverManager.observeMessages()
+        }
     }
 
     suspend fun stopGame() = withContext(Dispatchers.IO) {
-        ktorServer.stopServer()
+        serverManager.stopServer()
+        scope.cancel()
     }
 }
