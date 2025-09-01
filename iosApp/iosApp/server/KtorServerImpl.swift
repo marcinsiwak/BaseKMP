@@ -26,6 +26,8 @@ class KtorServerImpl: KtorServer {
 
 public class HttpServer: NSObject {
     
+    var sockets: [String: Telegraph.WebSocket] = [:]
+
     var server: Server!
     var websocketClient: WebSocketClient!
     let PORT:Int = 3000
@@ -56,6 +58,10 @@ public extension HttpServer {
         
     }
     
+    func sendMessage(userId: String, message: String) {
+        sockets[userId]?.send(text: message)
+    }
+    
 }
 
 
@@ -66,12 +72,20 @@ extension HttpServer: ServerDelegate {
 }
 
 extension HttpServer: ServerWebSocketDelegate {
+    
     public func server(_ server: Telegraph.Server, webSocketDidDisconnect webSocket: any Telegraph.WebSocket, error: (any Error)?) {
         print("Websocket client disconnected")
+//        sockets.removeAll { $0 === webSocket }
     }
     
     public func server(_ server: Telegraph.Server, webSocketDidConnect webSocket: any Telegraph.WebSocket, handshake: Telegraph.HTTPRequest) {
-        print("Websocket client connected")
+        let id = handshake.uri.queryItems?.first(where: { item in
+            item.name == "id"
+        })?.value
+        print("Websocket client connected:", id ?? "Unknown")
+//        sockets.append(webSocket)
+        
+        
     }
     
     

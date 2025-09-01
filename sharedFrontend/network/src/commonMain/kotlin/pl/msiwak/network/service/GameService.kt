@@ -1,7 +1,11 @@
 package pl.msiwak.network.service
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import pl.msiwak.common.model.Player
 import pl.msiwak.common.model.WebSocketEvent
@@ -27,13 +31,15 @@ class GameService(
     }
 
     suspend fun connectPlayer(host: String, playerName: String) = withContext(Dispatchers.IO) {
-        val deviceIpId = connectionManager.getLocalIpAddress()?.substringAfterLast(".") ?: throw Exception("Cannot get local IP address")
+        val deviceIpId = connectionManager.getLocalIpAddress()?.substringAfterLast(".")
+            ?: throw Exception("Cannot get local IP address")
         val player = Player(id = deviceIpId, name = playerName)
         ktorClient.connect(host = host, port = PORT, player = player)
     }
 
     suspend fun disconnectPlayer() = withContext(Dispatchers.IO) {
-        val deviceIpId = connectionManager.getLocalIpAddress()?.substringAfterLast(".") ?: throw Exception("Cannot get local IP address")
+        val deviceIpId = connectionManager.getLocalIpAddress()?.substringAfterLast(".")
+            ?: throw Exception("Cannot get local IP address")
 
         ktorClient.disconnect(deviceIpId)
     }

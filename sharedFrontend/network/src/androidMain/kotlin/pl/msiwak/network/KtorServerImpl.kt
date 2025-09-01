@@ -69,11 +69,7 @@ class KtorServerImpl : KtorServer {
                 val job = launch {
                     messageResponseFlow.collect { message ->
                         when (message) {
-                            is WebSocketEvent.PlayerConnected -> {
-                                send(
-                                    json.encodeToString<WebSocketEvent>(message)
-                                )
-                            }
+                            is WebSocketEvent.PlayerConnected -> send(json.encodeToString<WebSocketEvent>(message))
 
                             is WebSocketEvent.PlayerClientDisconnected -> {
                                 activeSessions.remove(message.player)
@@ -99,7 +95,6 @@ class KtorServerImpl : KtorServer {
                     incoming.consumeEach { frame ->
                         if (frame is Frame.Text) {
                             val receivedText = frame.readText()
-                            println("OUTPUT: WebSocket received: $receivedText")
                             val event = json.decodeFromString<WebSocketEvent>(receivedText)
                             _messageResponseFlow.emit(event)
                         }
@@ -109,7 +104,6 @@ class KtorServerImpl : KtorServer {
                 }.also {
                     job.cancel()
                 }
-
             }
         }
     }
