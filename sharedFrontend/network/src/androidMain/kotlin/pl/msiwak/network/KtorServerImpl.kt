@@ -48,7 +48,7 @@ class KtorServerImpl : KtorServer {
 
                 activeSessions[userId]?.close(
                     CloseReason(CloseReason.Codes.NORMAL, "Another session opened")
-                ) ?: _messages.emit("Player connected: $userId")
+                )
 
                 activeSessions[userId] = this
 

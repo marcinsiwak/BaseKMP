@@ -6,13 +6,13 @@ import kotlinx.serialization.Serializable
 sealed class WebSocketEvent() {
 
     @Serializable
-    data class PlayerConnected(val id: String) : WebSocketEvent()
+    data class PlayerConnected(val player: Player) : WebSocketEvent()
 
     @Serializable
-    data class DisplayCurrentUsers(val currentPlayers: List<String>) : WebSocketEvent()
+    data class DisplayCurrentUsers(val currentPlayers: List<Player>) : WebSocketEvent()
 
     @Serializable
-    data class PlayerDisconnected(val currentPlayers: List<String>) : WebSocketEvent()
+    data class PlayerDisconnected(val currentPlayers: List<Player>) : WebSocketEvent()
 
     @Serializable
     data class PlayerClientDisconnected(val id: String) : WebSocketEvent()

@@ -1,6 +1,5 @@
 package pl.msiwak.data.game
 
-import pl.msiwak.common.model.Player
 import pl.msiwak.network.service.GameService
 
 class GameRepository(
@@ -26,10 +25,5 @@ class GameRepository(
 
     suspend fun disconnectPlayer() {
         return gameService.disconnectPlayer()
-    }
-
-    suspend fun removePlayerFromGame(playerId: String): Boolean {
-//        return playerRepository.disconnectPlayer(playerId)
-        return true
     }
 }

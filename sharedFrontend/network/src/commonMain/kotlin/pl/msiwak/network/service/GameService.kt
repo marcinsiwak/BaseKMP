@@ -12,7 +12,6 @@ import pl.msiwak.common.model.WebSocketEvent
 import pl.msiwak.common.model.dispatcher.Dispatchers
 import pl.msiwak.network.ConnectionManager
 import pl.msiwak.network.KtorClient
-import pl.msiwak.network.KtorServer
 import pl.msiwak.network.ServerManager
 
 private const val PORT = 53287
@@ -32,7 +31,7 @@ class GameService(
         return@withContext connectionManager.findGame(port = PORT)
     }
 
-    suspend fun connectPlayer(host: String, playerName: String) = withContext(Dispatchers.IO) {
+    suspend fun connectPlayer(host: String, playerName: String) {
         val deviceIpId = connectionManager.getLocalIpAddress()?.substringAfterLast(".")
             ?: throw Exception("Cannot get local IP address")
         val player = Player(id = deviceIpId, name = playerName)

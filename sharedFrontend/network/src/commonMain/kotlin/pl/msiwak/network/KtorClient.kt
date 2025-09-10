@@ -25,8 +25,10 @@ import pl.msiwak.network.engine.EngineProvider
 class KtorClient(engine: EngineProvider) {
 
     private var session: WebSocketSession? = null
-    private val json = Json { ignoreUnknownKeys = true }
-
+    private val json = Json {
+        ignoreUnknownKeys = true
+        isLenient = true
+    }
     private var scope = CoroutineScope(Dispatchers.Main)
 
     private val _webSocketEvent = MutableSharedFlow<WebSocketEvent>()
@@ -51,6 +53,7 @@ class KtorClient(engine: EngineProvider) {
                     port = port,
                     path = "/ws?id=${player.id}"
                 ) {
+                    send(json.encodeToString<WebSocketEvent>(WebSocketEvent.PlayerConnected(player)))
                     launch {
                         webSocketClientEvent.collect { message ->
                             when (message) {
@@ -88,7 +91,7 @@ class KtorClient(engine: EngineProvider) {
     }
 
     suspend fun disconnect(playerId: String) {
-        val event: WebSocketEvent = WebSocketEvent. PlayerClientDisconnected(playerId)
+        val event: WebSocketEvent = WebSocketEvent.PlayerClientDisconnected(playerId)
         _webSocketClientEvent.emit(event)
         session = null
     }

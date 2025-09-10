@@ -34,13 +34,11 @@ class ConnectionManagerImpl : ConnectionManager {
         val ownIp = getLocalIpAddress() ?: throw Exception("Connect to network")
         val subnet = ownIp.substringBeforeLast(".")
 
-        for (i in 1..10) {
-            val host = "192.168.0.224"
+        for (i in 1..254) {
+            val host = "$subnet.$i"
             runCatching {
-                Log.d("NetworkScan", "Scanning host $host")
-                if (InetAddress.getByName(host).isReachable(1000)) {
+                if (InetAddress.getByName(host).isReachable(10)) {
                     val socket = Socket()
-                    Log.d("NetworkScan", "Scanning port $port")
                     socket.connect(InetSocketAddress(host, port), 200)
                     socket.close()
                     Log.d("NetworkScan", "Device with open port $port found: $host")
