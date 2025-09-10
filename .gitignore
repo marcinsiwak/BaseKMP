@@ -22,3 +22,5 @@ captures
 /iosApp/Pods
 /composeApp/composeApp.podspec
 
+/sharedFrontend/sharedFrontend.podspec
+/iosApp/iosApp.xcworkspace/xcshareddata/swiftpm/Package.resolved

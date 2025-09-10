@@ -14,7 +14,7 @@ fun AppNavHost(
 ) {
     NavHost(
         navController = navController,
-        startDestination = NavDestination.ScreenADestination.Graph
+        startDestination = NavDestination.GameDestination.Graph
     ) {
         navigationGraphs.fastForEach {
             it.create(navController, this@NavHost)

@@ -20,6 +20,8 @@ kotlin {
 
         framework {
             baseName = "ComposeApp"
+
+            export(projects.sharedFrontend.network)
         }
     }
 
@@ -39,12 +41,13 @@ kotlin {
             implementation(projects.sharedFrontend.navigation)
             implementation(projects.sharedFrontend.uiExample)
             implementation(projects.sharedFrontend.uiAiGenerated)
+            implementation(projects.sharedFrontend.uiGame)
             implementation(projects.sharedFrontend.commonResources)
             implementation(projects.sharedFrontend.commonModel)
             implementation(projects.sharedFrontend.data)
             implementation(projects.sharedFrontend.domain)
             implementation(projects.sharedFrontend.domainImpl)
-            implementation(projects.sharedFrontend.network)
+            api(projects.sharedFrontend.network)
 
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
@@ -61,10 +64,10 @@ kotlin {
 }
 
 android {
-    namespace = "pl.msiwak.baseKMP"
+    namespace = "pl.msiwak.cardsthegame"
 
     defaultConfig {
-        applicationId = "pl.msiwak.baseKMP"
+        applicationId = "pl.msiwak.cardsthegame"
         versionCode = 1
         versionName = "1.0"
     }
