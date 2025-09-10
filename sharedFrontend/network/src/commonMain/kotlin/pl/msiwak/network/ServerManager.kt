@@ -5,41 +5,41 @@ import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 import pl.msiwak.common.model.Player
 import pl.msiwak.common.model.WebSocketEvent
+import pl.msiwak.gamemanager.GameManager
 
 class ServerManager(
-    private val ktorServer: KtorServer
+    private val ktorServer: KtorServer,
+    private val gameManager: GameManager
 ) {
     private val json = Json {
         ignoreUnknownKeys = true
         isLenient = true
     }
 
-    private val players = mutableListOf<Player>()
-
     suspend fun observeMessages() {
         ktorServer.messages.map {
             json.decodeFromString<WebSocketEvent>(it)
         }
-            .filter { !(it is WebSocketEvent.PlayerConnected && players.contains(it.player)) }
+            .filter { !(it is WebSocketEvent.PlayerConnected && gameManager.getPlayers().contains(it.player)) }
             .collect { event ->
                 when (event) {
                     is WebSocketEvent.PlayerConnected -> {
-                        players.add(event.player)
+                        gameManager.joinGame(event.player)
                         ktorServer.sendMessageToAll(
                             json.encodeToString<WebSocketEvent>(
                                 WebSocketEvent.DisplayCurrentUsers(
-                                    players
+                                    gameManager.getPlayers()
                                 )
                             )
                         )
                     }
 
                     is WebSocketEvent.PlayerClientDisconnected -> {
-                        players.removeAll { player -> player.id == event.id }
+                        gameManager.leaveGame(event.id)
                         ktorServer.sendMessageToAll(
                             json.encodeToString<WebSocketEvent>(
                                 WebSocketEvent.DisplayCurrentUsers(
-                                    players
+                                    gameManager.getPlayers()
                                 )
                             )
                         )

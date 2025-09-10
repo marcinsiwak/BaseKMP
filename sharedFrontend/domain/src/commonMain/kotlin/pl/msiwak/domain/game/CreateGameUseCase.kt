@@ -1,5 +1,5 @@
 package pl.msiwak.domain.game
 
-interface StopGameUseCase {
+interface CreateGameUseCase {
     suspend operator fun invoke()
 }

@@ -11,12 +11,12 @@ class GameRepository(
         return gameService.findGame()
     }
 
-    suspend fun startGame() {
-        gameService.startGame()
+    suspend fun createGame() {
+        gameService.createGame()
     }
 
-    suspend fun stopGame() {
-        gameService.stopGame()
+    suspend fun finishGame() {
+        gameService.finishGame()
     }
 
     suspend fun addPlayerToGame(host: String, playerName: String) {

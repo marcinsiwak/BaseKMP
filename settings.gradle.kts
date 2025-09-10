@@ -44,6 +44,7 @@ include(":sharedFrontend:network")
 include(":sharedFrontend:data")
 include(":sharedFrontend:domain")
 include(":sharedFrontend:domain-impl")
+include(":sharedFrontend:game-manager")
 
 include(":server")
 include(":server:data")

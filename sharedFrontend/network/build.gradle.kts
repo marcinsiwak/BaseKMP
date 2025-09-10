@@ -33,6 +33,7 @@ kotlin {
             commonMain.dependencies {
                 implementation(projects.shared.model)
                 implementation(projects.sharedFrontend.commonModel)
+                implementation(projects.sharedFrontend.gameManager)
 
                 implementation(libs.koin.core)
                 implementation(libs.ktor.core)

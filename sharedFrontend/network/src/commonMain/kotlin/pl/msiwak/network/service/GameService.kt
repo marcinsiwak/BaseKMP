@@ -45,7 +45,7 @@ class GameService(
         ktorClient.disconnect(deviceIpId)
     }
 
-    suspend fun startGame() = withContext(Dispatchers.IO) {
+    suspend fun createGame() = withContext(Dispatchers.IO) {
         if (!scope.isActive) {
             scope = CoroutineScope(Dispatchers.IO)
         }
@@ -56,7 +56,7 @@ class GameService(
         }
     }
 
-    suspend fun stopGame() = withContext(Dispatchers.IO) {
+    suspend fun finishGame() = withContext(Dispatchers.IO) {
         serverManager.stopServer()
         scope.cancel()
     }

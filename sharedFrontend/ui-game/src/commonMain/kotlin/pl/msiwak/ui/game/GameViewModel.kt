@@ -14,12 +14,12 @@ import pl.msiwak.domain.game.AddPlayerToGameUseCase
 import pl.msiwak.domain.game.DisconnectUseCase
 import pl.msiwak.domain.game.FindGameIPAddressUseCase
 import pl.msiwak.domain.game.ObservePlayersConnectionUseCase
-import pl.msiwak.domain.game.StartGameUseCase
-import pl.msiwak.domain.game.StopGameUseCase
+import pl.msiwak.domain.game.CreateGameUseCase
+import pl.msiwak.domain.game.FinishGameUseCase
 
 class GameViewModel(
-    private val startGameUseCase: StartGameUseCase,
-    private val stopGameUseCase: StopGameUseCase,
+    private val createGameUseCase: CreateGameUseCase,
+    private val finishGameUseCase: FinishGameUseCase,
     private val addPlayerToGameUseCase: AddPlayerToGameUseCase,
     private val observePlayersConnectionUseCase: ObservePlayersConnectionUseCase,
     private val findGameIPAddressUseCase: FindGameIPAddressUseCase,
@@ -48,7 +48,7 @@ class GameViewModel(
             }
 
             is GameUiAction.StartSession -> onStartSession()
-            is GameUiAction.StopSession -> viewModelScope.launch(errorHandler) { stopGameUseCase() }
+            is GameUiAction.StopSession -> viewModelScope.launch(errorHandler) { finishGameUseCase() }
             is GameUiAction.Connect -> viewModelScope.launch(errorHandler) {
                 addPlayerToGameUseCase(
                     host = uiState.value.gameIpAddress ?: throw Exception("Game IP address not found"),
@@ -66,7 +66,7 @@ class GameViewModel(
 
     private fun onStartSession() {
         viewModelScope.launch(errorHandler) {
-            startGameUseCase()
+            createGameUseCase()
         }
     }
 
