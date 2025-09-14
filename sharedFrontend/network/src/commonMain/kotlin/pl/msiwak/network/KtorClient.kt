@@ -75,6 +75,12 @@ class KtorClient(engine: EngineProvider) {
         }
     }
 
+    fun send(webSocketEvent: WebSocketEvent) {
+        scope.launch {
+            _webSocketClientEvent.emit(webSocketEvent)
+        }
+    }
+
     private suspend fun DefaultClientWebSocketSession.listenForResponse() {
         incoming.consumeEach { frame ->
             when (frame) {

@@ -19,4 +19,7 @@ sealed class WebSocketEvent() {
 
     @Serializable
     data object Error : WebSocketEvent()
+
+    @Serializable
+    data class GameLobby(val id: String) : WebSocketEvent()
 }

@@ -3,7 +3,6 @@ package pl.msiwak.network
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
-import pl.msiwak.common.model.Player
 import pl.msiwak.common.model.WebSocketEvent
 import pl.msiwak.gamemanager.GameManager
 
@@ -46,13 +45,25 @@ class ServerManager(
                         ktorServer.closeSocker(event.id)
                     }
 
+                    is WebSocketEvent.GameLobby -> {
+                        ktorServer.sendMessage(
+                            event.id,
+                            json.encodeToString<WebSocketEvent>(
+                                WebSocketEvent.DisplayCurrentUsers(
+                                    gameManager.getPlayers()
+                                )
+                            )
+                        )
+                    }
+
                     else -> Unit
                 }
             }
     }
 
-    fun startServer(host: String, port: Int) {
+    suspend fun startServer(host: String, port: Int) {
         ktorServer.startServer(host, port)
+        gameManager.createGame()
     }
 
     fun stopServer() {

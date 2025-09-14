@@ -46,6 +46,9 @@ sealed class NavDestination {
         data object Graph : GameDestination()
 
         @Serializable
-        data object Screen : GameDestination()
+        data object StartScreen : GameDestination()
+
+        @Serializable
+        data object GameScreen : GameDestination()
     }
 }

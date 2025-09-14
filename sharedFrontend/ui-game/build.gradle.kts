@@ -26,6 +26,7 @@ kotlin {
             implementation(projects.sharedFrontend.commonModel)
             implementation(projects.sharedFrontend.commonResources)
             implementation(projects.sharedFrontend.domain)
+            implementation(projects.sharedFrontend.gameManager)
 
             implementation(compose.runtime)
             implementation(compose.foundation)

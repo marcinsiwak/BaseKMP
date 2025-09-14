@@ -14,7 +14,7 @@ import pl.msiwak.network.ConnectionManager
 import pl.msiwak.network.KtorClient
 import pl.msiwak.network.ServerManager
 
-private const val PORT = 53287
+private const val PORT = 63287
 
 class GameService(
     private val serverManager: ServerManager,
@@ -23,8 +23,14 @@ class GameService(
 ) {
     private var scope = CoroutineScope(Dispatchers.IO)
 
+    private lateinit var deviceIpId: String
+
     suspend fun observePlayersConnection(): Flow<WebSocketEvent> = withContext(Dispatchers.IO) {
         ktorClient.webSocketEvent.filterIsInstance<WebSocketEvent>()
+    }
+
+    suspend fun sendClientEvent(webSocketEvent: WebSocketEvent) = withContext(Dispatchers.IO) {
+        ktorClient.send(webSocketEvent)
     }
 
     suspend fun findGame(): String? = withContext(Dispatchers.IO) {
@@ -32,7 +38,7 @@ class GameService(
     }
 
     suspend fun connectPlayer(host: String, playerName: String) {
-        val deviceIpId = connectionManager.getLocalIpAddress()?.substringAfterLast(".")
+        deviceIpId = connectionManager.getLocalIpAddress()?.substringAfterLast(".")
             ?: throw Exception("Cannot get local IP address")
         val player = Player(id = deviceIpId, name = playerName)
         ktorClient.connect(host = host, port = PORT, player = player)
@@ -55,6 +61,8 @@ class GameService(
             serverManager.observeMessages()
         }
     }
+
+    fun getUserId(): String = deviceIpId
 
     suspend fun finishGame() = withContext(Dispatchers.IO) {
         serverManager.stopServer()

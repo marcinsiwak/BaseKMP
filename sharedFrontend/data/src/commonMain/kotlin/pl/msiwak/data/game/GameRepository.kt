@@ -1,5 +1,6 @@
 package pl.msiwak.data.game
 
+import pl.msiwak.common.model.WebSocketEvent
 import pl.msiwak.network.service.GameService
 
 class GameRepository(
@@ -26,4 +27,10 @@ class GameRepository(
     suspend fun disconnectPlayer() {
         return gameService.disconnectPlayer()
     }
+
+    fun getUserId(): String {
+        return gameService.getUserId()
+    }
+
+    suspend fun sendClientEvent(webSocketEvent: WebSocketEvent) = gameService.sendClientEvent(webSocketEvent)
 }
