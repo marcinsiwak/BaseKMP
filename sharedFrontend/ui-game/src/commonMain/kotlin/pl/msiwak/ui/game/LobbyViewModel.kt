@@ -15,15 +15,15 @@ import pl.msiwak.domain.game.GetUserIdUseCase
 import pl.msiwak.domain.game.ObserveWebSocketEventsUseCase
 import pl.msiwak.domain.game.SendClientEventUseCase
 
-class GameViewModel(
+class LobbyViewModel(
     private val observeWebSocketEventsUseCase: ObserveWebSocketEventsUseCase,
     private val disconnectUseCase: DisconnectUseCase,
     private val sendClientEventUseCase: SendClientEventUseCase,
     private val getUserIdUseCase: GetUserIdUseCase
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(GameState())
-    val uiState: StateFlow<GameState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(LobbyState())
+    val uiState: StateFlow<LobbyState> = _uiState.asStateFlow()
 
     private val errorHandler = CoroutineExceptionHandler { _, throwable ->
         print(throwable)
@@ -36,16 +36,12 @@ class GameViewModel(
         }
     }
 
-    fun onUiAction(action: GameUiAction) {
+    fun onUiAction(action: LobbyUiAction) {
         when (action) {
-            is GameUiAction.OnBackClicked -> {
+            is LobbyUiAction.OnBackClicked -> {
                 // Handle back navigation
             }
-
-
-            is GameUiAction.Disconnect -> viewModelScope.launch(errorHandler) { disconnectUseCase() }
-
-            else -> Unit
+            is LobbyUiAction.Disconnect -> viewModelScope.launch(errorHandler) { disconnectUseCase() }
         }
     }
 

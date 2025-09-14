@@ -19,7 +19,7 @@ import org.koin.compose.koinInject
 @Composable
 fun GameScreen(
     navController: NavController,
-    viewModel: GameViewModel = koinInject()
+    viewModel: LobbyViewModel = koinInject()
 ) {
     val state = viewModel.uiState.collectAsState()
 
@@ -39,7 +39,7 @@ fun GameScreen(
                 }
 
                 Button(onClick = {
-                    viewModel.onUiAction(GameUiAction.Disconnect)
+                    viewModel.onUiAction(LobbyUiAction.Disconnect)
                     navController.navigateUp()
                 }) {
                     Text("Disconnect from game")
