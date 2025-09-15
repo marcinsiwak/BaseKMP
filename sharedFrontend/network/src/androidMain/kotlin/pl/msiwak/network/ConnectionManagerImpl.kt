@@ -37,7 +37,7 @@ class ConnectionManagerImpl : ConnectionManager {
         for (i in 1..254) {
             val host = "$subnet.$i"
             runCatching {
-                if (InetAddress.getByName(host).isReachable(10)) {
+                if (InetAddress.getByName(host).isReachable(50)) {
                     val socket = Socket()
                     socket.connect(InetSocketAddress(host, port), 200)
                     socket.close()

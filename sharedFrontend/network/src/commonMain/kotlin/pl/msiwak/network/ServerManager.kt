@@ -1,6 +1,8 @@
 package pl.msiwak.network
 
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 import pl.msiwak.common.model.WebSocketEvent
@@ -15,6 +17,16 @@ class ServerManager(
         isLenient = true
     }
 
+    suspend fun observeGameSession() {
+        gameManager.currentGameSession.filterNotNull().collectLatest { gameSession ->
+            ktorServer.sendMessageToAll(
+                json.encodeToString<WebSocketEvent>(
+                    WebSocketEvent.UpdateGameSession(gameSession)
+                )
+            )
+        }
+    }
+
     suspend fun observeMessages() {
         ktorServer.messages.map {
             json.decodeFromString<WebSocketEvent>(it)
@@ -22,38 +34,31 @@ class ServerManager(
             .filter { !(it is WebSocketEvent.PlayerConnected && gameManager.getPlayers().contains(it.player)) }
             .collect { event ->
                 when (event) {
-                    is WebSocketEvent.PlayerConnected -> {
-                        gameManager.joinGame(event.player)
-                        ktorServer.sendMessageToAll(
-                            json.encodeToString<WebSocketEvent>(
-                                WebSocketEvent.DisplayCurrentUsers(
-                                    gameManager.getPlayers()
-                                )
-                            )
-                        )
-                    }
+                    is WebSocketEvent.PlayerConnected -> gameManager.joinGame(event.player)
+
 
                     is WebSocketEvent.PlayerClientDisconnected -> {
                         gameManager.leaveGame(event.id)
-                        ktorServer.sendMessageToAll(
-                            json.encodeToString<WebSocketEvent>(
-                                WebSocketEvent.DisplayCurrentUsers(
-                                    gameManager.getPlayers()
-                                )
-                            )
-                        )
                         ktorServer.closeSocker(event.id)
                     }
 
                     is WebSocketEvent.GameLobby -> {
-                        ktorServer.sendMessage(
-                            event.id,
-                            json.encodeToString<WebSocketEvent>(
-                                WebSocketEvent.DisplayCurrentUsers(
-                                    gameManager.getPlayers()
+                        gameManager.getGameSession()?.let {
+                            ktorServer.sendMessage(
+                                event.id,
+                                json.encodeToString<WebSocketEvent>(
+                                    WebSocketEvent.UpdateGameSession(it)
                                 )
                             )
-                        )
+                        }
+                    }
+
+                    is WebSocketEvent.UpdateGameSession -> {
+                        gameManager.getGameSession()?.let {
+                            ktorServer.sendMessageToAll(
+                                json.encodeToString<WebSocketEvent>(event)
+                            )
+                        }
                     }
 
                     else -> Unit

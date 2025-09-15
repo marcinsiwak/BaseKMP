@@ -11,5 +11,5 @@ internal val viewModelModule = module {
     viewModel { ExampleViewModel() }
     viewModel { AiGeneratedViewModel() }
     viewModel { StartViewModel(get(), get(), get()) }
-    viewModel { LobbyViewModel(get(), get(), get(), get()) }
+    viewModel { LobbyViewModel(get(), get(), get(), get(), get()) }
 }

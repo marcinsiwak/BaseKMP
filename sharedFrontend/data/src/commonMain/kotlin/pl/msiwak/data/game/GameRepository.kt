@@ -1,12 +1,26 @@
 package pl.msiwak.data.game
 
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import pl.msiwak.common.model.GameSession
 import pl.msiwak.common.model.WebSocketEvent
 import pl.msiwak.network.service.GameService
 
 class GameRepository(
     private val gameService: GameService
 ) {
-    suspend fun observePlayersConnection() = gameService.observePlayersConnection()
+    private val _currentGameSession = MutableStateFlow<GameSession?>(null)
+    val currentGameSession: StateFlow<GameSession?> = _currentGameSession.asStateFlow()
+
+    suspend fun observeWebSocketEvents() {
+        gameService.observeWebSocketEvents().collect {
+            when (it) {
+                is WebSocketEvent.UpdateGameSession -> _currentGameSession.value = it.gameSession
+                else -> {}
+            }
+        }
+    }
 
     suspend fun findGame(): String? {
         return gameService.findGame()

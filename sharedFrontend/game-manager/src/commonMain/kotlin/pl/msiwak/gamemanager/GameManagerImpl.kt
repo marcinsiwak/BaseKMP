@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import pl.msiwak.common.model.GameSession
 import pl.msiwak.common.model.Player
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -51,7 +52,7 @@ class GameManagerImpl : GameManager {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getGameSession(gameId: String): GameSession? {
+    override suspend fun getGameSession(): GameSession? {
         return currentGameSession.value
     }
 }

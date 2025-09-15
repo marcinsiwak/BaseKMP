@@ -1,7 +1,8 @@
-package pl.msiwak.gamemanager
+package pl.msiwak.common.model
 
-import pl.msiwak.common.model.Player
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class GameSession(
     val gameId: String,
     val players: List<Player> = emptyList(),

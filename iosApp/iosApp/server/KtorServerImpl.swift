@@ -125,7 +125,6 @@ extension HttpServer: ServerWebSocketDelegate {
         
         if sockets[userId] == nil {
             print("Websocket client connected:", id ?? "Unknown")
-            subject?.send("Player connected: \(userId)")
             sockets[userId] = webSocket
         }
         

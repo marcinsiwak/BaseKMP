@@ -1,6 +1,7 @@
 package pl.msiwak.gamemanager
 
 import kotlinx.coroutines.flow.StateFlow
+import pl.msiwak.common.model.GameSession
 import pl.msiwak.common.model.Player
 
 interface GameManager {
@@ -14,7 +15,7 @@ interface GameManager {
     suspend fun finishGame(gameId: String)
     suspend fun pauseGame(gameId: String)
     suspend fun resumeGame(gameId: String)
-    suspend fun getGameSession(gameId: String): GameSession?
+    suspend fun getGameSession(): GameSession?
 
     suspend fun getPlayers(): List<Player>
 }

@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import pl.msiwak.common.model.WebSocketEvent
 import pl.msiwak.domain.game.DisconnectUseCase
 import pl.msiwak.domain.game.GetUserIdUseCase
+import pl.msiwak.domain.game.ObserveGameSessionUseCase
 import pl.msiwak.domain.game.ObserveWebSocketEventsUseCase
 import pl.msiwak.domain.game.SendClientEventUseCase
 
@@ -19,7 +20,8 @@ class LobbyViewModel(
     private val observeWebSocketEventsUseCase: ObserveWebSocketEventsUseCase,
     private val disconnectUseCase: DisconnectUseCase,
     private val sendClientEventUseCase: SendClientEventUseCase,
-    private val getUserIdUseCase: GetUserIdUseCase
+    private val getUserIdUseCase: GetUserIdUseCase,
+    private val observeGameSessionUseCase: ObserveGameSessionUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LobbyState())
@@ -31,7 +33,12 @@ class LobbyViewModel(
 
     init {
         viewModelScope.launch(errorHandler) {
-            observeWebSocketEvents()
+            launch {
+                observeWebSocketEventsUseCase()
+            }
+            launch {
+                observeGameSession()
+            }
             sendClientEventUseCase(WebSocketEvent.GameLobby(getUserIdUseCase()))
         }
     }
@@ -41,19 +48,14 @@ class LobbyViewModel(
             is LobbyUiAction.OnBackClicked -> {
                 // Handle back navigation
             }
+
             is LobbyUiAction.Disconnect -> viewModelScope.launch(errorHandler) { disconnectUseCase() }
         }
     }
 
-    private suspend fun observeWebSocketEvents() {
-        observeWebSocketEventsUseCase().collectLatest { event ->
-            when (event) {
-                is WebSocketEvent.DisplayCurrentUsers -> {
-                    _uiState.update { it.copy(players = event.currentPlayers) }
-                }
-
-                else -> Unit
-            }
+    private suspend fun observeGameSession() {
+        observeGameSessionUseCase().collectLatest { gameSession ->
+            _uiState.update { it.copy(players = gameSession?.players ?: emptyList()) }
         }
     }
 }
