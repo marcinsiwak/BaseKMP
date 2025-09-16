@@ -113,6 +113,7 @@ extension HttpServer: ServerWebSocketDelegate {
         print("Websocket client disconnected")
         if let key = sockets.first(where: { $0.value === webSocket })?.key {
             sockets.removeValue(forKey: key)
+            subject?.send("Client disconnected: \(key)")
         }
     }
     

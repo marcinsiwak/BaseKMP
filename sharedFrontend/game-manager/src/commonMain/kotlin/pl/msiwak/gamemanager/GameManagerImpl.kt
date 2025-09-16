@@ -23,12 +23,31 @@ class GameManagerImpl : GameManager {
     }
 
     override suspend fun joinGame(player: Player) {
-        _currentGameSession.update { it?.copy(players = it.players + player) }
+        with(currentGameSession.value ?: throw IllegalStateException("Game has not been created yet")) {
+            if (players.any { it.id == player.id }) {
+                val updatedPlayers = players.map { if (it.id == player.id) player.copy(isActive = true) else it }
+                _currentGameSession.update { it?.copy(players = updatedPlayers) }
+            } else {
+                _currentGameSession.update { it?.copy(players = players + player) }
+            }
+        }
     }
 
     override suspend fun leaveGame(playerId: String) {
         _currentGameSession.update {
             it?.copy(players = it.players.filter { player -> player.id != playerId })
+        }
+    }
+
+    override suspend fun disablePlayer(playerId: String) {
+        _currentGameSession.update {
+            it?.copy(players = it.players.map { player ->
+                if (player.id == playerId) {
+                    player.copy(isActive = false)
+                } else {
+                    player
+                }
+            })
         }
     }
 
@@ -54,5 +73,9 @@ class GameManagerImpl : GameManager {
 
     override suspend fun getGameSession(): GameSession? {
         return currentGameSession.value
+    }
+
+    override suspend fun updateAdminId(id: String) {
+        _currentGameSession.update { it?.copy(adminId = id) }
     }
 }

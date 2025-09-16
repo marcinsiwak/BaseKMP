@@ -6,5 +6,6 @@ import kotlinx.serialization.Serializable
 data class GameSession(
     val gameId: String,
     val players: List<Player> = emptyList(),
-    val isStarted: Boolean = false
+    val isStarted: Boolean = false,
+    val adminId: String? = null
 )

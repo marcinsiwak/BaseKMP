@@ -3,18 +3,19 @@ package pl.msiwak.ui.game.start
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import pl.msiwak.domain.game.AddPlayerToGameUseCase
+import pl.msiwak.domain.game.ConnectPlayerToGameUseCase
 import pl.msiwak.domain.game.CreateGameUseCase
 import pl.msiwak.domain.game.FindGameIPAddressUseCase
 
 class StartViewModel(
     private val createGameUseCase: CreateGameUseCase,
-    private val addPlayerToGameUseCase: AddPlayerToGameUseCase,
+    private val connectPlayerToGameUseCase: ConnectPlayerToGameUseCase,
     private val findGameIPAddressUseCase: FindGameIPAddressUseCase
 ) : ViewModel() {
 
@@ -24,6 +25,7 @@ class StartViewModel(
     private val errorHandler = CoroutineExceptionHandler { _, exception ->
         _uiState.update { it.copy(isLoading = false) }
     }
+    private var findGameJob: Job? = null
 
     init {
         findGame()
@@ -43,7 +45,8 @@ class StartViewModel(
     }
 
     private fun findGame() {
-        viewModelScope.launch(errorHandler) {
+        if (findGameJob?.isActive == true) return
+        findGameJob = viewModelScope.launch(errorHandler) {
             val existingGameIpAddress = findGameIPAddressUseCase()
             _uiState.update { it.copy(gameIpAddress = existingGameIpAddress) }
         }
@@ -59,8 +62,7 @@ class StartViewModel(
 
     private fun joinGame() {
         viewModelScope.launch(errorHandler) {
-            addPlayerToGameUseCase(
-                host = uiState.value.gameIpAddress ?: throw Exception("Game IP address not found"),
+            connectPlayerToGameUseCase(
                 playerName = uiState.value.playerName
             )
         }

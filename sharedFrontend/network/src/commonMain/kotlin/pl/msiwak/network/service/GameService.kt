@@ -25,6 +25,8 @@ class GameService(
 
     private lateinit var deviceIpId: String
 
+    private var serverIp: String? = null
+
     suspend fun observeWebSocketEvents(): Flow<WebSocketEvent> = withContext(Dispatchers.IO) {
         ktorClient.webSocketEvent.filterIsInstance<WebSocketEvent>()
     }
@@ -34,14 +36,17 @@ class GameService(
     }
 
     suspend fun findGame(): String? = withContext(Dispatchers.IO) {
-        return@withContext connectionManager.findGame(port = PORT)
+        serverIp = connectionManager.findGame(port = PORT)
+        return@withContext serverIp
     }
 
-    suspend fun connectPlayer(host: String, playerName: String) {
+    suspend fun connectPlayer(playerName: String) {
         deviceIpId = connectionManager.getLocalIpAddress()?.substringAfterLast(".")
             ?: throw Exception("Cannot get local IP address")
-        val player = Player(id = deviceIpId, name = playerName)
-        ktorClient.connect(host = host, port = PORT, player = player)
+        val player = Player(id = deviceIpId, name = playerName, isActive = true)
+
+        val ip = serverIp ?: throw Exception("Cannot find server IP")
+        ktorClient.connect(host = ip, port = PORT, player = player)
     }
 
     suspend fun disconnectPlayer() = withContext(Dispatchers.IO) {
@@ -57,7 +62,8 @@ class GameService(
         }
         scope.launch {
             val ipAddress = connectionManager.getLocalIpAddress() ?: throw Exception("Cannot get local IP address")
-            serverManager.startServer(ipAddress, PORT)
+            launch { serverManager.startServer(ipAddress, PORT) }
+            launch { serverManager.createGame() }
             launch { serverManager.observeMessages() }
             launch { serverManager.observeGameSession() }
         }

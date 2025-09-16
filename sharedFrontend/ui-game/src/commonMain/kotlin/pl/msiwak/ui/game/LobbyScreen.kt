@@ -34,7 +34,7 @@ fun GameScreen(
             Column {
                 state.value.players.fastForEach {
                     Text(
-                        text = "Player ${it.name} (${it.id}) is ready: "
+                        text = "Player ${it.name} (${it.id}) is ready: isActive: ${it.isActive}"
                     )
                 }
 

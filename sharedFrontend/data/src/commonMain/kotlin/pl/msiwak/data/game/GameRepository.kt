@@ -34,8 +34,8 @@ class GameRepository(
         gameService.finishGame()
     }
 
-    suspend fun addPlayerToGame(host: String, playerName: String) {
-        return gameService.connectPlayer(host, playerName)
+    suspend fun connectPlayer(playerName: String) {
+        return gameService.connectPlayer(playerName)
     }
 
     suspend fun disconnectPlayer() {

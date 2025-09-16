@@ -10,6 +10,7 @@ interface GameManager {
     suspend fun createGame(maxRounds: Int = 10)
     suspend fun joinGame(player: Player)
     suspend fun leaveGame(playerId: String)
+    suspend fun disablePlayer(playerId: String)
     suspend fun startGame(gameId: String)
     suspend fun nextRound(gameId: String)
     suspend fun finishGame(gameId: String)
@@ -18,4 +19,5 @@ interface GameManager {
     suspend fun getGameSession(): GameSession?
 
     suspend fun getPlayers(): List<Player>
+    suspend fun updateAdminId(id: String)
 }

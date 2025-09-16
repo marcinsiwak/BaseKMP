@@ -5,6 +5,9 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.util.Log
 import androidx.annotation.RequiresPermission
+import kotlinx.coroutines.async
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.selects.select
 import pl.msiwak.common.AppContext
 import java.net.Inet4Address
 import java.net.InetAddress
@@ -37,7 +40,9 @@ class ConnectionManagerImpl : ConnectionManager {
         for (i in 1..254) {
             val host = "$subnet.$i"
             runCatching {
+                Log.d("NetworkScan", "Scanning $host")
                 if (InetAddress.getByName(host).isReachable(50)) {
+                    Log.d("NetworkScan", "$host is reachable")
                     val socket = Socket()
                     socket.connect(InetSocketAddress(host, port), 200)
                     socket.close()

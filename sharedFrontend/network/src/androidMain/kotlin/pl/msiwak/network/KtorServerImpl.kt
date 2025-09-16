@@ -1,5 +1,6 @@
 package pl.msiwak.network
 
+import android.util.Log
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
 import io.ktor.server.cio.CIO
@@ -7,6 +8,8 @@ import io.ktor.server.engine.EmbeddedServer
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.routing.routing
 import io.ktor.server.websocket.WebSockets
+import io.ktor.server.websocket.pingPeriod
+import io.ktor.server.websocket.timeout
 import io.ktor.server.websocket.webSocket
 import io.ktor.websocket.CloseReason
 import io.ktor.websocket.Frame
@@ -14,10 +17,14 @@ import io.ktor.websocket.WebSocketSession
 import io.ktor.websocket.close
 import io.ktor.websocket.readText
 import io.ktor.websocket.send
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.withContext
+import kotlin.time.Duration.Companion.seconds
 
 class KtorServerImpl : KtorServer {
     private var server: EmbeddedServer<*, *>? = null
@@ -29,8 +36,7 @@ class KtorServerImpl : KtorServer {
     override fun startServer(host: String, port: Int) {
         server = embeddedServer(CIO, port = port, host = host) {
             configureServer()
-        }.start(wait = false)
-
+        }.start(wait = true)
     }
 
     override fun stopServer() {
@@ -40,7 +46,10 @@ class KtorServerImpl : KtorServer {
     }
 
     private fun Application.configureServer() {
-        install(WebSockets)
+        install(WebSockets) {
+            pingPeriod = 15.seconds
+            timeout = 30.seconds
+        }
 
         routing {
             webSocket("/ws") {
@@ -56,11 +65,22 @@ class KtorServerImpl : KtorServer {
                     incoming.consumeEach { frame ->
                         if (frame is Frame.Text) {
                             val receivedText = frame.readText()
+                            Log.e("OUTPUT", "OUTPUT: incoming andorid.KtorServerImpl: $activeSessions")
                             _messages.emit(receivedText)
                         }
                     }
                 }.onFailure { exception ->
-                    println("OUTPUT: WebSocket exception: ${exception.localizedMessage}")
+                    Log.e("OUTPUT", "OUTPUT: Client disconnected: $userId")
+                    withContext(NonCancellable) {
+                        activeSessions[userId]?.close(
+                            CloseReason(
+                                CloseReason.Codes.NORMAL,
+                                "Another session opened"
+                            )
+                        )
+                        _messages.emit("Client disconnected: $userId")
+                        this@withContext.coroutineContext.cancelChildren()
+                    }
                 }
             }
         }
@@ -78,8 +98,4 @@ class KtorServerImpl : KtorServer {
         activeSessions[userId]?.close(CloseReason(CloseReason.Codes.NORMAL, "Closed by server"))
         activeSessions.remove(userId)
     }
-
-    fun isRunning(): Boolean = server != null
-
-    fun getServerUrl(port: Int = 8080): String = "http://localhost:$port"
 }

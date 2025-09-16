@@ -29,16 +29,20 @@ class ServerManager(
 
     suspend fun observeMessages() {
         ktorServer.messages.map {
-            json.decodeFromString<WebSocketEvent>(it)
+            if (it.startsWith("Client disconnected: ")) {
+                WebSocketEvent.PlayerClientDisconnected(it.substringAfter("Client disconnected: "))
+            } else {
+                json.decodeFromString<WebSocketEvent>(it)
+            }
         }
-            .filter { !(it is WebSocketEvent.PlayerConnected && gameManager.getPlayers().contains(it.player)) }
             .collect { event ->
                 when (event) {
                     is WebSocketEvent.PlayerConnected -> gameManager.joinGame(event.player)
 
 
                     is WebSocketEvent.PlayerClientDisconnected -> {
-                        gameManager.leaveGame(event.id)
+//                        gameManager.leaveGame(event.id)
+                        gameManager.disablePlayer(event.id)
                         ktorServer.closeSocker(event.id)
                     }
 
@@ -68,6 +72,9 @@ class ServerManager(
 
     suspend fun startServer(host: String, port: Int) {
         ktorServer.startServer(host, port)
+    }
+
+    suspend fun createGame() {
         gameManager.createGame()
     }
 
