@@ -26,8 +26,8 @@ class GameRepository(
         return gameService.findGame()
     }
 
-    suspend fun createGame() {
-        gameService.createGame()
+    suspend fun createGame(adminName: String) {
+        gameService.createGame(adminName)
     }
 
     suspend fun finishGame() {

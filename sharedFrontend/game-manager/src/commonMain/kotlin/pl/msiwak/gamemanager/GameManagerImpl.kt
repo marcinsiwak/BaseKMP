@@ -14,8 +14,8 @@ class GameManagerImpl : GameManager {
     override val currentGameSession: StateFlow<GameSession?> = _currentGameSession.asStateFlow()
 
     @OptIn(ExperimentalUuidApi::class)
-    override suspend fun createGame(maxRounds: Int) {
-        _currentGameSession.value = GameSession(gameId = Uuid.random().toString())
+    override suspend fun createGame(adminId: String) {
+        _currentGameSession.value = GameSession(gameId = Uuid.random().toString(), adminId = adminId)
     }
 
     override suspend fun getPlayers(): List<Player> {

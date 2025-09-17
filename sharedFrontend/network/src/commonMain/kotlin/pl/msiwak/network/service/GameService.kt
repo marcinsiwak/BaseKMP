@@ -56,14 +56,19 @@ class GameService(
         ktorClient.disconnect(deviceIpId)
     }
 
-    suspend fun createGame() = withContext(Dispatchers.IO) {
+    suspend fun createGame(adminName: String) = withContext(Dispatchers.IO) {
         if (!scope.isActive) {
             scope = CoroutineScope(Dispatchers.IO)
         }
         scope.launch {
             val ipAddress = connectionManager.getLocalIpAddress() ?: throw Exception("Cannot get local IP address")
             launch { serverManager.startServer(ipAddress, PORT) }
-            launch { serverManager.createGame() }
+            launch {
+                deviceIpId = ipAddress.substringAfterLast(".")
+                serverManager.createGame(deviceIpId)
+                val player = Player(id = deviceIpId, name = adminName, isActive = true)
+                ktorClient.connect(host = ipAddress, port = PORT, player = player)
+            }
             launch { serverManager.observeMessages() }
             launch { serverManager.observeGameSession() }
         }

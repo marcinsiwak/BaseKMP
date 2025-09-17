@@ -55,7 +55,7 @@ class StartViewModel(
     private fun createGame() {
         viewModelScope.launch(errorHandler) {
             _uiState.update { it.copy(isLoading = true) }
-            createGameUseCase()
+            createGameUseCase(uiState.value.playerName)
             _uiState.update { it.copy(isLoading = false) }
         }
     }

@@ -74,8 +74,8 @@ class ServerManager(
         ktorServer.startServer(host, port)
     }
 
-    suspend fun createGame() {
-        gameManager.createGame()
+    suspend fun createGame(adminId: String) {
+        gameManager.createGame(adminId)
     }
 
     fun stopServer() {

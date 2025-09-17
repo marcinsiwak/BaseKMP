@@ -12,10 +12,10 @@ import io.ktor.websocket.send
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import pl.msiwak.common.model.Player
@@ -41,37 +41,32 @@ class KtorClient(engine: EngineProvider) {
         install(WebSockets)
     }
 
-    suspend fun connect(host: String, port: Int, player: Player) {
-        if (!scope.isActive) {
-            scope = CoroutineScope(Dispatchers.Main)
-        }
-        scope.launch {
-            runCatching {
-                client.webSocket(
-                    method = HttpMethod.Get,
-                    host = host,
-                    port = port,
-                    path = "/ws?id=${player.id}"
-                ) {
-                    send(json.encodeToString<WebSocketEvent>(WebSocketEvent.PlayerConnected(player)))
-                    launch {
-                        webSocketClientEvent.collect { message ->
-                            when (message) {
-                                is WebSocketEvent.PlayerClientDisconnected -> {
-                                    send(json.encodeToString<WebSocketEvent>(message))
-                                }
-
-                                else -> Unit
+    suspend fun connect(host: String, port: Int, player: Player) = coroutineScope {
+        runCatching {
+            client.webSocket(
+                method = HttpMethod.Get,
+                host = host,
+                port = port,
+                path = "/ws?id=${player.id}"
+            ) {
+                send(json.encodeToString<WebSocketEvent>(WebSocketEvent.PlayerConnected(player)))
+                launch {
+                    webSocketClientEvent.collect { message ->
+                        when (message) {
+                            is WebSocketEvent.PlayerClientDisconnected, is WebSocketEvent.GameLobby -> {
+                                send(json.encodeToString<WebSocketEvent>(message))
                             }
 
+                            else -> Unit
                         }
+
                     }
-                    session = this
-                    listenForResponse()
                 }
-            }.onFailure { exception ->
-                println("OUTPUT: Failed to connect: $exception")
+                session = this
+                listenForResponse()
             }
+        }.onFailure { exception ->
+            println("OUTPUT: Failed to connect: $exception")
         }
     }
 

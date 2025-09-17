@@ -7,7 +7,7 @@ import pl.msiwak.common.model.Player
 interface GameManager {
     val currentGameSession: StateFlow<GameSession?>
 
-    suspend fun createGame(maxRounds: Int = 10)
+    suspend fun createGame(adminId: String)
     suspend fun joinGame(player: Player)
     suspend fun leaveGame(playerId: String)
     suspend fun disablePlayer(playerId: String)

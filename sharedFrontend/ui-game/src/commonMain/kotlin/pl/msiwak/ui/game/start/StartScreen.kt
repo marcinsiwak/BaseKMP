@@ -17,12 +17,14 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import pl.msiwak.destination.NavDestination
 
@@ -32,6 +34,8 @@ fun StartScreen(
     viewModel: StartViewModel = koinInject()
 ) {
     val state = viewModel.uiState.collectAsState()
+
+    val scope = rememberCoroutineScope()
 
     Scaffold { paddingValues ->
         Box(
@@ -75,11 +79,27 @@ fun StartScreen(
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     Button(
-                        onClick = { viewModel.onUiAction(StartUiAction.CreateGame) },
+                        onClick = {
+                            scope.launch {
+                                viewModel.onUiAction(StartUiAction.CreateGame)
+                            }
+                        },
                         modifier = Modifier.weight(1f),
                         enabled = !state.value.isLoading && state.value.playerName.isNotBlank()
                     ) {
                         Text("Create Game")
+                    }
+                    Button(
+                        onClick = {
+                            scope.launch {
+                                navController.navigate(NavDestination.GameDestination.GameScreen)
+
+                            }
+                        },
+                        modifier = Modifier.weight(1f),
+                        enabled = !state.value.isLoading && state.value.playerName.isNotBlank()
+                    ) {
+                        Text("To lobby")
                     }
 
                     Button(
