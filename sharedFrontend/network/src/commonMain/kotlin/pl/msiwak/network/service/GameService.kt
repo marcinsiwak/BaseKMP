@@ -43,9 +43,11 @@ class GameService(
     suspend fun connectPlayer(playerName: String) {
         deviceIpId = connectionManager.getLocalIpAddress()?.substringAfterLast(".")
             ?: throw Exception("Cannot get local IP address")
-        val player = Player(id = deviceIpId, name = playerName, isActive = true)
+        connectPlayerToGame(playerName, serverIp ?: throw Exception("Cannot find server IP"))
+    }
 
-        val ip = serverIp ?: throw Exception("Cannot find server IP")
+    private suspend fun connectPlayerToGame(playerName: String, ip: String) {
+        val player = Player(id = deviceIpId, name = playerName, isActive = true)
         ktorClient.connect(host = ip, port = PORT, player = player)
     }
 
@@ -63,15 +65,16 @@ class GameService(
         scope.launch {
             val ipAddress = connectionManager.getLocalIpAddress() ?: throw Exception("Cannot get local IP address")
             launch { serverManager.startServer(ipAddress, PORT) }
-            launch {
-                deviceIpId = ipAddress.substringAfterLast(".")
-                serverManager.createGame(deviceIpId)
-                val player = Player(id = deviceIpId, name = adminName, isActive = true)
-                ktorClient.connect(host = ipAddress, port = PORT, player = player)
-            }
+            launch { createGameAndConnect(ipAddress, adminName) }
             launch { serverManager.observeMessages() }
             launch { serverManager.observeGameSession() }
         }
+    }
+
+    private suspend fun createGameAndConnect(ipAddress: String, adminName: String) {
+        deviceIpId = ipAddress.substringAfterLast(".")
+        serverManager.createGame(deviceIpId)
+        connectPlayerToGame(adminName, ipAddress)
     }
 
     fun getUserId(): String = deviceIpId
