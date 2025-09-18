@@ -23,14 +23,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import pl.msiwak.destination.NavDestination
 
 @Composable
 fun StartScreen(
-    navController: NavHostController,
     viewModel: StartViewModel = koinInject()
 ) {
     val state = viewModel.uiState.collectAsState()
@@ -89,23 +87,10 @@ fun StartScreen(
                     ) {
                         Text("Create Game")
                     }
-                    Button(
-                        onClick = {
-                            scope.launch {
-                                navController.navigate(NavDestination.GameDestination.GameScreen)
-
-                            }
-                        },
-                        modifier = Modifier.weight(1f),
-                        enabled = !state.value.isLoading && state.value.playerName.isNotBlank()
-                    ) {
-                        Text("To lobby")
-                    }
 
                     Button(
                         onClick = {
                             viewModel.onUiAction(StartUiAction.JoinGame)
-                            navController.navigate(NavDestination.GameDestination.GameScreen)
                         },
                         modifier = Modifier.weight(1f),
                         enabled = !state.value.isLoading && state.value.playerName.isNotBlank()

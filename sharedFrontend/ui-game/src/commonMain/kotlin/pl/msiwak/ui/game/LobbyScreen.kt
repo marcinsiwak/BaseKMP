@@ -13,12 +13,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
-import androidx.navigation.NavController
 import org.koin.compose.koinInject
 
 @Composable
 fun GameScreen(
-    navController: NavController,
     viewModel: LobbyViewModel = koinInject()
 ) {
     val state = viewModel.uiState.collectAsState()
@@ -40,7 +38,6 @@ fun GameScreen(
 
                 Button(onClick = {
                     viewModel.onUiAction(LobbyUiAction.Disconnect)
-                    navController.navigateUp()
                 }) {
                     Text("Disconnect from game")
                 }

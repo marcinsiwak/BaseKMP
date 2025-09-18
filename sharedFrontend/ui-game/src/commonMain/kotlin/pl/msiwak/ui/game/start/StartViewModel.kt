@@ -9,14 +9,17 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import pl.msiwak.destination.NavDestination
 import pl.msiwak.domain.game.ConnectPlayerToGameUseCase
 import pl.msiwak.domain.game.CreateGameUseCase
 import pl.msiwak.domain.game.FindGameIPAddressUseCase
+import pl.msiwak.navigator.Navigator
 
 class StartViewModel(
     private val createGameUseCase: CreateGameUseCase,
     private val connectPlayerToGameUseCase: ConnectPlayerToGameUseCase,
-    private val findGameIPAddressUseCase: FindGameIPAddressUseCase
+    private val findGameIPAddressUseCase: FindGameIPAddressUseCase,
+    private val navigator: Navigator
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(StartState())
@@ -57,6 +60,7 @@ class StartViewModel(
             _uiState.update { it.copy(isLoading = true) }
             createGameUseCase(uiState.value.playerName)
             _uiState.update { it.copy(isLoading = false) }
+            navigator.navigate(NavDestination.GameDestination.GameScreen)
         }
     }
 
@@ -65,6 +69,7 @@ class StartViewModel(
             connectPlayerToGameUseCase(
                 playerName = uiState.value.playerName
             )
+            navigator.navigate(NavDestination.GameDestination.GameScreen)
         }
     }
 

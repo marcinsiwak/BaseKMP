@@ -15,13 +15,15 @@ import pl.msiwak.domain.game.GetUserIdUseCase
 import pl.msiwak.domain.game.ObserveGameSessionUseCase
 import pl.msiwak.domain.game.ObserveWebSocketEventsUseCase
 import pl.msiwak.domain.game.SendClientEventUseCase
+import pl.msiwak.navigator.Navigator
 
 class LobbyViewModel(
     private val observeWebSocketEventsUseCase: ObserveWebSocketEventsUseCase,
     private val disconnectUseCase: DisconnectUseCase,
     private val sendClientEventUseCase: SendClientEventUseCase,
     private val getUserIdUseCase: GetUserIdUseCase,
-    private val observeGameSessionUseCase: ObserveGameSessionUseCase
+    private val observeGameSessionUseCase: ObserveGameSessionUseCase,
+    private val navigator: Navigator
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LobbyState())
@@ -49,7 +51,10 @@ class LobbyViewModel(
                 // Handle back navigation
             }
 
-            is LobbyUiAction.Disconnect -> viewModelScope.launch(errorHandler) { disconnectUseCase() }
+            is LobbyUiAction.Disconnect -> viewModelScope.launch(errorHandler) {
+                disconnectUseCase()
+                navigator.navigateUp()
+            }
         }
     }
 

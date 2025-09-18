@@ -12,15 +12,14 @@ import pl.msiwak.ui.game.start.StartScreen
 class GameGraph : NavigationGraph {
 
     override fun create(
-        navController: NavHostController,
         navGraphBuilder: NavGraphBuilder
     ) {
         navGraphBuilder.navigation<NavDestination.GameDestination.Graph>(startDestination = NavDestination.GameDestination.StartScreen) {
             composable<NavDestination.GameDestination.StartScreen> {
-                StartScreen(navController)
+                StartScreen()
             }
             composable<NavDestination.GameDestination.GameScreen> {
-                GameScreen(navController)
+                GameScreen()
             }
         }
     }
