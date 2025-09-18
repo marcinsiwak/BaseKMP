@@ -7,12 +7,11 @@ import io.ktor.client.plugins.websocket.webSocket
 import io.ktor.http.HttpMethod
 import io.ktor.websocket.Frame
 import io.ktor.websocket.WebSocketSession
+import io.ktor.websocket.readReason
 import io.ktor.websocket.readText
 import io.ktor.websocket.send
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -65,9 +64,10 @@ class KtorClient(engine: EngineProvider) {
                 session = this
                 listenForResponse()
             }
-        }.onFailure { exception ->
-            println("OUTPUT: Failed to connect: $exception")
         }
+            .onFailure { exception ->
+                println("OUTPUT: Failed to connect: $exception")
+            }
     }
 
     fun send(webSocketEvent: WebSocketEvent) {
@@ -77,16 +77,15 @@ class KtorClient(engine: EngineProvider) {
     }
 
     private suspend fun DefaultClientWebSocketSession.listenForResponse() {
-        incoming.consumeEach { frame ->
-            when (frame) {
+        while (true) {
+            when (val frame = incoming.receive()) {
                 is Frame.Text -> {
                     val text = frame.readText()
-                    print("OUTPUT: Received text: $text")
+                    println("OUTPUT: Received text: $text")
                     val event = json.decodeFromString<WebSocketEvent>(text)
                     _webSocketEvent.emit(event)
                 }
-
-                else -> {}
+                else -> println("OUTPUT: Received non-text frame: $frame")
             }
         }
     }
