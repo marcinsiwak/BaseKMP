@@ -66,9 +66,11 @@ class StartViewModel(
 
     private fun joinGame() {
         viewModelScope.launch(errorHandler) {
+            _uiState.update { it.copy(isLoading = true) }
             connectPlayerToGameUseCase(
                 playerName = uiState.value.playerName
             )
+            _uiState.update { it.copy(isLoading = false) }
             navigator.navigate(NavDestination.GameDestination.GameScreen)
         }
     }

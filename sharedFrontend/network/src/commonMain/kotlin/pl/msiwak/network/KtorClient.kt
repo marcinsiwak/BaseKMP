@@ -41,7 +41,7 @@ class KtorClient(engine: EngineProvider) {
         install(WebSockets)
     }
 
-    suspend fun connect(host: String, port: Int, player: Player) = coroutineScope {
+    suspend fun connect(host: String, port: Int, player: Player) {
         runCatching {
             client.webSocket(
                 method = HttpMethod.Get,

@@ -40,10 +40,12 @@ class GameService(
         return@withContext serverIp
     }
 
-    suspend fun connectPlayer(playerName: String) {
-        deviceIpId = connectionManager.getLocalIpAddress()?.substringAfterLast(".")
-            ?: throw Exception("Cannot get local IP address")
-        connectPlayerToGame(playerName, serverIp ?: throw Exception("Cannot find server IP"))
+    suspend fun connectPlayer(playerName: String) = withContext(Dispatchers.IO) {
+        deviceIpId = connectionManager.getLocalIpAddress()?.substringAfterLast(".") ?: throw Exception("Cannot get local IP address")
+        val ip = serverIp ?: throw Exception("Cannot find server IP")
+        scope.launch {
+            connectPlayerToGame(playerName, ip)
+        }
     }
 
     private suspend fun connectPlayerToGame(playerName: String, ip: String) {
@@ -62,8 +64,8 @@ class GameService(
         if (!scope.isActive) {
             scope = CoroutineScope(Dispatchers.IO)
         }
+        val ipAddress = connectionManager.getLocalIpAddress() ?: throw Exception("Cannot get local IP address")
         scope.launch {
-            val ipAddress = connectionManager.getLocalIpAddress() ?: throw Exception("Cannot get local IP address")
             launch { serverManager.startServer(ipAddress, PORT) }
             launch { createGameAndConnect(ipAddress, adminName) }
             launch { serverManager.observeMessages() }
