@@ -5,6 +5,7 @@ import io.ktor.client.plugins.websocket.DefaultClientWebSocketSession
 import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.client.plugins.websocket.webSocket
 import io.ktor.http.HttpMethod
+import io.ktor.websocket.CloseReason
 import io.ktor.websocket.Frame
 import io.ktor.websocket.readText
 import io.ktor.websocket.send
@@ -38,39 +39,25 @@ class KtorClient(engine: EngineProvider) {
     }
 
     suspend fun connect(host: String, port: Int, player: Player) {
-        runCatching {
-            client.webSocket(
-                method = HttpMethod.Get,
-                host = host,
-                port = port,
-                path = "/ws?id=${player.id}"
-            ) {
-                send(json.encodeToString<WebSocketEvent>(WebSocketEvent.PlayerConnected(player)))
-                launch {
-                    webSocketClientEvent.collect { message ->
-                        when (message) {
-                            is WebSocketEvent.PlayerClientDisconnected, is WebSocketEvent.GameLobby -> {
-                                send(json.encodeToString<WebSocketEvent>(message))
-                            }
-
-                            else -> Unit
+        client.webSocket(
+            method = HttpMethod.Get,
+            host = host,
+            port = port,
+            path = "/ws?id=${player.id}"
+        ) {
+            send(json.encodeToString<WebSocketEvent>(WebSocketEvent.PlayerConnected(player)))
+            launch {
+                webSocketClientEvent.collect { message ->
+                    when (message) {
+                        is WebSocketEvent.PlayerClientDisconnected, is WebSocketEvent.GameLobby -> {
+                            send(json.encodeToString<WebSocketEvent>(message))
                         }
-
+                        else -> Unit
                     }
                 }
-                listenForResponse()
             }
+            listenForResponse()
         }
-            .onFailure { exception ->
-                when (exception) {
-                    is ClosedReceiveChannelException -> {
-                        println("OUTPUT: WebSocket connection closed: ${exception.message}")
-                        _webSocketEvent.emit(WebSocketEvent.ServerDown)
-                    }
-
-                    else -> println("OUTPUT: WebSocket connection failed: ${exception.message}")
-                }
-            }
     }
 
     fun send(webSocketEvent: WebSocketEvent) {
@@ -80,18 +67,47 @@ class KtorClient(engine: EngineProvider) {
     }
 
     private suspend fun DefaultClientWebSocketSession.listenForResponse() {
-        while (true) {
-            when (val frame = incoming.receive()) {
-                is Frame.Text -> {
-                    val text = frame.readText()
-                    println("OUTPUT: Received text: $text")
-                    val event = json.decodeFromString<WebSocketEvent>(text)
-                    _webSocketEvent.emit(event)
+        runCatching {
+            while (true) {
+                when (val frame = incoming.receive()) {
+                    is Frame.Text -> {
+                        val text = frame.readText()
+                        println("OUTPUT: Received text: $text")
+                        val event = json.decodeFromString<WebSocketEvent>(text)
+                        _webSocketEvent.emit(event)
+                    }
+
+                    else -> println("OUTPUT: Received non-text frame: $frame")
+                }
+            }
+        }.onFailure {
+            when (it) {
+                is ClosedReceiveChannelException -> {
+                    when (val reason = closeReason.await()?.knownReason) {
+                        CloseReason.Codes.GOING_AWAY -> {
+                            println("OUTPUT: Connection closed normally player disconnected")
+                        }
+
+                        CloseReason.Codes.CLOSED_ABNORMALLY -> {
+                            println("OUTPUT: Connection closed abnormally")
+                            _webSocketEvent.emit(WebSocketEvent.ServerDown)
+                        }
+
+                        else -> println("OUTPUT: Connection closed with reason: $reason")
+                    }
                 }
 
-                else -> println("OUTPUT: Received non-text frame: $frame")
+                else -> println("OUTPUT: Error in listenForResponse: ${it.message}")
             }
         }
+//        catch (e: ClosedReceiveChannelException) {
+//            println("OUTPUT: Channel closed: ${closeReason.await()}")
+//            _webSocketEvent.emit(WebSocketEvent.ServerDown)
+//        } catch (e: Throwable) {
+//            println("OUTPUT: WebSocket error: ${e.message}")
+//        } finally {
+//            println("OUTPUT: listenForResponse finished")
+//        }
     }
 
     suspend fun disconnect(playerId: String) {

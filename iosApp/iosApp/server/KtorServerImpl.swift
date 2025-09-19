@@ -96,7 +96,10 @@ public extension HttpServer {
     }
 
     func closeSocket(userId: String) {
-        sockets[userId]?.close(immediately: true)
+        if let socket = sockets[userId] {
+            socket.close(immediately: false)               // graceful close (code 1000)
+            sockets.removeValue(forKey: userId)
+        }
     }
 }
 

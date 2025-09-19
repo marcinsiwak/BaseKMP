@@ -34,6 +34,7 @@ class KtorServerImpl : KtorServer {
     private var activeSessions = mutableMapOf<String, WebSocketSession>()
 
     override fun startServer(host: String, port: Int) {
+        if (server != null) return
         server = embeddedServer(CIO, port = port, host = host) {
             configureServer()
         }.start(wait = true)
