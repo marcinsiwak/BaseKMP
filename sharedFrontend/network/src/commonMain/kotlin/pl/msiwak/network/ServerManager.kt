@@ -39,7 +39,6 @@ class ServerManager(
                 when (event) {
                     is WebSocketEvent.PlayerConnected -> gameManager.joinGame(event.player)
 
-
                     is WebSocketEvent.PlayerClientDisconnected -> {
 //                        gameManager.leaveGame(event.id)
                         gameManager.disablePlayer(event.id)
@@ -74,8 +73,8 @@ class ServerManager(
         ktorServer.startServer(host, port)
     }
 
-    suspend fun createGame(adminId: String) {
-        gameManager.createGame(adminId)
+    suspend fun createGame(adminId: String, ipAddress: String?) {
+        gameManager.createGame(adminId, ipAddress)
     }
 
     fun stopServer() {

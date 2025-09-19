@@ -60,7 +60,7 @@ class LobbyViewModel(
 
     private suspend fun observeGameSession() {
         observeGameSessionUseCase().collectLatest { gameSession ->
-            _uiState.update { it.copy(players = gameSession?.players ?: emptyList()) }
+            _uiState.update { it.copy(players = gameSession?.players ?: emptyList(), gameIpAddress = gameSession?.gameServerIpAddress) }
         }
     }
 }

@@ -2,8 +2,10 @@ package pl.msiwak.network.service
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -41,7 +43,8 @@ class GameService(
     }
 
     suspend fun connectPlayer(playerName: String) = withContext(Dispatchers.IO) {
-        deviceIpId = connectionManager.getLocalIpAddress()?.substringAfterLast(".") ?: throw Exception("Cannot get local IP address")
+        deviceIpId = connectionManager.getLocalIpAddress()?.substringAfterLast(".")
+            ?: throw Exception("Cannot get local IP address")
         val ip = serverIp ?: throw Exception("Cannot find server IP")
         scope.launch {
             connectPlayerToGame(playerName, ip)
@@ -75,7 +78,7 @@ class GameService(
 
     private suspend fun createGameAndConnect(ipAddress: String, adminName: String) {
         deviceIpId = ipAddress.substringAfterLast(".")
-        serverManager.createGame(deviceIpId)
+        serverManager.createGame(deviceIpId, ipAddress)
         connectPlayerToGame(adminName, ipAddress)
     }
 

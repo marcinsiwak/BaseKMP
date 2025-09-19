@@ -14,8 +14,13 @@ class GameManagerImpl : GameManager {
     override val currentGameSession: StateFlow<GameSession?> = _currentGameSession.asStateFlow()
 
     @OptIn(ExperimentalUuidApi::class)
-    override suspend fun createGame(adminId: String) {
-        _currentGameSession.value = GameSession(gameId = Uuid.random().toString(), adminId = adminId)
+    override suspend fun createGame(adminId: String, ipAddress: String?) {
+        if (currentGameSession.value != null) {
+            _currentGameSession.update { it?.copy(adminId = adminId, gameServerIpAddress = ipAddress) }
+        } else {
+            _currentGameSession.value =
+                GameSession(gameId = Uuid.random().toString(), adminId = adminId, gameServerIpAddress = ipAddress)
+        }
     }
 
     override suspend fun getPlayers(): List<Player> {

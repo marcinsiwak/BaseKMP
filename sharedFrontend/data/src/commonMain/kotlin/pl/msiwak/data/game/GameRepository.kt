@@ -17,6 +17,15 @@ class GameRepository(
         gameService.observeWebSocketEvents().collect {
             when (it) {
                 is WebSocketEvent.UpdateGameSession -> _currentGameSession.value = it.gameSession
+                WebSocketEvent.ServerDown -> {
+                    with(currentGameSession.value ?: return@collect) {
+                        val playerToBeAdmin = players.first { player -> player.id != adminId }
+                        if (playerToBeAdmin.id == gameService.getUserId()) {
+                            gameService.createGame(playerToBeAdmin.name)
+                        }
+                    }
+                }
+
                 else -> {}
             }
         }

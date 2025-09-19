@@ -30,6 +30,9 @@ fun GameScreen(
             contentAlignment = Alignment.Center
         ) {
             Column {
+                Text(
+                    text = "Game id: ${state.value.gameIpAddress}"
+                )
                 state.value.players.fastForEach {
                     Text(
                         text = "Player ${it.name} (${it.id}) is ready: isActive: ${it.isActive}"

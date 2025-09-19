@@ -6,12 +6,11 @@ import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.client.plugins.websocket.webSocket
 import io.ktor.http.HttpMethod
 import io.ktor.websocket.Frame
-import io.ktor.websocket.WebSocketSession
-import io.ktor.websocket.readReason
 import io.ktor.websocket.readText
 import io.ktor.websocket.send
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -22,8 +21,6 @@ import pl.msiwak.common.model.WebSocketEvent
 import pl.msiwak.network.engine.EngineProvider
 
 class KtorClient(engine: EngineProvider) {
-
-    private var session: WebSocketSession? = null
     private val json = Json {
         ignoreUnknownKeys = true
         isLenient = true
@@ -61,12 +58,18 @@ class KtorClient(engine: EngineProvider) {
 
                     }
                 }
-                session = this
                 listenForResponse()
             }
         }
             .onFailure { exception ->
-                println("OUTPUT: Failed to connect: $exception")
+                when (exception) {
+                    is ClosedReceiveChannelException -> {
+                        println("OUTPUT: WebSocket connection closed: ${exception.message}")
+                        _webSocketEvent.emit(WebSocketEvent.ServerDown)
+                    }
+
+                    else -> println("OUTPUT: WebSocket connection failed: ${exception.message}")
+                }
             }
     }
 
@@ -85,6 +88,7 @@ class KtorClient(engine: EngineProvider) {
                     val event = json.decodeFromString<WebSocketEvent>(text)
                     _webSocketEvent.emit(event)
                 }
+
                 else -> println("OUTPUT: Received non-text frame: $frame")
             }
         }
@@ -93,6 +97,5 @@ class KtorClient(engine: EngineProvider) {
     suspend fun disconnect(playerId: String) {
         val event: WebSocketEvent = WebSocketEvent.PlayerClientDisconnected(playerId)
         _webSocketClientEvent.emit(event)
-        session = null
     }
 }

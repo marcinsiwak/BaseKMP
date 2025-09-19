@@ -7,5 +7,6 @@ data class GameSession(
     val gameId: String,
     val players: List<Player> = emptyList(),
     val isStarted: Boolean = false,
-    val adminId: String? = null
+    val adminId: String? = null,
+    val gameServerIpAddress: String? = null
 )
