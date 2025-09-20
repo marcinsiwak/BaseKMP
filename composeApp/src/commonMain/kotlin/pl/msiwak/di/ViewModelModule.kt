@@ -11,7 +11,7 @@ import pl.msiwak.ui.game.start.StartViewModel
 internal val viewModelModule = module {
     viewModel { ExampleViewModel() }
     viewModel { AiGeneratedViewModel() }
-    viewModel { MainViewModel(get()) }
+    viewModel { MainViewModel(get(), get()) }
     viewModel { StartViewModel(get(), get(), get(), get()) }
     viewModel { LobbyViewModel(get(), get(), get(), get(), get(), get()) }
 }

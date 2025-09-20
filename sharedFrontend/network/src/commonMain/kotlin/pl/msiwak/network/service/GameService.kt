@@ -5,7 +5,6 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -70,9 +69,10 @@ class GameService(
         val ipAddress = connectionManager.getLocalIpAddress() ?: throw Exception("Cannot get local IP address")
         scope.launch {
             launch { serverManager.startServer(ipAddress, PORT) }
-            launch { createGameAndConnect(ipAddress, adminName) }
             launch { serverManager.observeMessages() }
             launch { serverManager.observeGameSession() }
+            delay(1000) // add await for server to start
+            launch {  createGameAndConnect(ipAddress, adminName) }
         }
     }
 

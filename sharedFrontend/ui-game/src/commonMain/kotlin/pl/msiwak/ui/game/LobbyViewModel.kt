@@ -35,13 +35,12 @@ class LobbyViewModel(
 
     init {
         viewModelScope.launch(errorHandler) {
-            launch {
-                observeWebSocketEventsUseCase()
-            }
+//            launch {
+//                observeWebSocketEventsUseCase()
+//            }
             launch {
                 observeGameSession()
             }
-            sendClientEventUseCase(WebSocketEvent.GameLobby(getUserIdUseCase()))
         }
     }
 
