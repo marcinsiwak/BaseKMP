@@ -9,6 +9,7 @@ import io.ktor.websocket.CloseReason
 import io.ktor.websocket.Frame
 import io.ktor.websocket.readText
 import io.ktor.websocket.send
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
@@ -96,18 +97,14 @@ class KtorClient(engine: EngineProvider) {
                         else -> println("OUTPUT: Connection closed with reason: $reason")
                     }
                 }
+                is CancellationException -> {
+                    println("OUTPUT: listenForResponse cancelled: ${it.message}")
+                    _webSocketEvent.emit(WebSocketEvent.ServerDown)
+                }
 
                 else -> println("OUTPUT: Error in listenForResponse: ${it.message}")
             }
         }
-//        catch (e: ClosedReceiveChannelException) {
-//            println("OUTPUT: Channel closed: ${closeReason.await()}")
-//            _webSocketEvent.emit(WebSocketEvent.ServerDown)
-//        } catch (e: Throwable) {
-//            println("OUTPUT: WebSocket error: ${e.message}")
-//        } finally {
-//            println("OUTPUT: listenForResponse finished")
-//        }
     }
 
     suspend fun disconnect(playerId: String) {

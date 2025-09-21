@@ -5,9 +5,14 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.retryWhen
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import pl.msiwak.common.error.GameNotFoundException
 import pl.msiwak.common.model.Player
 import pl.msiwak.common.model.WebSocketEvent
 import pl.msiwak.common.model.dispatcher.Dispatchers
@@ -36,10 +41,14 @@ class GameService(
         ktorClient.send(webSocketEvent)
     }
 
-    suspend fun findGame(): String? = withContext(Dispatchers.IO) {
-        serverIp = connectionManager.findGame(port = PORT)
-        return@withContext serverIp
-    }
+    fun findGame(): Flow<String?> = flow<String?> {
+        emit(connectionManager.findGame(port = PORT) ?: throw GameNotFoundException())
+        delay(1000)
+    }.onEach {
+        serverIp = it
+    }.retryWhen { cause, attempt ->
+        cause is GameNotFoundException && attempt < 4
+    }.flowOn(Dispatchers.IO)
 
     suspend fun connectPlayer(playerName: String) = withContext(Dispatchers.IO) {
         deviceIpId = connectionManager.getLocalIpAddress()?.substringAfterLast(".")
@@ -72,7 +81,7 @@ class GameService(
             launch { serverManager.observeMessages() }
             launch { serverManager.observeGameSession() }
             delay(1000) // add await for server to start
-            launch {  createGameAndConnect(ipAddress, adminName) }
+            launch { createGameAndConnect(ipAddress, adminName) }
         }
     }
 

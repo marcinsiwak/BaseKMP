@@ -3,6 +3,7 @@ package pl.msiwak.data.game
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import pl.msiwak.common.model.GameSession
 import pl.msiwak.common.model.WebSocketEvent
 import pl.msiwak.network.service.GameService
@@ -19,9 +20,13 @@ class GameRepository(
                 is WebSocketEvent.UpdateGameSession -> _currentGameSession.value = it.gameSession
                 WebSocketEvent.ServerDown -> {
                     with(currentGameSession.value ?: return@collect) {
+                        val currentPlayer = players.first { player -> player.id == gameService.getUserId() }
                         val playerToBeAdmin = players.first { player -> player.id != adminId }
-                        if (playerToBeAdmin.id == gameService.getUserId()) {
+                        if (playerToBeAdmin.id == currentPlayer.id) {
                             gameService.createGame(playerToBeAdmin.name)
+                        } else {
+                            findGame()
+                            gameService.connectPlayer(currentPlayer.name)
                         }
                     }
                 }
@@ -32,7 +37,7 @@ class GameRepository(
     }
 
     suspend fun findGame(): String? {
-        return gameService.findGame()
+        return gameService.findGame().first()
     }
 
     suspend fun createGame(adminName: String) {
