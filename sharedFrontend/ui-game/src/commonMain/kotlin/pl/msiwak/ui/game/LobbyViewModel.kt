@@ -18,10 +18,7 @@ import pl.msiwak.domain.game.SendClientEventUseCase
 import pl.msiwak.navigator.Navigator
 
 class LobbyViewModel(
-    private val observeWebSocketEventsUseCase: ObserveWebSocketEventsUseCase,
     private val disconnectUseCase: DisconnectUseCase,
-    private val sendClientEventUseCase: SendClientEventUseCase,
-    private val getUserIdUseCase: GetUserIdUseCase,
     private val observeGameSessionUseCase: ObserveGameSessionUseCase,
     private val navigator: Navigator
 ) : ViewModel() {
@@ -35,9 +32,6 @@ class LobbyViewModel(
 
     init {
         viewModelScope.launch(errorHandler) {
-//            launch {
-//                observeWebSocketEventsUseCase()
-//            }
             launch {
                 observeGameSession()
             }
