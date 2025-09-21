@@ -7,15 +7,18 @@ import androidx.navigation.navigation
 import pl.msiwak.destination.NavDestination
 import pl.msiwak.graph.NavigationGraph
 import pl.msiwak.ui.game.GameScreen
+import pl.msiwak.ui.game.start.StartScreen
 
 class GameGraph : NavigationGraph {
 
     override fun create(
-        navController: NavHostController,
         navGraphBuilder: NavGraphBuilder
     ) {
-        navGraphBuilder.navigation<NavDestination.GameDestination.Graph>(startDestination = NavDestination.GameDestination.Screen) {
-            composable<NavDestination.GameDestination.Screen> {
+        navGraphBuilder.navigation<NavDestination.GameDestination.Graph>(startDestination = NavDestination.GameDestination.StartScreen) {
+            composable<NavDestination.GameDestination.StartScreen> {
+                StartScreen()
+            }
+            composable<NavDestination.GameDestination.GameScreen> {
                 GameScreen()
             }
         }

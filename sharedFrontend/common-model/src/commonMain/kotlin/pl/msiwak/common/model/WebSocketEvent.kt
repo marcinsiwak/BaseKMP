@@ -2,8 +2,11 @@ package pl.msiwak.common.model
 
 import kotlinx.serialization.Serializable
 
-@Serializable()
+@Serializable
 sealed class WebSocketEvent() {
+
+    @Serializable
+    data class UpdateGameSession(val gameSession: GameSession) : WebSocketEvent()
 
     @Serializable
     data class PlayerConnected(val player: Player) : WebSocketEvent()
@@ -19,4 +22,10 @@ sealed class WebSocketEvent() {
 
     @Serializable
     data object Error : WebSocketEvent()
+
+    @Serializable
+    data class GameLobby(val id: String) : WebSocketEvent()
+
+    @Serializable
+    data object ServerDown : WebSocketEvent()
 }

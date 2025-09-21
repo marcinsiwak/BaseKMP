@@ -1,6 +1,5 @@
 package pl.msiwak.ui.game
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,7 +17,7 @@ import org.koin.compose.koinInject
 
 @Composable
 fun GameScreen(
-    viewModel: GameViewModel = koinInject()
+    viewModel: LobbyViewModel = koinInject()
 ) {
     val state = viewModel.uiState.collectAsState()
 
@@ -31,37 +30,17 @@ fun GameScreen(
             contentAlignment = Alignment.Center
         ) {
             Column {
-                Text("EXISTING GAME IP: ${state.value.gameIpAddress}")
-
+                Text(
+                    text = "Game id: ${state.value.gameIpAddress}"
+                )
                 state.value.players.fastForEach {
                     Text(
-                        text = "Player ${it.name} (${it.id}) is ready: "
+                        text = "Player ${it.name} (${it.id}) is ready: isActive: ${it.isActive}"
                     )
                 }
 
                 Button(onClick = {
-                    viewModel.onUiAction(GameUiAction.Refresh)
-                }) {
-                    Text("Refresh")
-                }
-
-                Button(onClick = {
-                    viewModel.onUiAction(GameUiAction.StartSession)
-                }) {
-                    Text("Start Game")
-                }
-                Button(onClick = {
-                    viewModel.onUiAction(GameUiAction.StopSession)
-                }) {
-                    Text("Stop Game")
-                }
-                Button(onClick = {
-                    viewModel.onUiAction(GameUiAction.Connect)
-                }) {
-                    Text("Connect to game")
-                }
-                Button(onClick = {
-                    viewModel.onUiAction(GameUiAction.Disconnect)
+                    viewModel.onUiAction(LobbyUiAction.Disconnect)
                 }) {
                     Text("Disconnect from game")
                 }

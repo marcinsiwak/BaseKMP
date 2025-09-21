@@ -5,11 +5,16 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.util.Log
 import androidx.annotation.RequiresPermission
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.withTimeoutOrNull
 import pl.msiwak.common.AppContext
+import java.io.IOException
 import java.net.Inet4Address
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.Socket
+import java.net.SocketTimeoutException
 
 class ConnectionManagerImpl : ConnectionManager {
 
@@ -34,18 +39,53 @@ class ConnectionManagerImpl : ConnectionManager {
         val ownIp = getLocalIpAddress() ?: throw Exception("Connect to network")
         val subnet = ownIp.substringBeforeLast(".")
 
-        for (i in 1..254) {
-            val host = "$subnet.$i"
-            runCatching {
-                if (InetAddress.getByName(host).isReachable(10)) {
-                    val socket = Socket()
-                    socket.connect(InetSocketAddress(host, port), 200)
-                    socket.close()
-                    Log.d("NetworkScan", "Device with open port $port found: $host")
-                    return host
+        Log.d("NetworkScan", "Starting network scan for port $port on subnet $subnet.x")
+
+        return coroutineScope {
+            val scanTasks = (1..254).map { i ->
+                async {
+                    val host = "$subnet.$i"
+                    scanHost(host, port)
                 }
             }
+            for (task in scanTasks) {
+                val result = task.await()
+                if (result != null) {
+                    Log.d("NetworkScan", "Game found at $result, cancelling remaining scans")
+                    scanTasks.forEach { if (it != task) it.cancel() }
+                    return@coroutineScope result
+                }
+            }
+            Log.d("NetworkScan", "No game server found on subnet $subnet.x")
+            null
         }
-        return null
+    }
+
+    private suspend fun scanHost(host: String, port: Int): String? {
+        return withTimeoutOrNull(1000) { // 1 second timeout per host
+            runCatching {
+                Log.d("NetworkScan", "Scanning $host")
+
+                // First check if host is reachable
+                if (!InetAddress.getByName(host).isReachable(100)) {
+                    return@runCatching null
+                }
+
+                Log.d("NetworkScan", "$host is reachable, checking port $port")
+
+                // Then check if port is open
+                Socket().use { socket ->
+                    socket.connect(InetSocketAddress(host, port), 500)
+                    Log.d("NetworkScan", "Game server found at $host:$port")
+                    host
+                }
+            }.onFailure { e ->
+                when (e) {
+                    is SocketTimeoutException -> Log.v("NetworkScan", "$host:$port - connection timeout")
+                    is IOException -> Log.v("NetworkScan", "$host:$port - connection failed: ${e.message}")
+                    else -> Log.w("NetworkScan", "$host:$port - unexpected error: ${e.message}")
+                }
+            }.getOrNull()
+        }
     }
 }

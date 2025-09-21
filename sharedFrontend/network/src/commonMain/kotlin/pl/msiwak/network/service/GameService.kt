@@ -2,11 +2,17 @@ package pl.msiwak.network.service
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.retryWhen
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import pl.msiwak.common.error.GameNotFoundException
 import pl.msiwak.common.model.Player
 import pl.msiwak.common.model.WebSocketEvent
 import pl.msiwak.common.model.dispatcher.Dispatchers
@@ -23,19 +29,39 @@ class GameService(
 ) {
     private var scope = CoroutineScope(Dispatchers.IO)
 
-    suspend fun observePlayersConnection(): Flow<WebSocketEvent> = withContext(Dispatchers.IO) {
+    private lateinit var deviceIpId: String
+
+    private var serverIp: String? = null
+
+    suspend fun observeWebSocketEvents(): Flow<WebSocketEvent> = withContext(Dispatchers.IO) {
         ktorClient.webSocketEvent.filterIsInstance<WebSocketEvent>()
     }
 
-    suspend fun findGame(): String? = withContext(Dispatchers.IO) {
-        return@withContext connectionManager.findGame(port = PORT)
+    suspend fun sendClientEvent(webSocketEvent: WebSocketEvent) = withContext(Dispatchers.IO) {
+        ktorClient.send(webSocketEvent)
     }
 
-    suspend fun connectPlayer(host: String, playerName: String) {
-        val deviceIpId = connectionManager.getLocalIpAddress()?.substringAfterLast(".")
+    fun findGame(): Flow<String?> = flow<String?> {
+        emit(connectionManager.findGame(port = PORT) ?: throw GameNotFoundException())
+        delay(1000)
+    }.onEach {
+        serverIp = it
+    }.retryWhen { cause, attempt ->
+        cause is GameNotFoundException && attempt < 4
+    }.flowOn(Dispatchers.IO)
+
+    suspend fun connectPlayer(playerName: String) = withContext(Dispatchers.IO) {
+        deviceIpId = connectionManager.getLocalIpAddress()?.substringAfterLast(".")
             ?: throw Exception("Cannot get local IP address")
-        val player = Player(id = deviceIpId, name = playerName)
-        ktorClient.connect(host = host, port = PORT, player = player)
+        val ip = serverIp ?: throw Exception("Cannot find server IP")
+        scope.launch {
+            connectPlayerToGame(playerName, ip)
+        }
+    }
+
+    private suspend fun connectPlayerToGame(playerName: String, ip: String) {
+        val player = Player(id = deviceIpId, name = playerName, isActive = true)
+        ktorClient.connect(host = ip, port = PORT, player = player)
     }
 
     suspend fun disconnectPlayer() = withContext(Dispatchers.IO) {
@@ -45,18 +71,29 @@ class GameService(
         ktorClient.disconnect(deviceIpId)
     }
 
-    suspend fun startGame() = withContext(Dispatchers.IO) {
+    suspend fun createGame(adminName: String) = withContext(Dispatchers.IO) {
         if (!scope.isActive) {
             scope = CoroutineScope(Dispatchers.IO)
         }
+        val ipAddress = connectionManager.getLocalIpAddress() ?: throw Exception("Cannot get local IP address")
         scope.launch {
-            val ipAddress = connectionManager.getLocalIpAddress() ?: throw Exception("Cannot get local IP address")
-            serverManager.startServer(ipAddress, PORT)
-            serverManager.observeMessages()
+            launch { serverManager.startServer(ipAddress, PORT) }
+            launch { serverManager.observeMessages() }
+            launch { serverManager.observeGameSession() }
+            delay(1000) // add await for server to start
+            launch { createGameAndConnect(ipAddress, adminName) }
         }
     }
 
-    suspend fun stopGame() = withContext(Dispatchers.IO) {
+    private suspend fun createGameAndConnect(ipAddress: String, adminName: String) {
+        deviceIpId = ipAddress.substringAfterLast(".")
+        serverManager.createGame(deviceIpId, ipAddress)
+        connectPlayerToGame(adminName, ipAddress)
+    }
+
+    fun getUserId(): String = deviceIpId
+
+    suspend fun finishGame() = withContext(Dispatchers.IO) {
         serverManager.stopServer()
         scope.cancel()
     }

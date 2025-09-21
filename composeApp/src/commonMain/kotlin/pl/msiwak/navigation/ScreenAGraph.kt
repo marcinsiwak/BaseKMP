@@ -13,7 +13,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import cardsthegame.sharedfrontend.common_resources.generated.resources.Res
@@ -28,7 +27,6 @@ import pl.msiwak.graph.NavigationGraph
 class ScreenAGraph : NavigationGraph {
 
     override fun create(
-        navController: NavHostController,
         navGraphBuilder: NavGraphBuilder
     ) {
         navGraphBuilder.navigation<NavDestination.ScreenADestination.Graph>(startDestination = NavDestination.ScreenADestination.Screen) {
@@ -38,16 +36,6 @@ class ScreenAGraph : NavigationGraph {
                     Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                         Button(onClick = { showContent = !showContent }) {
                             Text("Click me!")
-                        }
-                        Button(onClick = {
-                            navController.navigate(NavDestination.ExampleDestination.Screen)
-                        }) {
-                            Text("Navigate to Screen B")
-                        }
-                        Button(onClick = {
-                            navController.navigate(NavDestination.AiGeneratedDestination.Screen)
-                        }) {
-                            Text("Navigate to AI Generated Screen")
                         }
                         AnimatedVisibility(showContent) {
                             val greeting = remember { Greeting().greet() }

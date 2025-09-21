@@ -5,17 +5,17 @@ import io.ktor.client.plugins.websocket.DefaultClientWebSocketSession
 import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.client.plugins.websocket.webSocket
 import io.ktor.http.HttpMethod
+import io.ktor.websocket.CloseReason
 import io.ktor.websocket.Frame
-import io.ktor.websocket.WebSocketSession
 import io.ktor.websocket.readText
 import io.ktor.websocket.send
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import pl.msiwak.common.model.Player
@@ -23,8 +23,6 @@ import pl.msiwak.common.model.WebSocketEvent
 import pl.msiwak.network.engine.EngineProvider
 
 class KtorClient(engine: EngineProvider) {
-
-    private var session: WebSocketSession? = null
     private val json = Json {
         ignoreUnknownKeys = true
         isLenient = true
@@ -42,50 +40,69 @@ class KtorClient(engine: EngineProvider) {
     }
 
     suspend fun connect(host: String, port: Int, player: Player) {
-        if (!scope.isActive) {
-            scope = CoroutineScope(Dispatchers.Main)
-        }
-        scope.launch {
-            runCatching {
-                client.webSocket(
-                    method = HttpMethod.Get,
-                    host = host,
-                    port = port,
-                    path = "/ws?id=${player.id}"
-                ) {
-                    send(json.encodeToString<WebSocketEvent>(WebSocketEvent.PlayerConnected(player)))
-                    launch {
-                        webSocketClientEvent.collect { message ->
-                            when (message) {
-                                is WebSocketEvent.PlayerClientDisconnected -> {
-                                    send(json.encodeToString<WebSocketEvent>(message))
-                                }
-
-                                else -> Unit
-                            }
-
+        client.webSocket(
+            method = HttpMethod.Get,
+            host = host,
+            port = port,
+            path = "/ws?id=${player.id}"
+        ) {
+            send(json.encodeToString<WebSocketEvent>(WebSocketEvent.PlayerConnected(player)))
+            launch {
+                webSocketClientEvent.collect { message ->
+                    when (message) {
+                        is WebSocketEvent.PlayerClientDisconnected, is WebSocketEvent.GameLobby -> {
+                            send(json.encodeToString<WebSocketEvent>(message))
                         }
+                        else -> Unit
                     }
-                    session = this
-                    listenForResponse()
                 }
-            }.onFailure { exception ->
-                println("OUTPUT: Failed to connect: $exception")
             }
+            listenForResponse()
+        }
+    }
+
+    fun send(webSocketEvent: WebSocketEvent) {
+        scope.launch {
+            _webSocketClientEvent.emit(webSocketEvent)
         }
     }
 
     private suspend fun DefaultClientWebSocketSession.listenForResponse() {
-        incoming.consumeEach { frame ->
-            when (frame) {
-                is Frame.Text -> {
-                    val text = frame.readText()
-                    print("OUTPUT: Received text: $text")
-                    val event = json.decodeFromString<WebSocketEvent>(text)
-                    _webSocketEvent.emit(event)
+        runCatching {
+            while (true) {
+                when (val frame = incoming.receive()) {
+                    is Frame.Text -> {
+                        val text = frame.readText()
+                        println("OUTPUT: Received text: $text")
+                        val event = json.decodeFromString<WebSocketEvent>(text)
+                        _webSocketEvent.emit(event)
+                    }
+
+                    else -> println("OUTPUT: Received non-text frame: $frame")
+                }
+            }
+        }.onFailure {
+            when (it) {
+                is ClosedReceiveChannelException -> {
+                    when (val reason = closeReason.await()?.knownReason) {
+                        CloseReason.Codes.GOING_AWAY -> {
+                            println("OUTPUT: Connection closed normally player disconnected")
+                        }
+
+                        CloseReason.Codes.CLOSED_ABNORMALLY -> {
+                            println("OUTPUT: Connection closed abnormally")
+                            _webSocketEvent.emit(WebSocketEvent.ServerDown)
+                        }
+
+                        else -> println("OUTPUT: Connection closed with reason: $reason")
+                    }
+                }
+                is CancellationException -> {
+                    println("OUTPUT: listenForResponse cancelled: ${it.message}")
+                    _webSocketEvent.emit(WebSocketEvent.ServerDown)
                 }
 
-                else -> {}
+                else -> println("OUTPUT: Error in listenForResponse: ${it.message}")
             }
         }
     }
@@ -93,6 +110,5 @@ class KtorClient(engine: EngineProvider) {
     suspend fun disconnect(playerId: String) {
         val event: WebSocketEvent = WebSocketEvent.PlayerClientDisconnected(playerId)
         _webSocketClientEvent.emit(event)
-        session = null
     }
 }

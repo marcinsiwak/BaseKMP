@@ -96,7 +96,10 @@ public extension HttpServer {
     }
 
     func closeSocket(userId: String) {
-        sockets[userId]?.close(immediately: true)
+        if let socket = sockets[userId] {
+            socket.close(immediately: false)               // graceful close (code 1000)
+            sockets.removeValue(forKey: userId)
+        }
     }
 }
 
@@ -113,6 +116,7 @@ extension HttpServer: ServerWebSocketDelegate {
         print("Websocket client disconnected")
         if let key = sockets.first(where: { $0.value === webSocket })?.key {
             sockets.removeValue(forKey: key)
+            subject?.send("Client disconnected: \(key)")
         }
     }
     
@@ -125,7 +129,6 @@ extension HttpServer: ServerWebSocketDelegate {
         
         if sockets[userId] == nil {
             print("Websocket client connected:", id ?? "Unknown")
-            subject?.send("Player connected: \(userId)")
             sockets[userId] = webSocket
         }
         

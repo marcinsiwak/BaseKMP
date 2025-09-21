@@ -47,6 +47,7 @@ kotlin {
             implementation(projects.sharedFrontend.data)
             implementation(projects.sharedFrontend.domain)
             implementation(projects.sharedFrontend.domainImpl)
+            implementation(projects.sharedFrontend.gameManager)
             api(projects.sharedFrontend.network)
 
             implementation(libs.koin.core)

@@ -3,7 +3,6 @@ package pl.msiwak.navigation
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.Text
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
@@ -14,7 +13,6 @@ import pl.msiwak.graph.NavigationGraph
 class ScreenBGraph : NavigationGraph {
 
     override fun create(
-        navController: NavHostController,
         navGraphBuilder: NavGraphBuilder
     ) {
         navGraphBuilder.navigation<NavDestination.ScreenBDestination.Graph>(startDestination = NavDestination.ScreenBDestination.Screen()) {
