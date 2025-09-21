@@ -28,4 +28,7 @@ sealed class WebSocketEvent() {
 
     @Serializable
     data object ServerDown : WebSocketEvent()
+
+    @Serializable
+    data class SetPlayerReady(val id: String) : WebSocketEvent()
 }

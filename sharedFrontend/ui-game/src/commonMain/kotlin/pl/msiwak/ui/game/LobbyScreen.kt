@@ -35,8 +35,14 @@ fun GameScreen(
                 )
                 state.value.players.fastForEach {
                     Text(
-                        text = "Player ${it.name} (${it.id}) is ready: isActive: ${it.isActive}"
+                        text = "Player ${it.name} (${it.id}) isActive: ${it.isActive} isReady: ${it.isReady}"
                     )
+                }
+
+                Button(onClick = {
+                    viewModel.onUiAction(LobbyUiAction.SetReady)
+                }) {
+                    Text("Ready")
                 }
 
                 Button(onClick = {

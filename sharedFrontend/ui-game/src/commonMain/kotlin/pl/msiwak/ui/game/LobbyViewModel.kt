@@ -9,18 +9,16 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import pl.msiwak.common.model.WebSocketEvent
 import pl.msiwak.domain.game.DisconnectUseCase
-import pl.msiwak.domain.game.GetUserIdUseCase
 import pl.msiwak.domain.game.ObserveGameSessionUseCase
-import pl.msiwak.domain.game.ObserveWebSocketEventsUseCase
-import pl.msiwak.domain.game.SendClientEventUseCase
+import pl.msiwak.domain.game.SetPlayerReadyUseCase
 import pl.msiwak.navigator.Navigator
 
 class LobbyViewModel(
     private val disconnectUseCase: DisconnectUseCase,
     private val observeGameSessionUseCase: ObserveGameSessionUseCase,
-    private val navigator: Navigator
+    private val navigator: Navigator,
+    private val setPlayerReadyUseCase: SetPlayerReadyUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LobbyState())
@@ -32,9 +30,7 @@ class LobbyViewModel(
 
     init {
         viewModelScope.launch(errorHandler) {
-            launch {
-                observeGameSession()
-            }
+            launch { observeGameSession() }
         }
     }
 
@@ -48,12 +44,21 @@ class LobbyViewModel(
                 disconnectUseCase()
                 navigator.navigateUp()
             }
+
+            LobbyUiAction.SetReady -> viewModelScope.launch(errorHandler) {
+                setPlayerReadyUseCase()
+            }
         }
     }
 
     private suspend fun observeGameSession() {
         observeGameSessionUseCase().collectLatest { gameSession ->
-            _uiState.update { it.copy(players = gameSession?.players ?: emptyList(), gameIpAddress = gameSession?.gameServerIpAddress) }
+            _uiState.update {
+                it.copy(
+                    players = gameSession?.players ?: emptyList(),
+                    gameIpAddress = gameSession?.gameServerIpAddress
+                )
+            }
         }
     }
 }

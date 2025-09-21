@@ -20,4 +20,6 @@ interface GameManager {
 
     suspend fun getPlayers(): List<Player>
     suspend fun updateAdminId(id: String)
+
+    suspend fun setPlayerReady(id: String)
 }

@@ -83,4 +83,18 @@ class GameManagerImpl : GameManager {
     override suspend fun updateAdminId(id: String) {
         _currentGameSession.update { it?.copy(adminId = id) }
     }
+
+    override suspend fun setPlayerReady(id: String) {
+        _currentGameSession.update {
+            it?.copy(
+                players = it.players.map { player ->
+                    if (player.id == id) {
+                        player.copy(isReady = true)
+                    } else {
+                        player
+                    }
+                }
+            )
+        }
+    }
 }

@@ -50,7 +50,7 @@ class KtorClient(engine: EngineProvider) {
             launch {
                 webSocketClientEvent.collect { message ->
                     when (message) {
-                        is WebSocketEvent.PlayerClientDisconnected, is WebSocketEvent.GameLobby -> {
+                        is WebSocketEvent.PlayerClientDisconnected, is WebSocketEvent.GameLobby, is WebSocketEvent.SetPlayerReady -> {
                             send(json.encodeToString<WebSocketEvent>(message))
                         }
                         else -> Unit

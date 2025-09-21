@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
@@ -44,11 +45,13 @@ class GameService(
     fun findGame(): Flow<String?> = flow<String?> {
         emit(connectionManager.findGame(port = PORT) ?: throw GameNotFoundException())
         delay(1000)
-    }.onEach {
-        serverIp = it
-    }.retryWhen { cause, attempt ->
-        cause is GameNotFoundException && attempt < 4
-    }.flowOn(Dispatchers.IO)
+    }
+        .retryWhen { cause, attempt ->
+            cause is GameNotFoundException && attempt < 4
+        }
+        .catch { emit(null) }
+        .onEach { serverIp = it }
+        .flowOn(Dispatchers.IO)
 
     suspend fun connectPlayer(playerName: String) = withContext(Dispatchers.IO) {
         deviceIpId = connectionManager.getLocalIpAddress()?.substringAfterLast(".")

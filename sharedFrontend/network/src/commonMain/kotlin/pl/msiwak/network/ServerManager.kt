@@ -63,6 +63,9 @@ class ServerManager(
                             )
                         }
                     }
+                    is WebSocketEvent.SetPlayerReady -> {
+                        gameManager.setPlayerReady(event.id)
+                    }
 
                     else -> Unit
                 }
