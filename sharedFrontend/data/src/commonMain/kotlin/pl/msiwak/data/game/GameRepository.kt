@@ -21,6 +21,10 @@ class GameRepository(
                 WebSocketEvent.ServerDown -> {
                     with(currentGameSession.value ?: return@collect) {
                         val currentPlayer = players.first { player -> player.id == gameService.getUserId() }
+                        findGame()?.let {
+                            gameService.connectPlayer(currentPlayer.name)
+                            return@collect
+                        }
                         val playerToBeAdmin = players.first { player -> player.id != adminId }
                         if (playerToBeAdmin.id == currentPlayer.id) {
                             gameService.createGame(playerToBeAdmin.name)

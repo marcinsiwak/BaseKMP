@@ -19,10 +19,11 @@ import io.ktor.websocket.readText
 import io.ktor.websocket.send
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.cancelChildren
-import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlin.time.Duration.Companion.seconds
 
@@ -32,6 +33,8 @@ class KtorServerImpl : KtorServer {
     override val messages: Flow<String> = _messages.asSharedFlow()
 
     private var activeSessions = mutableMapOf<String, WebSocketSession>()
+
+    private val mutex = Mutex()
 
     override fun startServer(host: String, port: Int) {
         if (server != null) return
@@ -63,15 +66,19 @@ class KtorServerImpl : KtorServer {
                 activeSessions[userId] = this
 
                 runCatching {
-                    incoming.consumeEach { frame ->
-                        if (frame is Frame.Text) {
-                            val receivedText = frame.readText()
-                            Log.e("OUTPUT", "OUTPUT: incoming andorid.KtorServerImpl: $activeSessions")
-                            _messages.emit(receivedText)
+                    while (true) {
+                        when (val frame = incoming.receive()) {
+                            is Frame.Text -> {
+                                val receivedText = frame.readText()
+                                println("OUTPUT: KtorServerImpl Received text: $receivedText")
+                                _messages.emit(receivedText)
+                            }
+
+                            else -> println("OUTPUT: Received non-text frame: $frame")
                         }
                     }
                 }.onFailure { exception ->
-                    Log.e("OUTPUT", "OUTPUT: Client disconnected: $userId")
+                    Log.e("OUTPUT", "OUTPUT - KtorServerImpl: $exception")
                     withContext(NonCancellable) {
                         activeSessions[userId]?.close(
                             CloseReason(
@@ -88,15 +95,21 @@ class KtorServerImpl : KtorServer {
     }
 
     override suspend fun sendMessage(userId: String, message: String) {
-        activeSessions[userId]?.send(message)
+        mutex.withLock {
+            activeSessions[userId]?.send(message)
+        }
     }
 
     override suspend fun sendMessageToAll(message: String) {
-        activeSessions.values.forEach { it.send(message) }
+        mutex.withLock {
+            activeSessions.values.forEach { it.send(message) }
+        }
     }
 
     override suspend fun closeSocker(userId: String) {
-        activeSessions[userId]?.close(CloseReason(CloseReason.Codes.NORMAL, "Closed by server"))
-        activeSessions.remove(userId)
+        mutex.withLock {
+            activeSessions[userId]?.close(CloseReason(CloseReason.Codes.NORMAL, "Closed by server"))
+            activeSessions.remove(userId)
+        }
     }
 }
