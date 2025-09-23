@@ -18,8 +18,8 @@ class GameRepository(
     suspend fun observeWebSocketEvents() {
         gameService.observeWebSocketEvents().collect {
             when (it) {
-                is WebSocketEvent.UpdateGameSession -> _currentGameSession.value = it.gameSession
-                WebSocketEvent.ServerDown -> {
+                is WebSocketEvent.ServerActions.UpdateGameSession -> _currentGameSession.value = it.gameSession
+                WebSocketEvent.ClientActions.ServerDownDetected -> {
                     with(currentGameSession.value ?: return@collect) {
                         val currentPlayer = players.first { player -> player.id == gameService.getUserId() }
                         findGame()?.let {

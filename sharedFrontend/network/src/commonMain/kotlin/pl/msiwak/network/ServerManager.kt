@@ -22,7 +22,7 @@ class ServerManager(
         gameManager.currentGameSession.filterNotNull().collectLatest { gameSession ->
             ktorServer.sendMessageToAll(
                 json.encodeToString<WebSocketEvent>(
-                    WebSocketEvent.UpdateGameSession(gameSession)
+                    WebSocketEvent.ServerActions.UpdateGameSession(gameSession)
                 )
             )
         }
@@ -31,40 +31,29 @@ class ServerManager(
     suspend fun observeMessages() {
         ktorServer.messages.map {
             if (it.startsWith("Client disconnected: ")) {
-                WebSocketEvent.PlayerClientDisconnected(it.substringAfter("Client disconnected: "))
+                WebSocketEvent.ClientActions.PlayerClientDisconnected(it.substringAfter("Client disconnected: "))
             } else {
                 json.decodeFromString<WebSocketEvent>(it)
             }
         }
             .collect { event ->
                 when (event) {
-                    is WebSocketEvent.PlayerConnected -> gameManager.joinGame(event.player)
+                    is WebSocketEvent.ClientActions.PlayerConnected -> gameManager.joinGame(event.player)
 
-                    is WebSocketEvent.PlayerClientDisconnected -> {
+                    is WebSocketEvent.ClientActions.PlayerClientDisconnected -> {
 //                        gameManager.leaveGame(event.id)
                         gameManager.disablePlayer(event.id)
                         ktorServer.closeSocker(event.id)
                     }
 
-                    is WebSocketEvent.GameLobby -> {
-                        gameManager.getGameSession()?.let {
-                            ktorServer.sendMessage(
-                                event.id,
-                                json.encodeToString<WebSocketEvent>(
-                                    WebSocketEvent.UpdateGameSession(it)
-                                )
-                            )
-                        }
-                    }
-
-                    is WebSocketEvent.UpdateGameSession -> {
+                    is WebSocketEvent.ServerActions.UpdateGameSession -> {
                         gameManager.getGameSession()?.let {
                             ktorServer.sendMessageToAll(
                                 json.encodeToString<WebSocketEvent>(event)
                             )
                         }
                     }
-                    is WebSocketEvent.SetPlayerReady -> {
+                    is WebSocketEvent.ClientActions.SetPlayerReady -> {
                         gameManager.setPlayerReady(event.id)
                     }
 

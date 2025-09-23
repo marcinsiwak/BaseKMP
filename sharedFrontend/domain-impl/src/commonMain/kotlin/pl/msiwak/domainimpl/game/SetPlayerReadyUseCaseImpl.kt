@@ -7,6 +7,6 @@ import pl.msiwak.domain.game.SetPlayerReadyUseCase
 
 class SetPlayerReadyUseCaseImpl(private val gameRepository: GameRepository) : SetPlayerReadyUseCase {
     override suspend fun invoke() {
-        gameRepository.sendClientEvent(WebSocketEvent.SetPlayerReady(gameRepository.getUserId()))
+        gameRepository.sendClientEvent(WebSocketEvent.ClientActions.SetPlayerReady(gameRepository.getUserId()))
     }
 }
