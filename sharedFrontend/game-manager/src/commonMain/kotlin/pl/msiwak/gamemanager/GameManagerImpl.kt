@@ -90,15 +90,17 @@ class GameManagerImpl : GameManager {
     }
 
     override suspend fun setPlayerReady(id: String) {
+        val updatedPlayers = currentGameSession.value?.players?.map { player ->
+            if (player.id == id) {
+                player.copy(isReady = true)
+            } else {
+                player
+            }
+        } ?: emptyList()
         _currentGameSession.update {
             it?.copy(
-                players = it.players.map { player ->
-                    if (player.id == id) {
-                        player.copy(isReady = true)
-                    } else {
-                        player
-                    }
-                }
+                players = updatedPlayers,
+                isStarted = updatedPlayers.all { player -> player.isReady }
             )
         }
     }
