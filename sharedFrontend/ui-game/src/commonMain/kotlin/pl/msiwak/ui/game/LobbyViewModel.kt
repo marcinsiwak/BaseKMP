@@ -7,8 +7,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import pl.msiwak.destination.NavDestination
 import pl.msiwak.domain.game.DisconnectUseCase
 import pl.msiwak.domain.game.ObserveGameSessionUseCase
 import pl.msiwak.domain.game.SetPlayerReadyUseCase
@@ -52,12 +54,17 @@ class LobbyViewModel(
     }
 
     private suspend fun observeGameSession() {
-        observeGameSessionUseCase().collectLatest { gameSession ->
-            _uiState.update {
-                it.copy(
-                    players = gameSession?.players ?: emptyList(),
-                    gameIpAddress = gameSession?.gameServerIpAddress
-                )
+        observeGameSessionUseCase().filterNotNull().collectLatest { gameSession ->
+            with(gameSession) {
+                _uiState.update {
+                    it.copy(
+                        players = players,
+                        gameIpAddress = gameServerIpAddress
+                    )
+                }
+                if (isStarted) {
+                    navigator.navigate(NavDestination.GameDestination.CardsPreparationScreen)
+                }
             }
         }
     }

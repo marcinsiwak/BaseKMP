@@ -60,7 +60,7 @@ class StartViewModel(
             _uiState.update { it.copy(isLoading = true) }
             createGameUseCase(uiState.value.playerName)
             _uiState.update { it.copy(isLoading = false) }
-            navigator.navigate(NavDestination.GameDestination.GameScreen)
+            navigator.navigate(NavDestination.GameDestination.LobbyScreen)
         }
     }
 
@@ -71,7 +71,7 @@ class StartViewModel(
                 playerName = uiState.value.playerName
             )
             _uiState.update { it.copy(isLoading = false) }
-            navigator.navigate(NavDestination.GameDestination.GameScreen)
+            navigator.navigate(NavDestination.GameDestination.LobbyScreen)
         }
     }
 

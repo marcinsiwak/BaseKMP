@@ -6,6 +6,7 @@ import pl.msiwak.MainViewModel
 import pl.msiwak.ui.aiGenerated.AiGeneratedViewModel
 import pl.msiwak.ui.example.ExampleViewModel
 import pl.msiwak.ui.game.LobbyViewModel
+import pl.msiwak.ui.game.gameplay.CardsPreparationViewModel
 import pl.msiwak.ui.game.start.StartViewModel
 
 internal val viewModelModule = module {
@@ -14,4 +15,5 @@ internal val viewModelModule = module {
     viewModel { MainViewModel(get(), get()) }
     viewModel { StartViewModel(get(), get(), get(), get()) }
     viewModel { LobbyViewModel(get(), get(), get(), get()) }
+    viewModel { CardsPreparationViewModel(get()) }
 }
