@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
+import pl.msiwak.common.model.GameSession
 import pl.msiwak.common.model.WebSocketEvent
 import pl.msiwak.gamemanager.GameManager
 
@@ -76,8 +77,8 @@ class ServerManager(
         ktorServer.startServer(host, port)
     }
 
-    suspend fun createGame(adminId: String, ipAddress: String?) {
-        gameManager.createGame(adminId, ipAddress)
+    suspend fun createGame(adminId: String, ipAddress: String?, gameSession: GameSession?) {
+        gameManager.createGame(adminId, ipAddress, gameSession)
     }
 
     fun stopServer() {

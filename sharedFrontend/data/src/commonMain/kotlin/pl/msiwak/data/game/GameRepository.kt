@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import pl.msiwak.common.model.GameSession
 import pl.msiwak.common.model.WebSocketEvent
 import pl.msiwak.network.service.GameService
@@ -27,7 +28,7 @@ class GameRepository(
                         }
                         val playerToBeAdmin = players.first { player -> player.id != adminId }
                         if (playerToBeAdmin.id == currentPlayer.id) {
-                            gameService.createGame(playerToBeAdmin.name)
+                            gameService.createGame(playerToBeAdmin.name, this)
                         } else {
                             findGame()
                             gameService.connectPlayer(currentPlayer.name)
@@ -35,7 +36,7 @@ class GameRepository(
                     }
                 }
 
-                else -> {}
+                else -> Unit
             }
         }
     }

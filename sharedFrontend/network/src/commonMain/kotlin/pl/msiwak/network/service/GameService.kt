@@ -14,6 +14,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import pl.msiwak.common.error.GameNotFoundException
+import pl.msiwak.common.model.GameSession
 import pl.msiwak.common.model.Player
 import pl.msiwak.common.model.WebSocketEvent
 import pl.msiwak.common.model.dispatcher.Dispatchers
@@ -74,7 +75,7 @@ class GameService(
         ktorClient.disconnect(deviceIpId)
     }
 
-    suspend fun createGame(adminName: String) = withContext(Dispatchers.IO) {
+    suspend fun createGame(adminName: String, gameSession: GameSession? = null) = withContext(Dispatchers.IO) {
         if (!scope.isActive) {
             scope = CoroutineScope(Dispatchers.IO)
         }
@@ -84,13 +85,13 @@ class GameService(
             launch { serverManager.observeMessages() }
             launch { serverManager.observeGameSession() }
             delay(1000) // add await for server to start
-            launch { createGameAndConnect(ipAddress, adminName) }
+            launch { createGameAndConnect(ipAddress, adminName, gameSession) }
         }
     }
 
-    private suspend fun createGameAndConnect(ipAddress: String, adminName: String) {
+    private suspend fun createGameAndConnect(ipAddress: String, adminName: String, gameSession: GameSession?) {
         deviceIpId = ipAddress.substringAfterLast(".")
-        serverManager.createGame(deviceIpId, ipAddress)
+        serverManager.createGame(deviceIpId, ipAddress, gameSession)
         connectPlayerToGame(adminName, ipAddress)
     }
 
