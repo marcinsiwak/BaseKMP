@@ -20,7 +20,7 @@ class GameManagerImpl : GameManager {
                 gameId = gameSession.gameId,
                 adminId = adminId,
                 gameServerIpAddress = ipAddress,
-                players = gameSession.players.map { if(it.id != ipAddress) it.copy(isActive = false) else it },
+                players = gameSession.players.map { if (it.id != ipAddress) it.copy(isActive = false) else it },
             )
         } else {
             _currentGameSession.value =
@@ -103,5 +103,9 @@ class GameManagerImpl : GameManager {
                 isStarted = updatedPlayers.all { player -> player.isReady }
             )
         }
+    }
+
+    override suspend fun addCardToGame(cardText: String) {
+        _currentGameSession.update { it?.copy(cards = it.cards + cardText) }
     }
 }

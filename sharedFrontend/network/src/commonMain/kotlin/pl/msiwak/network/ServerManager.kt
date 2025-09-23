@@ -56,6 +56,9 @@ class ServerManager(
                     is WebSocketEvent.ClientActions.SetPlayerReady -> {
                         gameManager.setPlayerReady(event.id)
                     }
+                    is WebSocketEvent.ClientActions.AddCard -> {
+                        gameManager.addCardToGame(event.cardText)
+                    }
 
                     else -> Unit
                 }

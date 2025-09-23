@@ -4,7 +4,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.update
 import pl.msiwak.common.model.GameSession
 import pl.msiwak.common.model.WebSocketEvent
 import pl.msiwak.network.service.GameService
@@ -19,22 +18,7 @@ class GameRepository(
         gameService.observeWebSocketEvents().collect {
             when (it) {
                 is WebSocketEvent.ServerActions.UpdateGameSession -> _currentGameSession.value = it.gameSession
-                WebSocketEvent.ClientActions.ServerDownDetected -> {
-                    with(currentGameSession.value ?: return@collect) {
-                        val currentPlayer = players.first { player -> player.id == gameService.getUserId() }
-                        findGame()?.let {
-                            gameService.connectPlayer(currentPlayer.name)
-                            return@collect
-                        }
-                        val playerToBeAdmin = players.first { player -> player.id != adminId }
-                        if (playerToBeAdmin.id == currentPlayer.id) {
-                            gameService.createGame(playerToBeAdmin.name, this)
-                        } else {
-                            findGame()
-                            gameService.connectPlayer(currentPlayer.name)
-                        }
-                    }
-                }
+                WebSocketEvent.ClientActions.ServerDownDetected -> managePlayerConnection()
 
                 else -> Unit
             }
@@ -66,4 +50,21 @@ class GameRepository(
     }
 
     suspend fun sendClientEvent(webSocketEvent: WebSocketEvent) = gameService.sendClientEvent(webSocketEvent)
+
+    private suspend fun managePlayerConnection() {
+        with(currentGameSession.value ?: return) {
+            val currentPlayer = players.first { player -> player.id == gameService.getUserId() }
+            findGame()?.let {
+                gameService.connectPlayer(currentPlayer.name)
+                return
+            }
+            val playerToBeAdmin = players.first { player -> player.id != adminId }
+            if (playerToBeAdmin.id == currentPlayer.id) {
+                gameService.createGame(playerToBeAdmin.name, this)
+            } else {
+                findGame()
+                gameService.connectPlayer(currentPlayer.name)
+            }
+        }
+    }
 }

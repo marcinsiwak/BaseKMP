@@ -9,10 +9,12 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import pl.msiwak.domain.game.AddCardUseCase
 import pl.msiwak.domain.game.ObserveGameSessionUseCase
 
 class CardsPreparationViewModel(
-    private val observeGameSessionUseCase: ObserveGameSessionUseCase
+    private val observeGameSessionUseCase: ObserveGameSessionUseCase,
+    private val addCardUseCase: AddCardUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CardsPreparationViewState())
@@ -27,13 +29,16 @@ class CardsPreparationViewModel(
     fun onUiAction(action: CardsPreparationUiAction) {
         when (action) {
             is CardsPreparationUiAction.OnTextInput -> _uiState.update { it.copy(text = action.text) }
-            is CardsPreparationUiAction.OnAddCardClicked ->
+            is CardsPreparationUiAction.OnAddCardClicked -> viewModelScope.launch { addCardUseCase(uiState.value.text) }
+            is CardsPreparationUiAction.OnAnimationFinished -> _uiState.update { it.copy(isAnimationPlaying = false) }
         }
     }
 
     private suspend fun observeGameSession() {
         observeGameSessionUseCase().filterNotNull().collectLatest { gameSession ->
-
+            with(gameSession) {
+                _uiState.update { it.copy(cards = cards, isAnimationPlaying = true) }
+            }
         }
     }
 }

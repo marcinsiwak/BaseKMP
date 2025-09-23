@@ -1,6 +1,7 @@
 package pl.msiwak.di
 
 import org.koin.dsl.module
+import pl.msiwak.domain.game.AddCardUseCase
 import pl.msiwak.domain.game.ConnectPlayerToGameUseCase
 import pl.msiwak.domain.game.CreateGameUseCase
 import pl.msiwak.domain.game.DisconnectUseCase
@@ -11,6 +12,7 @@ import pl.msiwak.domain.game.ObserveGameSessionUseCase
 import pl.msiwak.domain.game.ObserveWebSocketEventsUseCase
 import pl.msiwak.domain.game.SendClientEventUseCase
 import pl.msiwak.domain.game.SetPlayerReadyUseCase
+import pl.msiwak.domainimpl.game.AddCardUseCaseImpl
 import pl.msiwak.domainimpl.game.ConnectPlayerToGameUseCaseImpl
 import pl.msiwak.domainimpl.game.CreateGameUseCaseImpl
 import pl.msiwak.domainimpl.game.DisconnectUseCaseImpl
@@ -33,4 +35,5 @@ internal val useCaseModule = module {
     factory<GetUserIdUseCase> { GetUserIdUseCaseImpl(get()) }
     factory<ObserveGameSessionUseCase> { ObserveGameSessionUseCaseImpl(get()) }
     factory<SetPlayerReadyUseCase> { SetPlayerReadyUseCaseImpl(get()) }
+    factory<AddCardUseCase> { AddCardUseCaseImpl(get()) }
 }

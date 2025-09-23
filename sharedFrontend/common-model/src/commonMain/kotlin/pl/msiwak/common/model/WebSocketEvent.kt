@@ -7,17 +7,23 @@ sealed class WebSocketEvent() {
 
     @Serializable
     sealed class ClientActions : WebSocketEvent() {
+
+        // connection events
         @Serializable
         data class PlayerConnected(val player: Player) : ClientActions()
-
-        @Serializable
-        data class SetPlayerReady(val id: String) : ClientActions()
 
         @Serializable
         data class PlayerClientDisconnected(val id: String) : ClientActions()
 
         @Serializable
         data object ServerDownDetected : ClientActions()
+
+        // game events
+        @Serializable
+        data class SetPlayerReady(val id: String) : ClientActions()
+
+        @Serializable
+        data class AddCard(val cardText: String) : ClientActions()
     }
 
     @Serializable
