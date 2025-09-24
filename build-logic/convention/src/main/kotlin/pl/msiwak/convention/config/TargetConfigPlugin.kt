@@ -24,12 +24,11 @@ class TargetConfigPlugin : Plugin<Project> {
             jvm()
             jvmToolchain(17)
             wasmJs {
-                if (moduleName.isNullOrEmpty()) {
-                    moduleName = "composeApp"
-                }
                 browser {
                     val rootDirPath = project.rootDir.path
                     val projectDirPath = project.projectDir.path
+                    outputModuleName.set("composeApp")
+
                     commonWebpackConfig {
                         if (outputFileName.isNullOrEmpty()) {
                             outputFileName = "composeApp.js"

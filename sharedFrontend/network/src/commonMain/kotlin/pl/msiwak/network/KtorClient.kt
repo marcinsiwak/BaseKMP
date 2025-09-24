@@ -88,12 +88,10 @@ class KtorClient(engine: EngineProvider) {
                             println("OUTPUT: Connection closed normally player disconnected")
                         }
 
-                        CloseReason.Codes.CLOSED_ABNORMALLY -> {
-                            println("OUTPUT: Connection closed abnormally")
+                        else -> {
+                            println("OUTPUT: Connection closed with reason: $reason")
                             _webSocketEvent.emit(WebSocketEvent.ClientActions.ServerDownDetected)
                         }
-
-                        else -> println("OUTPUT: Connection closed with reason: $reason")
                     }
                 }
 
