@@ -84,7 +84,7 @@ class KtorClient(engine: EngineProvider) {
             when (it) {
                 is ClosedReceiveChannelException -> {
                     when (val reason = closeReason.await()?.knownReason) {
-                        CloseReason.Codes.GOING_AWAY -> {
+                        CloseReason.Codes.GOING_AWAY, CloseReason.Codes.NORMAL -> {
                             println("OUTPUT: Connection closed normally player disconnected")
                         }
 
