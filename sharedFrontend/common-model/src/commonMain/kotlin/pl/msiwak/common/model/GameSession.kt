@@ -9,5 +9,5 @@ data class GameSession(
     val isStarted: Boolean = false,
     val adminId: String? = null,
     val gameServerIpAddress: String? = null,
-    val cards: List<String> = emptyList()
+    val cardsPerPlayer: Int = 4
 )

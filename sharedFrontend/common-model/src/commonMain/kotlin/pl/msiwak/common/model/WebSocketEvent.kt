@@ -23,7 +23,7 @@ sealed class WebSocketEvent() {
         data class SetPlayerReady(val id: String) : ClientActions()
 
         @Serializable
-        data class AddCard(val cardText: String) : ClientActions()
+        data class AddCard(val id: String, val cardText: String) : ClientActions()
     }
 
     @Serializable

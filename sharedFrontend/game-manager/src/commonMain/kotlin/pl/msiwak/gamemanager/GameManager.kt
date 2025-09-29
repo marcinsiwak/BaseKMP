@@ -22,5 +22,5 @@ interface GameManager {
     suspend fun updateAdminId(id: String)
 
     suspend fun setPlayerReady(id: String)
-    suspend fun addCardToGame(cardText: String)
+    suspend fun addCardToGame(userId: String, cardText: String)
 }

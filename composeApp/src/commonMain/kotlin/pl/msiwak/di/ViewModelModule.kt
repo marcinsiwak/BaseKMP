@@ -15,5 +15,5 @@ internal val viewModelModule = module {
     viewModel { MainViewModel(get(), get()) }
     viewModel { StartViewModel(get(), get(), get(), get()) }
     viewModel { LobbyViewModel(get(), get(), get(), get()) }
-    viewModel { CardsPreparationViewModel(get(), get()) }
+    viewModel { CardsPreparationViewModel(get(), get(), get()) }
 }

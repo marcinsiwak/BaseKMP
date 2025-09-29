@@ -105,7 +105,19 @@ class GameManagerImpl : GameManager {
         }
     }
 
-    override suspend fun addCardToGame(cardText: String) {
-        _currentGameSession.update { it?.copy(cards = it.cards + cardText) }
+    override suspend fun addCardToGame(userId: String, cardText: String) {
+        val playerCards = currentGameSession.value?.players?.find { it.id == userId }?.cards ?: emptyList()
+        val cardsPerPlayerLimit = currentGameSession.value?.cardsPerPlayer ?: 0
+        if (playerCards.size == cardsPerPlayerLimit) return
+
+        _currentGameSession.update {
+            it?.copy(
+                players =
+                    it.players.map { player ->
+                        if (player.id == userId) player.copy(cards = player.cards + cardText) else player
+                    }
+            )
+        }
+
     }
 }
