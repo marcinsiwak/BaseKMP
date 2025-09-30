@@ -25,7 +25,7 @@ fun RoundScreen(viewModel: RoundViewModel = koinInject()) {
         ) {
             Text(viewState.text)
 
-            if (viewState.isCurrentPlayerRound) {
+            if (viewState.isPlayerRound) {
                 viewState.currentCard?.text?.let { Text(it) }
 
                 Button(
@@ -57,7 +57,7 @@ fun RoundScreen(viewModel: RoundViewModel = koinInject()) {
                     }
                 }
             } else {
-                Text("PLAYER: TURN")
+                Text("${viewState.currentPlayerName} TURN")
             }
         }
     }

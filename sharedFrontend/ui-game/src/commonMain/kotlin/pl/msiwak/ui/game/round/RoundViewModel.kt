@@ -11,9 +11,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import pl.msiwak.common.model.Card
 import pl.msiwak.common.model.GameState
+import pl.msiwak.domain.game.ContinueGameUseCase
 import pl.msiwak.domain.game.GetUserIdUseCase
 import pl.msiwak.domain.game.ObserveGameSessionUseCase
-import pl.msiwak.domain.game.ContinueGameUseCase
 import pl.msiwak.navigator.Navigator
 
 class RoundViewModel(
@@ -73,8 +73,9 @@ class RoundViewModel(
                 availableCards = players.map { it.cards }.flatten().filter { it.isAvailable }
                 _uiState.update {
                     it.copy(
-                        isCurrentPlayerRound = gameSession.currentPlayerId == getUserIdUseCase(),
-                        currentCard = getRandomCard()
+                        isPlayerRound = gameSession.currentPlayerId == getUserIdUseCase(),
+                        currentCard = getRandomCard(),
+                        currentPlayerName = players.find { player -> player.id == currentPlayerId }?.name ?: ""
                     )
                 }
                 when (gameState) {
