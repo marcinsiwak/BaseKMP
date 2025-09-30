@@ -53,5 +53,11 @@ sealed class NavDestination {
 
         @Serializable
         data object CardsPreparationScreen : GameDestination()
+
+        @Serializable
+        data object RoundInfoScreen : GameDestination()
+
+        @Serializable
+        data object RoundScreen : GameDestination()
     }
 }

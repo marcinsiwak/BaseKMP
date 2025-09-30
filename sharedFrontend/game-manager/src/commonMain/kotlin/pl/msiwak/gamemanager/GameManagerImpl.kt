@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import pl.msiwak.common.model.GameSession
+import pl.msiwak.common.model.GameState
 import pl.msiwak.common.model.Player
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -106,18 +107,29 @@ class GameManagerImpl : GameManager {
     }
 
     override suspend fun addCardToGame(userId: String, cardText: String) {
-        val playerCards = currentGameSession.value?.players?.find { it.id == userId }?.cards ?: emptyList()
-        val cardsPerPlayerLimit = currentGameSession.value?.cardsPerPlayer ?: 0
+        val gameSession = currentGameSession.value ?: return
+        val playerCards = gameSession.players.find { it.id == userId }?.cards ?: emptyList()
+        val cardsPerPlayerLimit = gameSession.cardsPerPlayer
         if (playerCards.size == cardsPerPlayerLimit) return
 
-        _currentGameSession.update {
-            it?.copy(
-                players =
-                    it.players.map { player ->
-                        if (player.id == userId) player.copy(cards = player.cards + cardText) else player
-                    }
-            )
+        val updatedPlayers = gameSession.players.map { player ->
+            if (player.id == userId) {
+                player.copy(cards = player.cards + cardText)
+            } else {
+                player
+            }
         }
 
+        _currentGameSession.update {
+            if (updatedPlayers.all { player -> player.cards.size == cardsPerPlayerLimit }) {
+                it?.copy(
+                    players = updatedPlayers,
+                    gameState = GameState.TABOO,
+                    currentPlayerId = updatedPlayers.first().id
+                )
+            } else {
+                it?.copy(players = updatedPlayers)
+            }
+        }
     }
 }

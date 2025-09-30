@@ -9,14 +9,18 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import pl.msiwak.common.model.GameState
+import pl.msiwak.destination.NavDestination
 import pl.msiwak.domain.game.AddCardUseCase
 import pl.msiwak.domain.game.GetUserIdUseCase
 import pl.msiwak.domain.game.ObserveGameSessionUseCase
+import pl.msiwak.navigator.Navigator
 
 class CardsPreparationViewModel(
     private val observeGameSessionUseCase: ObserveGameSessionUseCase,
     private val addCardUseCase: AddCardUseCase,
-    private val getUserIdUseCase: GetUserIdUseCase
+    private val getUserIdUseCase: GetUserIdUseCase,
+    private val navigator: Navigator
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CardsPreparationViewState())
@@ -48,6 +52,9 @@ class CardsPreparationViewModel(
                         cards = players.map { player -> player.cards }.flatten(),
                         isAnimationPlaying = true
                     )
+                }
+                if (gameState == GameState.TABOO) {
+                    navigator.navigate(NavDestination.GameDestination.RoundInfoScreen)
                 }
             }
         }

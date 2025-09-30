@@ -7,6 +7,8 @@ import pl.msiwak.destination.NavDestination
 import pl.msiwak.graph.NavigationGraph
 import pl.msiwak.ui.game.LobbyScreen
 import pl.msiwak.ui.game.gameplay.CardsPreparationScreen
+import pl.msiwak.ui.game.round.RoundScreen
+import pl.msiwak.ui.game.roundinfo.RoundInfoScreen
 import pl.msiwak.ui.game.start.StartScreen
 
 class GameGraph : NavigationGraph {
@@ -23,6 +25,12 @@ class GameGraph : NavigationGraph {
             }
             composable<NavDestination.GameDestination.CardsPreparationScreen> {
                 CardsPreparationScreen()
+            }
+            composable<NavDestination.GameDestination.RoundInfoScreen> {
+                RoundInfoScreen()
+            }
+            composable<NavDestination.GameDestination.RoundScreen> {
+                RoundScreen()
             }
         }
     }
