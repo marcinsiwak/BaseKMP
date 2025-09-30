@@ -10,13 +10,14 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import pl.msiwak.common.model.GameState
-import pl.msiwak.destination.NavDestination
+import pl.msiwak.domain.game.ContinueGameUseCase
+import pl.msiwak.domain.game.GetUserIdUseCase
 import pl.msiwak.domain.game.ObserveGameSessionUseCase
-import pl.msiwak.navigator.Navigator
 
 class RoundInfoViewModel(
     private val observeGameSessionUseCase: ObserveGameSessionUseCase,
-    val navigator: Navigator
+    private val getUserIdUseCase: GetUserIdUseCase,
+    private val continueGameUseCase: ContinueGameUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RoundInfoViewState())
@@ -30,18 +31,23 @@ class RoundInfoViewModel(
 
     fun onUiAction(action: RoundInfoUiAction) {
         when (action) {
-            is RoundInfoUiAction.OnStartRoundClick -> viewModelScope.launch { navigator.navigate(NavDestination.GameDestination.RoundScreen) }
+            is RoundInfoUiAction.OnStartRoundClick -> viewModelScope.launch { continueGameUseCase() }
         }
     }
 
     private suspend fun observeGameSession() {
         observeGameSessionUseCase().filterNotNull().collectLatest { gameSession ->
             with(gameSession) {
+                _uiState.update {
+                    it.copy(
+                        isCurrentPlayerRound = gameSession.currentPlayerId == getUserIdUseCase()
+                    )
+                }
                 when (gameState) {
-                    GameState.TABOO -> _uiState.update { it.copy(text = "TABOO") }
-                    GameState.PUNS -> _uiState.update { it.copy(text = "PUNS") }
-                    GameState.TABOO_SHORT -> _uiState.update { it.copy(text = "TABOO_SHORT") }
-                    GameState.PUNS_SHORT -> _uiState.update { it.copy(text = "PUNS_SHORT") }
+                    GameState.TABOO_INFO -> _uiState.update { it.copy(text = "TABOO: Players must describe the card without saying the card’s words or obvious related terms.") }
+                    GameState.PUNS_INFO -> _uiState.update { it.copy(text = "PUNS: Players can say anything to describe the card (no direct use of the card’s words).") }
+                    GameState.TABOO_SHORT_INFO -> _uiState.update { it.copy(text = "TABOO_SHORT: Players can say just one single word to describe the card.") }
+                    GameState.PUNS_SHORT_INFO -> _uiState.update { it.copy(text = "PUNS_SHORT: Players act out the card with only one gesture, no words or sounds.") }
                     else -> Unit
                 }
             }

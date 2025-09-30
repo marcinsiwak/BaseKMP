@@ -23,4 +23,5 @@ interface GameManager {
 
     suspend fun setPlayerReady(id: String)
     suspend fun addCardToGame(userId: String, cardText: String)
+    suspend fun continueGame()
 }

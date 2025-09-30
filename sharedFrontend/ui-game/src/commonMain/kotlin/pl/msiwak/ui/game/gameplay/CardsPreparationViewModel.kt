@@ -35,7 +35,10 @@ class CardsPreparationViewModel(
     fun onUiAction(action: CardsPreparationUiAction) {
         when (action) {
             is CardsPreparationUiAction.OnTextInput -> _uiState.update { it.copy(text = action.text) }
-            is CardsPreparationUiAction.OnAddCardClicked -> viewModelScope.launch { addCardUseCase(uiState.value.text) }
+            is CardsPreparationUiAction.OnAddCardClicked -> viewModelScope.launch {
+                addCardUseCase(uiState.value.text)
+                _uiState.update { it.copy(text = "") }
+            }
             is CardsPreparationUiAction.OnAnimationFinished -> _uiState.update { it.copy(isAnimationPlaying = false) }
         }
     }
@@ -53,9 +56,9 @@ class CardsPreparationViewModel(
                         isAnimationPlaying = true
                     )
                 }
-                if (gameState == GameState.TABOO) {
-                    navigator.navigate(NavDestination.GameDestination.RoundInfoScreen)
-                }
+//                if (gameState == GameState.TABOO_INFO) {
+//                    navigator.navigate(NavDestination.GameDestination.RoundInfoScreen)
+//                }
             }
         }
     }

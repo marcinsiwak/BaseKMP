@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import pl.msiwak.common.model.Card
 import pl.msiwak.common.model.GameSession
 import pl.msiwak.common.model.GameState
 import pl.msiwak.common.model.Player
@@ -101,7 +102,7 @@ class GameManagerImpl : GameManager {
         _currentGameSession.update {
             it?.copy(
                 players = updatedPlayers,
-                isStarted = updatedPlayers.all { player -> player.isReady }
+                gameState = if (updatedPlayers.all { player -> player.isReady }) GameState.PREPARING_CARDS else it.gameState
             )
         }
     }
@@ -114,7 +115,7 @@ class GameManagerImpl : GameManager {
 
         val updatedPlayers = gameSession.players.map { player ->
             if (player.id == userId) {
-                player.copy(cards = player.cards + cardText)
+                player.copy(cards = player.cards + Card(text = cardText))
             } else {
                 player
             }
@@ -124,7 +125,7 @@ class GameManagerImpl : GameManager {
             if (updatedPlayers.all { player -> player.cards.size == cardsPerPlayerLimit }) {
                 it?.copy(
                     players = updatedPlayers,
-                    gameState = GameState.TABOO,
+                    gameState = GameState.TABOO_INFO,
                     currentPlayerId = updatedPlayers.first().id
                 )
             } else {
@@ -132,4 +133,27 @@ class GameManagerImpl : GameManager {
             }
         }
     }
+
+    override suspend fun continueGame() {
+        val currentGameState = currentGameSession.value?.gameState ?: return
+        when (currentGameState) {
+            GameState.TABOO_INFO -> updateGameStateTo(GameState.TABOO)
+            GameState.PUNS_INFO -> updateGameStateTo(GameState.PUNS)
+            GameState.TABOO_SHORT_INFO -> updateGameStateTo(GameState.TABOO_SHORT)
+            GameState.PUNS_SHORT_INFO -> updateGameStateTo(GameState.PUNS_SHORT)
+            GameState.TABOO -> updateGameStateTo(GameState.PUNS_INFO)
+            GameState.PUNS -> updateGameStateTo(GameState.TABOO_SHORT_INFO)
+            GameState.TABOO_SHORT -> updateGameStateTo(GameState.PUNS_SHORT_INFO)
+            GameState.PUNS_SHORT -> updateGameStateTo(GameState.FINISHED)
+
+            GameState.PREPARING_CARDS -> TODO()
+            GameState.WAITING_FOR_PLAYERS -> TODO()
+            GameState.FINISHED -> TODO()
+        }
+    }
+
+    private fun updateGameStateTo(taboo: GameState) {
+        _currentGameSession.update { it?.copy(gameState = taboo) }
+    }
+
 }

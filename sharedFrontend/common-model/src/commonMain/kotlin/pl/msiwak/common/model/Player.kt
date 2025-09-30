@@ -8,5 +8,5 @@ data class Player(
     val name: String,
     val isActive: Boolean = false,
     val isReady: Boolean = false,
-    val cards: List<String> = emptyList()
+    val cards: List<Card> = emptyList()
 )

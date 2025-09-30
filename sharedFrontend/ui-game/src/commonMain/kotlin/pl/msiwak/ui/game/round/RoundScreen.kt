@@ -26,7 +26,7 @@ fun RoundScreen(viewModel: RoundViewModel = koinInject()) {
             Text(viewState.text)
 
             if (viewState.isCurrentPlayerRound) {
-                Text(viewState.currentCard)
+                viewState.currentCard?.text?.let { Text(it) }
 
                 Button(
                     onClick = {
@@ -44,6 +44,17 @@ fun RoundScreen(viewModel: RoundViewModel = koinInject()) {
                     modifier = Modifier.padding(top = 16.dp)
                 ) {
                     Text("Skip")
+                }
+
+                if (viewState.isRoundFinished) {
+                    Button(
+                        onClick = {
+                            viewModel.onUiAction(RoundUiAction.OnRoundFinished)
+                        },
+                        modifier = Modifier.padding(top = 16.dp)
+                    ) {
+                        Text("Finish")
+                    }
                 }
             } else {
                 Text("PLAYER: TURN")

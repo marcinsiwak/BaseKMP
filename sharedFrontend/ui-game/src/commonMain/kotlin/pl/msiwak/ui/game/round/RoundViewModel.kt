@@ -9,19 +9,25 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import pl.msiwak.common.model.Card
 import pl.msiwak.common.model.GameState
 import pl.msiwak.domain.game.GetUserIdUseCase
 import pl.msiwak.domain.game.ObserveGameSessionUseCase
+import pl.msiwak.domain.game.ContinueGameUseCase
 import pl.msiwak.navigator.Navigator
 
 class RoundViewModel(
     private val observeGameSessionUseCase: ObserveGameSessionUseCase,
     private val getUserIdUseCase: GetUserIdUseCase,
+    private val continueGameUseCase: ContinueGameUseCase,
     val navigator: Navigator
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RoundViewState())
     val uiState: StateFlow<RoundViewState> = _uiState.asStateFlow()
+
+    private var availableCards = listOf<Card>()
+    private var currentCard: Card? = null
 
     init {
         viewModelScope.launch {
@@ -31,15 +37,46 @@ class RoundViewModel(
 
     fun onUiAction(action: RoundUiAction) {
         when (action) {
-            is RoundUiAction.OnCorrectClick -> {}
-            is RoundUiAction.OnSkipClick -> {}
+            is RoundUiAction.OnCorrectClick -> {
+                viewModelScope.launch {
+                    _uiState.update {
+                        it.copy(
+                            currentCard = getRandomCard(),
+                            isRoundFinished = availableCards.isEmpty()
+                        )
+                    }
+                }
+            }
+
+            is RoundUiAction.OnSkipClick -> {
+                viewModelScope.launch {
+                    _uiState.update {
+                        it.copy(
+                            currentCard = getRandomCard(),
+                            isRoundFinished = availableCards.isEmpty()
+                        )
+                    }
+                }
+            }
+
+            is RoundUiAction.OnRoundFinished -> {
+                viewModelScope.launch {
+                    continueGameUseCase()
+                }
+            }
         }
     }
 
     private suspend fun observeGameSession() {
         observeGameSessionUseCase().filterNotNull().collectLatest { gameSession ->
             with(gameSession) {
-                _uiState.update { it.copy(isCurrentPlayerRound = gameSession.currentPlayerId == getUserIdUseCase()) }
+                availableCards = players.map { it.cards }.flatten().filter { it.isAvailable }
+                _uiState.update {
+                    it.copy(
+                        isCurrentPlayerRound = gameSession.currentPlayerId == getUserIdUseCase(),
+                        currentCard = getRandomCard()
+                    )
+                }
                 when (gameState) {
                     GameState.TABOO -> _uiState.update { it.copy(text = "TABOO game") }
                     GameState.PUNS -> _uiState.update { it.copy(text = "PUNS game") }
@@ -48,6 +85,18 @@ class RoundViewModel(
                     else -> Unit
                 }
             }
+        }
+    }
+
+    private fun getRandomCard(): Card? {
+        return if (availableCards.isNotEmpty()) {
+            val randomCard = availableCards.random()
+            availableCards = availableCards.filter { it != randomCard }
+            randomCard
+        } else {
+            null
+        }.also {
+            currentCard = it
         }
     }
 }

@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
@@ -53,7 +55,8 @@ fun CardsPreparationScreen(viewModel: CardsPreparationViewModel = koinInject()) 
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .verticalScroll(rememberScrollState())
+                .imePadding()
         ) {
             Image(
                 modifier = Modifier.fillMaxWidth().imePadding(),
@@ -65,7 +68,8 @@ fun CardsPreparationScreen(viewModel: CardsPreparationViewModel = koinInject()) 
             )
 
             Column(
-                modifier = Modifier.fillMaxWidth().padding(top = 64.dp),
+                modifier = Modifier
+                    .fillMaxWidth(),
                 horizontalAlignment = CenterHorizontally
             ) {
                 with(viewState.cardLimits) {

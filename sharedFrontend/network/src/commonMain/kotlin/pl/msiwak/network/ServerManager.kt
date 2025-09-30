@@ -1,7 +1,6 @@
 package pl.msiwak.network
 
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
@@ -58,6 +57,9 @@ class ServerManager(
                     }
                     is WebSocketEvent.ClientActions.AddCard -> {
                         gameManager.addCardToGame(event.id, event.cardText)
+                    }
+                    is WebSocketEvent.ClientActions.ContinueGame -> {
+                        gameManager.continueGame()
                     }
 
                     else -> Unit

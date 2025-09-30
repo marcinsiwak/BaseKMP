@@ -62,9 +62,6 @@ class LobbyViewModel(
                         gameIpAddress = gameServerIpAddress
                     )
                 }
-                if (isStarted) {
-                    navigator.navigate(NavDestination.GameDestination.CardsPreparationScreen)
-                }
             }
         }
     }

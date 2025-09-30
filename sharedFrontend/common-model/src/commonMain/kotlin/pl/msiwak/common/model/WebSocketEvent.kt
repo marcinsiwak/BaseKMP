@@ -24,6 +24,9 @@ sealed class WebSocketEvent() {
 
         @Serializable
         data class AddCard(val id: String, val cardText: String) : ClientActions()
+
+        @Serializable
+        data object ContinueGame : ClientActions()
     }
 
     @Serializable
