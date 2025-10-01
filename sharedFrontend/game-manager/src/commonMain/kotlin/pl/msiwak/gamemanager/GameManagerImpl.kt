@@ -18,8 +18,7 @@ class GameManagerImpl : GameManager {
     @OptIn(ExperimentalUuidApi::class)
     override suspend fun createGame(adminId: String, ipAddress: String?, gameSession: GameSession?) {
         if (gameSession != null) {
-            _currentGameSession.value = GameSession(
-                gameId = gameSession.gameId,
+            _currentGameSession.value = gameSession.copy(
                 adminId = adminId,
                 gameServerIpAddress = ipAddress,
                 players = gameSession.players.map { if (it.id != ipAddress) it.copy(isActive = false) else it },
@@ -33,7 +32,7 @@ class GameManagerImpl : GameManager {
     override suspend fun joinGame(player: Player) {
         with(currentGameSession.value ?: throw IllegalStateException("Game has not been created yet")) {
             if (players.any { it.id == player.id }) {
-                val updatedPlayers = players.map { if (it.id == player.id) player.copy(isActive = true) else it }
+                val updatedPlayers = players.map { if (it.id == player.id) it.copy(isActive = true) else it }
                 _currentGameSession.update { it?.copy(players = updatedPlayers) }
             } else {
                 _currentGameSession.update { it?.copy(players = players + player) }

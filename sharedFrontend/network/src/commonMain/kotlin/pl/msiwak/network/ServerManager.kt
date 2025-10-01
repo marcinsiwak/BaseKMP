@@ -35,7 +35,7 @@ class ServerManager(
                 json.decodeFromString<WebSocketEvent>(it)
             }
         }
-            .collect { event ->
+            .collectLatest { event ->
                 when (event) {
                     is WebSocketEvent.ClientActions.PlayerConnected -> gameManager.joinGame(event.player)
 

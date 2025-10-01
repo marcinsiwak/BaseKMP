@@ -3,6 +3,7 @@ package pl.msiwak.data.game
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import pl.msiwak.common.model.GameSession
 import pl.msiwak.common.model.WebSocketEvent
@@ -15,9 +16,11 @@ class GameRepository(
     val currentGameSession: StateFlow<GameSession?> = _currentGameSession.asStateFlow()
 
     suspend fun observeWebSocketEvents() {
-        gameService.observeWebSocketEvents().collect {
+        gameService.observeWebSocketEvents().collectLatest {
             when (it) {
-                is WebSocketEvent.ServerActions.UpdateGameSession -> _currentGameSession.value = it.gameSession
+                is WebSocketEvent.ServerActions.UpdateGameSession -> {
+                    _currentGameSession.value = it.gameSession
+                }
                 WebSocketEvent.ClientActions.ServerDownDetected -> managePlayerConnection()
 
                 else -> Unit
