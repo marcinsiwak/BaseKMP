@@ -108,13 +108,6 @@ class GameManagerImpl : GameManager {
         val cardsPerPlayerLimit = gameSession.cardsPerPlayer
         if (playerCards.size == cardsPerPlayerLimit) return
 
-//        val updatedPlayers = gameSession.players.map { player ->
-//            if (player.id == userId) {
-//                player.copy(cards = player.cards + Card(text = cardText))
-//            } else {
-//                player
-//            }
-//        }
         val updatedCards = gameSession.cards + Card(text = cardText, playerId = userId)
 
         _currentGameSession.update {
