@@ -2,6 +2,8 @@ package pl.msiwak.ui.game.round
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,10 +32,14 @@ class RoundViewModel(
 
     private var availableCards = listOf<Card>()
     private var currentCard: Card? = null
+    private var timerJob: Job? = null
 
     init {
         viewModelScope.launch {
             observeGameSession()
+        }
+        viewModelScope.launch {
+            startCountdownTimer(5)
         }
     }
 
@@ -98,6 +104,22 @@ class RoundViewModel(
             null
         }.also {
             currentCard = it
+        }
+    }
+
+    private fun startCountdownTimer(durationInSeconds: Int) {
+        if (timerJob?.isActive == true) return
+        timerJob?.cancel()
+
+        _uiState.update { it.copy(timeRemaining = durationInSeconds, isTimerRunning = true) }
+
+        timerJob = viewModelScope.launch {
+            repeat(durationInSeconds) { i ->
+                delay(1000)
+                _uiState.update { it.copy(timeRemaining = durationInSeconds - i - 1) }
+            }
+            _uiState.update { it.copy(isTimerRunning = false, timeRemaining = 0) }
+
         }
     }
 }

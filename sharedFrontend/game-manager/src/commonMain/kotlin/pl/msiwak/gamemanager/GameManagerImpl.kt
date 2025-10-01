@@ -164,7 +164,10 @@ class GameManagerImpl : GameManager {
                 )
 
             } else {
-                it?.copy(gameState = fallbackGameState)
+                it?.copy(
+                    currentPlayerId = it.nextPlayer(),
+                    gameState = fallbackGameState
+                )
             }
         }
     }

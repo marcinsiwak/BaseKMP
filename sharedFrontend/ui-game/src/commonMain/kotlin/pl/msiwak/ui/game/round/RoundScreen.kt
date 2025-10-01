@@ -24,6 +24,7 @@ fun RoundScreen(viewModel: RoundViewModel = koinInject()) {
                 .padding(paddingValues)
         ) {
             Text(viewState.text)
+            Text("Time: ${viewState.timeRemaining}")
 
             if (viewState.isPlayerRound) {
                 viewState.currentCard?.text?.let { Text(it) }

@@ -7,5 +7,7 @@ data class RoundViewState(
     val currentCard: Card? = null,
     val isPlayerRound: Boolean = false,
     val isRoundFinished: Boolean = false,
-    val currentPlayerName: String = ""
+    val currentPlayerName: String = "",
+    val timeRemaining: Int = 0,
+    val isTimerRunning: Boolean = false
 )
