@@ -61,6 +61,12 @@ class ServerManager(
                     is WebSocketEvent.ClientActions.ContinueGame -> {
                         gameManager.continueGame()
                     }
+                    is WebSocketEvent.ClientActions.JoinTeam -> {
+                        gameManager.joinTeam(event.id, event.teamName)
+                    }
+                    is WebSocketEvent.ClientActions.SetCorrectAnswer -> {
+                        gameManager.setCorrectAnswer(event.cardText)
+                    }
 
                     else -> Unit
                 }

@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import pl.msiwak.destination.NavDestination
 import pl.msiwak.domain.game.DisconnectUseCase
+import pl.msiwak.domain.game.JoinTeamUseCase
 import pl.msiwak.domain.game.ObserveGameSessionUseCase
 import pl.msiwak.domain.game.SetPlayerReadyUseCase
 import pl.msiwak.navigator.Navigator
@@ -20,7 +21,8 @@ class LobbyViewModel(
     private val disconnectUseCase: DisconnectUseCase,
     private val observeGameSessionUseCase: ObserveGameSessionUseCase,
     private val navigator: Navigator,
-    private val setPlayerReadyUseCase: SetPlayerReadyUseCase
+    private val setPlayerReadyUseCase: SetPlayerReadyUseCase,
+    private val joinTeamUseCase: JoinTeamUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LobbyState())
@@ -50,6 +52,9 @@ class LobbyViewModel(
             LobbyUiAction.SetReady -> viewModelScope.launch(errorHandler) {
                 setPlayerReadyUseCase()
             }
+            is LobbyUiAction.JoinTeam -> viewModelScope.launch {
+                joinTeamUseCase(action.teamName)
+            }
         }
     }
 
@@ -59,7 +64,8 @@ class LobbyViewModel(
                 _uiState.update {
                     it.copy(
                         players = players,
-                        gameIpAddress = gameServerIpAddress
+                        gameIpAddress = gameServerIpAddress,
+                        teams = teams
                     )
                 }
             }

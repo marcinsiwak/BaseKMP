@@ -14,12 +14,14 @@ import pl.msiwak.common.model.GameState
 import pl.msiwak.domain.game.ContinueGameUseCase
 import pl.msiwak.domain.game.GetUserIdUseCase
 import pl.msiwak.domain.game.ObserveGameSessionUseCase
+import pl.msiwak.domain.game.SetCorrectAnswerUseCase
 import pl.msiwak.navigator.Navigator
 
 class RoundViewModel(
     private val observeGameSessionUseCase: ObserveGameSessionUseCase,
     private val getUserIdUseCase: GetUserIdUseCase,
     private val continueGameUseCase: ContinueGameUseCase,
+    private val setCorrectAnswerUseCase: SetCorrectAnswerUseCase,
     val navigator: Navigator
 ) : ViewModel() {
 
@@ -39,10 +41,10 @@ class RoundViewModel(
         when (action) {
             is RoundUiAction.OnCorrectClick -> {
                 viewModelScope.launch {
+                    currentCard?.text?.let { setCorrectAnswerUseCase(it) }
                     _uiState.update {
                         it.copy(
-                            currentCard = getRandomCard(),
-                            isRoundFinished = availableCards.isEmpty()
+                            currentCard = getRandomCard()
                         )
                     }
                 }
@@ -53,7 +55,6 @@ class RoundViewModel(
                     _uiState.update {
                         it.copy(
                             currentCard = getRandomCard(),
-                            isRoundFinished = availableCards.isEmpty()
                         )
                     }
                 }
@@ -70,12 +71,13 @@ class RoundViewModel(
     private suspend fun observeGameSession() {
         observeGameSessionUseCase().filterNotNull().collectLatest { gameSession ->
             with(gameSession) {
-                availableCards = players.map { it.cards }.flatten().filter { it.isAvailable }
+                availableCards = cards.filter { it.isAvailable }
                 _uiState.update {
                     it.copy(
                         isPlayerRound = gameSession.currentPlayerId == getUserIdUseCase(),
                         currentCard = getRandomCard(),
-                        currentPlayerName = players.find { player -> player.id == currentPlayerId }?.name ?: ""
+                        currentPlayerName = players.find { player -> player.id == currentPlayerId }?.name ?: "",
+                        isRoundFinished = availableCards.isEmpty()
                     )
                 }
                 when (gameState) {
@@ -91,9 +93,7 @@ class RoundViewModel(
 
     private fun getRandomCard(): Card? {
         return if (availableCards.isNotEmpty()) {
-            val randomCard = availableCards.random()
-            availableCards = availableCards.filter { it != randomCard }
-            randomCard
+            availableCards.random()
         } else {
             null
         }.also {

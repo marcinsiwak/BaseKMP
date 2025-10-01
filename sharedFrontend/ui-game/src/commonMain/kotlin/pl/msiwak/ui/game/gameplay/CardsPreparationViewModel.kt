@@ -49,10 +49,10 @@ class CardsPreparationViewModel(
                 _uiState.update {
                     it.copy(
                         cardLimits = Pair(
-                            players.find { player -> player.id == getUserIdUseCase() }?.cards?.count() ?: 0,
+                            cards.filter { card -> card.playerId == getUserIdUseCase() }.size,
                             cardsPerPlayer
                         ),
-                        cards = players.map { player -> player.cards }.flatten(),
+                        cards = cards,
                         isAnimationPlaying = true
                     )
                 }

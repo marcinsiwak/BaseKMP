@@ -18,10 +18,11 @@ interface GameManager {
     suspend fun resumeGame(gameId: String)
     suspend fun getGameSession(): GameSession?
 
-    suspend fun getPlayers(): List<Player>
     suspend fun updateAdminId(id: String)
 
     suspend fun setPlayerReady(id: String)
     suspend fun addCardToGame(userId: String, cardText: String)
     suspend fun continueGame()
+    suspend fun joinTeam(userId: String, teamName: String)
+    suspend fun setCorrectAnswer(cardText: String)
 }

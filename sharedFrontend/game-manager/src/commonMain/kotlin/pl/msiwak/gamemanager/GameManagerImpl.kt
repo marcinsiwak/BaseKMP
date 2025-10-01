@@ -30,10 +30,6 @@ class GameManagerImpl : GameManager {
         }
     }
 
-    override suspend fun getPlayers(): List<Player> {
-        return currentGameSession.value?.players ?: emptyList()
-    }
-
     override suspend fun joinGame(player: Player) {
         with(currentGameSession.value ?: throw IllegalStateException("Game has not been created yet")) {
             if (players.any { it.id == player.id }) {
@@ -109,42 +105,49 @@ class GameManagerImpl : GameManager {
 
     override suspend fun addCardToGame(userId: String, cardText: String) {
         val gameSession = currentGameSession.value ?: return
-        val playerCards = gameSession.players.find { it.id == userId }?.cards ?: emptyList()
+        val playerCards = gameSession.cards.filter { it.playerId == userId }
         val cardsPerPlayerLimit = gameSession.cardsPerPlayer
         if (playerCards.size == cardsPerPlayerLimit) return
 
-        val updatedPlayers = gameSession.players.map { player ->
-            if (player.id == userId) {
-                player.copy(cards = player.cards + Card(text = cardText))
-            } else {
-                player
-            }
-        }
+//        val updatedPlayers = gameSession.players.map { player ->
+//            if (player.id == userId) {
+//                player.copy(cards = player.cards + Card(text = cardText))
+//            } else {
+//                player
+//            }
+//        }
+        val updatedCards = gameSession.cards + Card(text = cardText, playerId = userId)
 
         _currentGameSession.update {
-            if (updatedPlayers.all { player -> player.cards.size == cardsPerPlayerLimit }) {
+            if (updatedCards.size == gameSession.cardsPerPlayer * gameSession.players.count()) {
                 it?.copy(
-                    players = updatedPlayers,
+                    players = gameSession.players,
                     gameState = GameState.TABOO_INFO,
-                    currentPlayerId = updatedPlayers.first().id
+                    currentPlayerId = gameSession.teams.first().playerIds.first(),
+                    cards = updatedCards
                 )
             } else {
-                it?.copy(players = updatedPlayers)
+                it?.copy(players = gameSession.players, cards = updatedCards)
             }
         }
     }
 
     override suspend fun continueGame() {
-        val currentGameState = currentGameSession.value?.gameState ?: return
+        val gameSession = currentGameSession.value ?: return
+        val currentGameState = gameSession.gameState
         when (currentGameState) {
-            GameState.TABOO_INFO -> updateGameStateTo(GameState.TABOO)
-            GameState.PUNS_INFO -> updateGameStateTo(GameState.PUNS)
-            GameState.TABOO_SHORT_INFO -> updateGameStateTo(GameState.TABOO_SHORT)
-            GameState.PUNS_SHORT_INFO -> updateGameStateTo(GameState.PUNS_SHORT)
-            GameState.TABOO -> updateGameStateTo(GameState.PUNS_INFO)
-            GameState.PUNS -> updateGameStateTo(GameState.TABOO_SHORT_INFO)
-            GameState.TABOO_SHORT -> updateGameStateTo(GameState.PUNS_SHORT_INFO)
-            GameState.PUNS_SHORT -> updateGameStateTo(GameState.FINISHED)
+            GameState.TABOO_INFO -> _currentGameSession.update { it?.copy(gameState = (GameState.TABOO)) }
+            GameState.PUNS_INFO -> _currentGameSession.update { it?.copy(gameState = (GameState.PUNS)) }
+            GameState.TABOO_SHORT_INFO -> _currentGameSession.update { it?.copy(gameState = (GameState.TABOO_SHORT)) }
+            GameState.PUNS_SHORT_INFO -> _currentGameSession.update { it?.copy(gameState = (GameState.PUNS_SHORT)) }
+            GameState.TABOO -> handleCardAvailabilityTransition(GameState.PUNS_INFO, GameState.TABOO_INFO)
+            GameState.PUNS -> handleCardAvailabilityTransition(GameState.TABOO_SHORT_INFO, GameState.PUNS_INFO)
+            GameState.TABOO_SHORT -> handleCardAvailabilityTransition(
+                GameState.PUNS_SHORT_INFO,
+                GameState.TABOO_SHORT_INFO
+            )
+
+            GameState.PUNS_SHORT -> handleCardAvailabilityTransition(GameState.FINISHED, GameState.PUNS_SHORT_INFO)
 
             GameState.PREPARING_CARDS -> TODO()
             GameState.WAITING_FOR_PLAYERS -> TODO()
@@ -152,8 +155,72 @@ class GameManagerImpl : GameManager {
         }
     }
 
-    private fun updateGameStateTo(taboo: GameState) {
-        _currentGameSession.update { it?.copy(gameState = taboo) }
+    private fun handleCardAvailabilityTransition(nextGameState: GameState, fallbackGameState: GameState) {
+        _currentGameSession.update {
+            if (it?.cards?.all { card -> !card.isAvailable } == true) {
+                it.copy(
+                    currentPlayerId = it.nextPlayer(),
+                    cards = it.cards.map { card -> card.copy(isAvailable = true) },
+                    gameState = nextGameState,
+                )
+
+            } else {
+                it?.copy(gameState = fallbackGameState)
+            }
+        }
     }
 
+    override suspend fun joinTeam(userId: String, teamName: String) {
+        _currentGameSession.update {
+            it?.copy(
+                teams = it.teams.map { team ->
+                    if (team.name == teamName) {
+                        team.copy(playerIds = team.playerIds + userId)
+                    } else {
+                        team.copy(playerIds = team.playerIds.filter { playerId -> playerId != userId })
+                    }
+                }
+            )
+        }
+    }
+
+    override suspend fun setCorrectAnswer(cardText: String) {
+        _currentGameSession.update {
+            it?.copy(
+                cards = it.cards.map { card ->
+                    if (card.text == cardText) {
+                        card.copy(isAvailable = false)
+                    } else {
+                        card
+                    }
+                }
+            )
+        }
+    }
+
+    private fun GameSession.nextPlayer(): String? {
+        if (teams.size < 2) return null
+
+        val teamA = teams[0]
+        val teamB = teams[1]
+
+        val currentTeam = when (currentPlayerId) {
+            null -> teamA
+            in teamA.playerIds -> teamB
+            in teamB.playerIds -> teamA
+            else -> teamA
+        }
+
+        val next =
+            currentTeam.playerIds.firstNotNullOfOrNull { id -> players.find { it.id == id && !it.hasPlayedThisRound } }
+
+        if (next != null) {
+            return next.id
+        }
+
+        val resetPlayers = players.map { it.copy(hasPlayedThisRound = false) }
+        val resetSession = copy(players = resetPlayers)
+
+        return resetSession.nextPlayer()
+    }
 }

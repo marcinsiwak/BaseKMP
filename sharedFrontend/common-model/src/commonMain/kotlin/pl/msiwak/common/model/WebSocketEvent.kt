@@ -23,7 +23,13 @@ sealed class WebSocketEvent() {
         data class SetPlayerReady(val id: String) : ClientActions()
 
         @Serializable
+        data class JoinTeam(val id: String, val teamName: String) : ClientActions()
+
+        @Serializable
         data class AddCard(val id: String, val cardText: String) : ClientActions()
+
+        @Serializable
+        data class SetCorrectAnswer(val cardText: String) : ClientActions()
 
         @Serializable
         data object ContinueGame : ClientActions()

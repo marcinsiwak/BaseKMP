@@ -11,7 +11,9 @@ data class GameSession(
     val gameServerIpAddress: String? = null,
     val cardsPerPlayer: Int = 1,
     val gameState: GameState = GameState.WAITING_FOR_PLAYERS,
-    val currentPlayerId: String? = null
+    val currentPlayerId: String? = null,
+    val teams: List<Team> = listOf(Team(id = 1, "A"), Team(id = 2, "B")),
+    val cards: List<Card> = emptyList()
 )
 
 @Serializable
