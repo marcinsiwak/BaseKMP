@@ -36,12 +36,12 @@ fun FinishScreen(viewModel: FinishViewModel = koinInject()) {
             )
             viewState.teams?.fastForEach {
                 Text(
-                    text = "Team: ${it.name}",
+                    text = "Team: ${it.name} - score: ${it.score}",
                     color = GameColors.TextPrimary
                 )
                 it.players.fastForEach { player ->
                     Text(
-                        text = "Player: ${player.name}",
+                        text = "Player: ${player.name} - id: ${player.score}",
                         color = GameColors.TextPrimary
                     )
                 }

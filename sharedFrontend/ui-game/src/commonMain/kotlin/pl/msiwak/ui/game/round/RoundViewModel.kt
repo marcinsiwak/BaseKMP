@@ -39,7 +39,7 @@ class RoundViewModel(
             observeGameSession()
         }
         viewModelScope.launch {
-            startCountdownTimer(5)
+            startCountdownTimer(3)
         }
     }
 

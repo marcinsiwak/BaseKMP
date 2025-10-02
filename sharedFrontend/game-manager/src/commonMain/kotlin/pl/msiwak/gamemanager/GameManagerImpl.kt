@@ -141,9 +141,10 @@ class GameManagerImpl : GameManager {
 
             GameState.PUNS_SHORT -> handleCardAvailabilityTransition(GameState.FINISHED, GameState.PUNS_SHORT_INFO)
 
-            GameState.PREPARING_CARDS -> TODO()
-            GameState.WAITING_FOR_PLAYERS -> TODO()
-            GameState.FINISHED -> TODO()
+            else -> Unit
+//            GameState.PREPARING_CARDS -> TODO()
+//            GameState.WAITING_FOR_PLAYERS -> TODO()
+//            GameState.FINISHED -> TODO()
         }
     }
 
@@ -158,10 +159,10 @@ class GameManagerImpl : GameManager {
 
             } else {
                 it?.copy(
-                    currentPlayerId = null,
+                    currentPlayerId = if (fallbackGameState == GameState.FINISHED) null else it.nextPlayer(),
                     gameState = fallbackGameState,
                     teams = if (fallbackGameState == GameState.FINISHED) {
-                        it.teams.sortedBy { team -> team.score }
+                        it.teams.sortedByDescending { team -> team.score }
                     } else it.teams
                 )
             }
@@ -199,7 +200,7 @@ class GameManagerImpl : GameManager {
                 } else {
                     team
                 }
-            }?.sortedBy { team -> team.score } ?: emptyList()
+            }?.sortedByDescending { team -> team.score } ?: emptyList()
 
             it?.copy(
                 cards = it.cards.map { card ->

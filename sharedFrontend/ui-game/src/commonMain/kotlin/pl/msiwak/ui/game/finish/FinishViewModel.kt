@@ -9,29 +9,21 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import pl.msiwak.domain.game.ContinueGameUseCase
-import pl.msiwak.domain.game.GetUserIdUseCase
 import pl.msiwak.domain.game.ObserveGameSessionUseCase
-import pl.msiwak.domain.game.SetCorrectAnswerUseCase
-import pl.msiwak.navigator.Navigator
 import pl.msiwak.ui.game.TeamItem
 
 class FinishViewModel(
-    private val observeGameSessionUseCase: ObserveGameSessionUseCase,
-    private val getUserIdUseCase: GetUserIdUseCase,
-    private val continueGameUseCase: ContinueGameUseCase,
-    private val setCorrectAnswerUseCase: SetCorrectAnswerUseCase,
-    val navigator: Navigator
+    private val observeGameSessionUseCase: ObserveGameSessionUseCase
 ) : ViewModel() {
+
+    private val _uiState = MutableStateFlow(FinishViewState())
+    val uiState: StateFlow<FinishViewState> = _uiState.asStateFlow()
 
     init {
         viewModelScope.launch {
             observeGameSession()
         }
     }
-
-    private val _uiState = MutableStateFlow(FinishViewState())
-    val uiState: StateFlow<FinishViewState> = _uiState.asStateFlow()
 
     fun onUiAction(action: FinishUiAction) {
 
@@ -45,7 +37,9 @@ class FinishViewModel(
                         teams = teams.map { team ->
                             TeamItem(
                                 team.name,
-                                players.filter { player -> team.playerIds.contains(player.id) })
+                                players.filter { player -> team.playerIds.contains(player.id) },
+                                team.score
+                            )
                         }
                     )
                 }
