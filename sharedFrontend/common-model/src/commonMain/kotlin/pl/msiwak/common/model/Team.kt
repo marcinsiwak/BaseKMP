@@ -6,5 +6,6 @@ import kotlinx.serialization.Serializable
 data class Team(
     val id: Int,
     val name: String,
-    val playerIds: List<String> = emptyList()
+    val playerIds: List<String> = emptyList(),
+    val score: Int = 0
 )

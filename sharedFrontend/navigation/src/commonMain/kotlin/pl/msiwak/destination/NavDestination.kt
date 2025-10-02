@@ -59,5 +59,8 @@ sealed class NavDestination {
 
         @Serializable
         data object RoundScreen : GameDestination()
+
+        @Serializable
+        data object FinishScreen : GameDestination()
     }
 }

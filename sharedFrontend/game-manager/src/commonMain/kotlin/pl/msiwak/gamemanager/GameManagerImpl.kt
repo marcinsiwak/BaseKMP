@@ -158,8 +158,11 @@ class GameManagerImpl : GameManager {
 
             } else {
                 it?.copy(
-                    currentPlayerId = it.nextPlayer(),
-                    gameState = fallbackGameState
+                    currentPlayerId = null,
+                    gameState = fallbackGameState,
+                    teams = if (fallbackGameState == GameState.FINISHED) {
+                        it.teams.sortedBy { team -> team.score }
+                    } else it.teams
                 )
             }
         }
@@ -181,6 +184,23 @@ class GameManagerImpl : GameManager {
 
     override suspend fun setCorrectAnswer(cardText: String) {
         _currentGameSession.update {
+            val playerToUpdateScore = it?.players?.find { player -> player.id == it.currentPlayerId }
+            val updatedPlayers = it?.players?.map { player ->
+                if (player.id == playerToUpdateScore?.id) {
+                    player.copy(score = player.score + 1)
+                } else {
+                    player
+                }
+            } ?: emptyList()
+
+            val updatedTeams = it?.teams?.map { team ->
+                if (team.playerIds.contains(it.currentPlayerId)) {
+                    team.copy(score = team.score + 1)
+                } else {
+                    team
+                }
+            }?.sortedBy { team -> team.score } ?: emptyList()
+
             it?.copy(
                 cards = it.cards.map { card ->
                     if (card.text == cardText) {
@@ -188,7 +208,9 @@ class GameManagerImpl : GameManager {
                     } else {
                         card
                     }
-                }
+                },
+                players = updatedPlayers,
+                teams = updatedTeams
             )
         }
     }

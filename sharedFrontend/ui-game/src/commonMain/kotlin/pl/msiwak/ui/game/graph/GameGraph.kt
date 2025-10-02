@@ -6,6 +6,7 @@ import androidx.navigation.navigation
 import pl.msiwak.destination.NavDestination
 import pl.msiwak.graph.NavigationGraph
 import pl.msiwak.ui.game.LobbyScreen
+import pl.msiwak.ui.game.finish.FinishScreen
 import pl.msiwak.ui.game.gameplay.CardsPreparationScreen
 import pl.msiwak.ui.game.round.RoundScreen
 import pl.msiwak.ui.game.roundinfo.RoundInfoScreen
@@ -31,6 +32,9 @@ class GameGraph : NavigationGraph {
             }
             composable<NavDestination.GameDestination.RoundScreen> {
                 RoundScreen()
+            }
+            composable<NavDestination.GameDestination.FinishScreen> {
+                FinishScreen()
             }
         }
     }

@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import pl.msiwak.destination.NavDestination
 import pl.msiwak.domain.game.DisconnectUseCase
 import pl.msiwak.domain.game.JoinTeamUseCase
 import pl.msiwak.domain.game.ObserveGameSessionUseCase
@@ -52,6 +51,7 @@ class LobbyViewModel(
             LobbyUiAction.SetReady -> viewModelScope.launch(errorHandler) {
                 setPlayerReadyUseCase()
             }
+
             is LobbyUiAction.JoinTeam -> viewModelScope.launch {
                 joinTeamUseCase(action.teamName)
             }
@@ -63,9 +63,20 @@ class LobbyViewModel(
             with(gameSession) {
                 _uiState.update {
                     it.copy(
-                        players = players,
+                        playersWithoutTeam = players.filter { player ->
+                            teams.none { team ->
+                                team.playerIds.contains(
+                                    player.id
+                                )
+                            }
+                        },
                         gameIpAddress = gameServerIpAddress,
-                        teams = teams
+                        teams = teams.map { team ->
+                            TeamItem(
+                                team.name,
+                                players.filter { player -> team.playerIds.contains(player.id) }
+                            )
+                        }
                     )
                 }
             }

@@ -1,17 +1,25 @@
 package pl.msiwak.ui.game
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import org.koin.compose.koinInject
+import pl.msiwak.cardsthegame.common.resources.GameColors
 
 @Composable
 fun LobbyScreen(
@@ -21,67 +29,96 @@ fun LobbyScreen(
 
     Scaffold { paddingValues ->
         Column(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .background(GameColors.Background)
+                .padding(top = 32.dp),
+            horizontalAlignment = CenterHorizontally
         ) {
             Text(
-                text = "Game id: ${state.value.gameIpAddress}"
+                text = "Game id: ${state.value.gameIpAddress}",
+                color = GameColors.OnPrimary
             )
 
             Row(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Column {
-                    Text(text = "Team A")
-                    state.value.players.filter { player ->
-                        state.value.teams.find { it.name == "A" }?.playerIds?.contains(
-                            player.id
-                        ) == true
-                    }.fastForEach {
+
+                state.value.teams.fastForEach {
+                    Column {
                         Text(
-                            text = "Player ${it.name}"
+                            text = it.name,
+                            color = GameColors.OnPrimary
                         )
-                    }
-                    Button(onClick = {
-                        viewModel.onUiAction(LobbyUiAction.JoinTeam("A"))
-                    }) {
-                        Text("Join Team A")
-                    }
-                }
-                Column {
-                    Text(text = "Team B")
-                    state.value.players.filter { player ->
-                        state.value.teams.find { it.name == "B" }?.playerIds?.contains(
-                            player.id
-                        ) == true
-                    }.fastForEach {
-                        Text(
-                            text = "Player ${it.name}"
-                        )
-                    }
-                    Button(onClick = {
-                        viewModel.onUiAction(LobbyUiAction.JoinTeam("B"))
-                    }) {
-                        Text("Join Team B")
+                        it.players.fastForEach { player ->
+                            Text(
+                                text = "Player ${player.name} isReady: ${player.isReady}",
+                                color = GameColors.OnPrimary
+                            )
+                        }
+                        Button(
+                            onClick = {
+                                viewModel.onUiAction(LobbyUiAction.JoinTeam(it.name))
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                backgroundColor = GameColors.ButtonPrimary,
+                                contentColor = GameColors.ButtonText
+                            )
+                        ) {
+                            Text(
+                                "Join Team ${it.name}",
+                                color = GameColors.ButtonText
+                            )
+                        }
                     }
                 }
             }
 
-            state.value.players.fastForEach {
+            Spacer(modifier = Modifier.weight(1f))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                state.value.playersWithoutTeam.fastForEach {
+                    Text(
+                        text = "Player ${it.name} (${it.id})\nisActive: ${it.isActive}\nisReady: ${it.isReady}",
+                        color = GameColors.OnPrimary
+                    )
+                }
+            }
+
+
+            Button(
+                onClick = {
+                    viewModel.onUiAction(LobbyUiAction.SetReady)
+                },
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = GameColors.ButtonPrimary,
+                    contentColor = GameColors.ButtonText
+                )
+            ) {
                 Text(
-                    text = "Player ${it.name} (${it.id}) isActive: ${it.isActive} isReady: ${it.isReady}"
+                    "Ready",
+                    color = GameColors.ButtonText
                 )
             }
 
-            Button(onClick = {
-                viewModel.onUiAction(LobbyUiAction.SetReady)
-            }) {
-                Text("Ready")
-            }
-
-            Button(onClick = {
-                viewModel.onUiAction(LobbyUiAction.Disconnect)
-            }) {
-                Text("Disconnect from game")
+            Button(
+                modifier = Modifier.padding(bottom = 32.dp),
+                onClick = {
+                    viewModel.onUiAction(LobbyUiAction.Disconnect)
+                },
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = GameColors.ButtonPrimary,
+                    contentColor = GameColors.ButtonText
+                )
+            ) {
+                Text(
+                    "Disconnect from game",
+                    color = GameColors.ButtonText
+                )
             }
         }
     }
