@@ -38,7 +38,7 @@ object GameColors {
 
     // Text Colors
     val TextPrimary = Color(0xFFFFFFFF)
-    val TextSecondary = Color(0xB3FFFFFF)
+    val TextSecondary = Color(0xFF000000)
     val TextDisabled = Color(0x61FFFFFF)
     val TextOnCard = Color(0xFF2C2438)
 

@@ -119,7 +119,6 @@ class RoundViewModel(
                 _uiState.update { it.copy(timeRemaining = durationInSeconds - i - 1) }
             }
             _uiState.update { it.copy(isTimerRunning = false, timeRemaining = 0) }
-
         }
     }
 }
