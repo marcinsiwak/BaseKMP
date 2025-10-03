@@ -11,6 +11,9 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
 import pl.msiwak.common.model.Card
 import pl.msiwak.common.model.GameState
 import pl.msiwak.domain.game.ContinueGameUseCase
@@ -18,6 +21,9 @@ import pl.msiwak.domain.game.GetUserIdUseCase
 import pl.msiwak.domain.game.ObserveGameSessionUseCase
 import pl.msiwak.domain.game.SetCorrectAnswerUseCase
 import pl.msiwak.navigator.Navigator
+import kotlin.coroutines.cancellation.CancellationException
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 class RoundViewModel(
     private val observeGameSessionUseCase: ObserveGameSessionUseCase,
@@ -37,9 +43,6 @@ class RoundViewModel(
     init {
         viewModelScope.launch {
             observeGameSession()
-        }
-        viewModelScope.launch {
-            startCountdownTimer(3)
         }
     }
 
@@ -83,9 +86,12 @@ class RoundViewModel(
                         isPlayerRound = gameSession.currentPlayerId == getUserIdUseCase(),
                         currentCard = getRandomCard(),
                         currentPlayerName = players.find { player -> player.id == currentPlayerId }?.name ?: "",
-                        isRoundFinished = availableCards.isEmpty()
+                        isRoundFinished = availableCards.isEmpty().also { isEmpty ->
+                            if (isEmpty) timerJob?.cancel() else startCountdownTimer(currentRoundStartDate)
+                        }
                     )
                 }
+
                 when (gameState) {
                     GameState.TABOO -> _uiState.update { it.copy(text = "TABOO game") }
                     GameState.PUNS -> _uiState.update { it.copy(text = "PUNS game") }
@@ -107,18 +113,44 @@ class RoundViewModel(
         }
     }
 
-    private fun startCountdownTimer(durationInSeconds: Int) {
+    @OptIn(ExperimentalTime::class)
+    private fun startCountdownTimer(currentRoundStartDate: LocalDateTime?) {
         if (timerJob?.isActive == true) return
-        timerJob?.cancel()
 
-        _uiState.update { it.copy(timeRemaining = durationInSeconds, isTimerRunning = true) }
+        if (currentRoundStartDate == null) {
+            _uiState.update { it.copy(timeRemaining = 0, isTimerRunning = false) }
+            return
+        }
+
+
+        val roundDurationSeconds = 5
+
+        val currentTime = Clock.System.now()
+        val startInstant = currentRoundStartDate.toInstant(TimeZone.UTC)
+        val elapsedSeconds = (currentTime - startInstant).inWholeSeconds.toInt()
+        val remainingSeconds = (roundDurationSeconds - elapsedSeconds).coerceAtLeast(0)
+
+        if (remainingSeconds <= 0) {
+            _uiState.update { it.copy(timeRemaining = 0, isTimerRunning = false) }
+            return
+        }
+
+        _uiState.update { it.copy(timeRemaining = remainingSeconds, isTimerRunning = true) }
 
         timerJob = viewModelScope.launch {
-            repeat(durationInSeconds) { i ->
-                delay(1000)
-                _uiState.update { it.copy(timeRemaining = durationInSeconds - i - 1) }
+            runCatching {
+                repeat(remainingSeconds) { i ->
+                    delay(1000)
+                    val newTimeRemaining = remainingSeconds - i - 1
+                    _uiState.update { it.copy(timeRemaining = newTimeRemaining) }
+                }
+                _uiState.update { it.copy(isTimerRunning = false, timeRemaining = 0, isRoundFinished = true) }
+            }.onFailure { e ->
+                if (e is CancellationException) {
+                    _uiState.update { it.copy(isTimerRunning = false, timeRemaining = 0, isRoundFinished = true) }
+                    throw e
+                }
             }
-            _uiState.update { it.copy(isTimerRunning = false, timeRemaining = 0) }
         }
     }
 }

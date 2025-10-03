@@ -23,6 +23,8 @@ kotlin {
             implementation(projects.sharedFrontend.commonModel)
             implementation(libs.kotlinx.coroutines)
             implementation(libs.koin.core)
+
+            implementation(libs.kotlinx.datetime)
         }
     }
 }

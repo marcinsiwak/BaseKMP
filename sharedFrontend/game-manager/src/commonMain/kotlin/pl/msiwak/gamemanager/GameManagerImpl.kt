@@ -4,13 +4,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import pl.msiwak.common.model.Card
 import pl.msiwak.common.model.GameSession
 import pl.msiwak.common.model.GameState
 import pl.msiwak.common.model.Player
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
+@OptIn(ExperimentalTime::class)
 class GameManagerImpl : GameManager {
     private val _currentGameSession = MutableStateFlow<GameSession?>(null)
     override val currentGameSession: StateFlow<GameSession?> = _currentGameSession.asStateFlow()
@@ -128,10 +133,10 @@ class GameManagerImpl : GameManager {
         val gameSession = currentGameSession.value ?: return
         val currentGameState = gameSession.gameState
         when (currentGameState) {
-            GameState.TABOO_INFO -> _currentGameSession.update { it?.copy(gameState = (GameState.TABOO)) }
-            GameState.PUNS_INFO -> _currentGameSession.update { it?.copy(gameState = (GameState.PUNS)) }
-            GameState.TABOO_SHORT_INFO -> _currentGameSession.update { it?.copy(gameState = (GameState.TABOO_SHORT)) }
-            GameState.PUNS_SHORT_INFO -> _currentGameSession.update { it?.copy(gameState = (GameState.PUNS_SHORT)) }
+            GameState.TABOO_INFO -> _currentGameSession.update { it?.copy(gameState = GameState.TABOO, currentRoundStartDate = Clock.System.now().toLocalDateTime(TimeZone.UTC)) }
+            GameState.PUNS_INFO -> _currentGameSession.update { it?.copy(gameState = GameState.PUNS, currentRoundStartDate = Clock.System.now().toLocalDateTime(TimeZone.UTC)) }
+            GameState.TABOO_SHORT_INFO -> _currentGameSession.update { it?.copy(gameState = GameState.TABOO_SHORT, currentRoundStartDate = Clock.System.now().toLocalDateTime(TimeZone.UTC)) }
+            GameState.PUNS_SHORT_INFO -> _currentGameSession.update { it?.copy(gameState = GameState.PUNS_SHORT, currentRoundStartDate = Clock.System.now().toLocalDateTime(TimeZone.UTC)) }
             GameState.TABOO -> handleCardAvailabilityTransition(GameState.PUNS_INFO, GameState.TABOO_INFO)
             GameState.PUNS -> handleCardAvailabilityTransition(GameState.TABOO_SHORT_INFO, GameState.PUNS_INFO)
             GameState.TABOO_SHORT -> handleCardAvailabilityTransition(
@@ -155,15 +160,15 @@ class GameManagerImpl : GameManager {
                     currentPlayerId = it.nextPlayer(),
                     cards = it.cards.map { card -> card.copy(isAvailable = true) },
                     gameState = nextGameState,
+                    currentRoundStartDate = Clock.System.now().toLocalDateTime(TimeZone.UTC)
                 )
 
             } else {
                 it?.copy(
                     currentPlayerId = if (fallbackGameState == GameState.FINISHED) null else it.nextPlayer(),
                     gameState = fallbackGameState,
-                    teams = if (fallbackGameState == GameState.FINISHED) {
-                        it.teams.sortedByDescending { team -> team.score }
-                    } else it.teams
+                    teams = if (fallbackGameState == GameState.FINISHED) it.teams.sortedByDescending { team -> team.score } else it.teams,
+                    currentRoundStartDate = Clock.System.now().toLocalDateTime(TimeZone.UTC) // can be moved to if
                 )
             }
         }
