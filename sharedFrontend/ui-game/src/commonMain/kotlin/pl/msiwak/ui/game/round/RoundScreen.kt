@@ -1,31 +1,22 @@
 package pl.msiwak.ui.game.round
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import cardsthegame.sharedfrontend.common_resources.generated.resources.Res
-import cardsthegame.sharedfrontend.common_resources.generated.resources.ic_card
-import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
 import pl.msiwak.cardsthegame.common.resources.GameColors
+import pl.msiwak.ui.game.component.CardItem
 
 @Composable
 fun RoundScreen(viewModel: RoundViewModel = koinInject()) {
@@ -52,26 +43,10 @@ fun RoundScreen(viewModel: RoundViewModel = koinInject()) {
 
             if (viewState.isPlayerRound) {
                 viewState.currentCard?.text?.let {
-                    Box(
+                    CardItem(
                         modifier = Modifier.padding(vertical = 32.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Image(
-                            modifier = Modifier.wrapContentSize(),
-                            painter = painterResource(Res.drawable.ic_card),
-                            contentDescription = "Card Image"
-                        )
-
-                        Text(
-                            modifier = Modifier.matchParentSize()
-                                .wrapContentHeight()
-                                .padding(16.dp)
-                                .align(Alignment.Center),
-                            text = it,
-                            color = Color.Black,
-                            textAlign = TextAlign.Center
-                        )
-                    }
+                        text = it
+                    )
                 }
 
                 if (viewState.isTimerRunning) {

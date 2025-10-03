@@ -57,7 +57,7 @@ class GameService(
     suspend fun connectPlayer(playerName: String) = withContext(Dispatchers.IO) {
         deviceIpId = connectionManager.getLocalIpAddress()?.substringAfterLast(".")
             ?: throw Exception("Cannot get local IP address")
-        val ip = serverIp ?: throw Exception("Cannot find server IP")
+        val ip = serverIp ?: throw GameNotFoundException()
         scope.launch {
             connectPlayerToGame(playerName, ip)
         }

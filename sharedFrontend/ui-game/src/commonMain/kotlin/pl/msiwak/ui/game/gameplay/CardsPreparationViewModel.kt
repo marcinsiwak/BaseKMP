@@ -53,12 +53,9 @@ class CardsPreparationViewModel(
                             cardsPerPlayer
                         ),
                         cards = cards,
-                        isAnimationPlaying = true
+                        isAnimationPlaying = it.cards != cards
                     )
                 }
-//                if (gameState == GameState.TABOO_INFO) {
-//                    navigator.navigate(NavDestination.GameDestination.RoundInfoScreen)
-//                }
             }
         }
     }
