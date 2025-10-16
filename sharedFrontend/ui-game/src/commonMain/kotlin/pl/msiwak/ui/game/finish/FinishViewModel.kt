@@ -9,11 +9,14 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import pl.msiwak.destination.NavDestination
 import pl.msiwak.domain.game.ObserveGameSessionUseCase
+import pl.msiwak.navigator.Navigator
 import pl.msiwak.ui.game.TeamItem
 
 class FinishViewModel(
-    private val observeGameSessionUseCase: ObserveGameSessionUseCase
+    private val observeGameSessionUseCase: ObserveGameSessionUseCase,
+    private val navigator: Navigator
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(FinishViewState())
@@ -26,7 +29,9 @@ class FinishViewModel(
     }
 
     fun onUiAction(action: FinishUiAction) {
-
+        when (action) {
+            is FinishUiAction.OnPlayAgainClicked -> viewModelScope.launch { navigator.navigate(NavDestination.GameDestination.StartScreen) }
+        }
     }
 
     private suspend fun observeGameSession() {

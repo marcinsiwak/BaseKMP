@@ -15,12 +15,11 @@ import kotlin.time.ExperimentalTime
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
-@OptIn(ExperimentalTime::class)
+@OptIn(ExperimentalTime::class, ExperimentalUuidApi::class)
 class GameManagerImpl : GameManager {
     private val _currentGameSession = MutableStateFlow<GameSession?>(null)
     override val currentGameSession: StateFlow<GameSession?> = _currentGameSession.asStateFlow()
 
-    @OptIn(ExperimentalUuidApi::class)
     override suspend fun createGame(adminId: String, ipAddress: String?, gameSession: GameSession?) {
         if (gameSession != null) {
             _currentGameSession.value = gameSession.copy(
@@ -168,7 +167,7 @@ class GameManagerImpl : GameManager {
                     currentPlayerId = if (fallbackGameState == GameState.FINISHED) null else it.nextPlayer(),
                     gameState = fallbackGameState,
                     teams = if (fallbackGameState == GameState.FINISHED) it.teams.sortedByDescending { team -> team.score } else it.teams,
-                    currentRoundStartDate = Clock.System.now().toLocalDateTime(TimeZone.UTC) // can be moved to if
+                    currentRoundStartDate = Clock.System.now().toLocalDateTime(TimeZone.UTC)
                 )
             }
         }
