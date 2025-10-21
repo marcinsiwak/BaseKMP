@@ -41,7 +41,7 @@ class MainViewModel(
                     GameState.TABOO_SHORT -> navigator.navigate(NavDestination.GameDestination.RoundScreen)
                     GameState.PUNS_SHORT_INFO -> navigator.navigate(NavDestination.GameDestination.RoundInfoScreen)
                     GameState.PUNS_SHORT -> navigator.navigate(NavDestination.GameDestination.RoundScreen)
-                    GameState.FINISHED -> navigator.navigate(NavDestination.GameDestination.FinishScreen)
+                    GameState.SUMMARY -> navigator.navigate(NavDestination.GameDestination.FinishScreen)
                     else -> Unit
                 }
             }

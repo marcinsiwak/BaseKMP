@@ -1,7 +1,6 @@
 package pl.msiwak.network.service
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -97,8 +96,8 @@ class GameService(
 
     fun getUserId(): String = deviceIpId
 
-    suspend fun finishGame() = withContext(Dispatchers.IO) {
-        serverManager.stopServer()
-        scope.cancel()
-    }
+//    suspend fun finishGame() = withContext(Dispatchers.IO) {
+//        serverManager.stopServer()
+//        scope.cancel()
+//    }
 }

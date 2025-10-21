@@ -1,15 +1,21 @@
 package pl.msiwak.gamemanager
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import pl.msiwak.common.model.Card
 import pl.msiwak.common.model.GameSession
 import pl.msiwak.common.model.GameState
 import pl.msiwak.common.model.Player
+import pl.msiwak.common.model.dispatcher.Dispatchers
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import kotlin.uuid.ExperimentalUuidApi
@@ -19,6 +25,28 @@ import kotlin.uuid.Uuid
 class GameManagerImpl : GameManager {
     private val _currentGameSession = MutableStateFlow<GameSession?>(null)
     override val currentGameSession: StateFlow<GameSession?> = _currentGameSession.asStateFlow()
+
+    private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+
+    init {
+        scope.launch {
+            currentGameSession.collect { gameSession ->
+                if (gameSession?.gameState == GameState.SUMMARY) {
+                    delay(1000)
+                    _currentGameSession.update { it?.copy(gameState = GameState.FINISHED) }
+                    delay(1000)
+                    currentGameSession.value?.let {
+                        _currentGameSession.value =
+                            GameSession(
+                                gameId = Uuid.random().toString(),
+                                adminId = it.adminId,
+                                gameServerIpAddress = it.gameServerIpAddress
+                            )
+                    }
+                }
+            }
+        }
+    }
 
     override suspend fun createGame(adminId: String, ipAddress: String?, gameSession: GameSession?) {
         if (gameSession != null) {
@@ -132,18 +160,42 @@ class GameManagerImpl : GameManager {
         val gameSession = currentGameSession.value ?: return
         val currentGameState = gameSession.gameState
         when (currentGameState) {
-            GameState.TABOO_INFO -> _currentGameSession.update { it?.copy(gameState = GameState.TABOO, currentRoundStartDate = Clock.System.now().toLocalDateTime(TimeZone.UTC)) }
-            GameState.PUNS_INFO -> _currentGameSession.update { it?.copy(gameState = GameState.PUNS, currentRoundStartDate = Clock.System.now().toLocalDateTime(TimeZone.UTC)) }
-            GameState.TABOO_SHORT_INFO -> _currentGameSession.update { it?.copy(gameState = GameState.TABOO_SHORT, currentRoundStartDate = Clock.System.now().toLocalDateTime(TimeZone.UTC)) }
-            GameState.PUNS_SHORT_INFO -> _currentGameSession.update { it?.copy(gameState = GameState.PUNS_SHORT, currentRoundStartDate = Clock.System.now().toLocalDateTime(TimeZone.UTC)) }
-            GameState.TABOO -> handleCardAvailabilityTransition(GameState.PUNS_INFO, GameState.TABOO_INFO)
-            GameState.PUNS -> handleCardAvailabilityTransition(GameState.TABOO_SHORT_INFO, GameState.PUNS_INFO)
-            GameState.TABOO_SHORT -> handleCardAvailabilityTransition(
+            GameState.TABOO_INFO -> _currentGameSession.update {
+                it?.copy(
+                    gameState = GameState.TABOO,
+                    currentRoundStartDate = Clock.System.now().toLocalDateTime(TimeZone.UTC)
+                )
+            }
+
+            GameState.PUNS_INFO -> _currentGameSession.update {
+                it?.copy(
+                    gameState = GameState.PUNS,
+                    currentRoundStartDate = Clock.System.now().toLocalDateTime(TimeZone.UTC)
+                )
+            }
+
+            GameState.TABOO_SHORT_INFO -> _currentGameSession.update {
+                it?.copy(
+                    gameState = GameState.TABOO_SHORT,
+                    currentRoundStartDate = Clock.System.now().toLocalDateTime(TimeZone.UTC)
+                )
+            }
+
+            GameState.PUNS_SHORT_INFO -> _currentGameSession.update {
+                it?.copy(
+                    gameState = GameState.PUNS_SHORT,
+                    currentRoundStartDate = Clock.System.now().toLocalDateTime(TimeZone.UTC)
+                )
+            }
+
+            GameState.TABOO -> handleGameContinuation(GameState.PUNS_INFO, GameState.TABOO_INFO)
+            GameState.PUNS -> handleGameContinuation(GameState.TABOO_SHORT_INFO, GameState.PUNS_INFO)
+            GameState.TABOO_SHORT -> handleGameContinuation(
                 GameState.PUNS_SHORT_INFO,
                 GameState.TABOO_SHORT_INFO
             )
 
-            GameState.PUNS_SHORT -> handleCardAvailabilityTransition(GameState.FINISHED, GameState.PUNS_SHORT_INFO)
+            GameState.PUNS_SHORT -> handleGameContinuation(GameState.SUMMARY, GameState.PUNS_SHORT_INFO)
 
             else -> Unit
 //            GameState.PREPARING_CARDS -> TODO()
@@ -152,7 +204,7 @@ class GameManagerImpl : GameManager {
         }
     }
 
-    private fun handleCardAvailabilityTransition(nextGameState: GameState, fallbackGameState: GameState) {
+    private fun handleGameContinuation(nextGameState: GameState, fallbackGameState: GameState) {
         _currentGameSession.update {
             if (it?.cards?.all { card -> !card.isAvailable } == true) {
                 it.copy(
@@ -164,9 +216,9 @@ class GameManagerImpl : GameManager {
 
             } else {
                 it?.copy(
-                    currentPlayerId = if (fallbackGameState == GameState.FINISHED) null else it.nextPlayer(),
+                    currentPlayerId = if (fallbackGameState == GameState.SUMMARY) null else it.nextPlayer(),
                     gameState = fallbackGameState,
-                    teams = if (fallbackGameState == GameState.FINISHED) it.teams.sortedByDescending { team -> team.score } else it.teams,
+                    teams = if (fallbackGameState == GameState.SUMMARY) it.teams.sortedByDescending { team -> team.score } else it.teams,
                     currentRoundStartDate = Clock.System.now().toLocalDateTime(TimeZone.UTC)
                 )
             }

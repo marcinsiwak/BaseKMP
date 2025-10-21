@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 import pl.msiwak.common.model.GameSession
+import pl.msiwak.common.model.GameState
 import pl.msiwak.common.model.WebSocketEvent
 import pl.msiwak.gamemanager.GameManager
 
@@ -19,11 +20,15 @@ class ServerManager(
 
     suspend fun observeGameSession() {
         gameManager.currentGameSession.filterNotNull().collectLatest { gameSession ->
-            ktorServer.sendMessageToAll(
-                json.encodeToString<WebSocketEvent>(
-                    WebSocketEvent.ServerActions.UpdateGameSession(gameSession)
+            if (gameSession.gameState == GameState.FINISHED) {
+                ktorServer.closeAllSockets()
+            } else {
+                ktorServer.sendMessageToAll(
+                    json.encodeToString<WebSocketEvent>(
+                        WebSocketEvent.ServerActions.UpdateGameSession(gameSession)
+                    )
                 )
-            )
+            }
         }
     }
 
@@ -81,7 +86,7 @@ class ServerManager(
         gameManager.createGame(adminId, ipAddress, gameSession)
     }
 
-    fun stopServer() {
+    suspend fun stopServer() {
         ktorServer.stopServer()
     }
 

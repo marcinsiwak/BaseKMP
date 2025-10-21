@@ -30,5 +30,6 @@ enum class GameState {
     TABOO_SHORT,
     PUNS_SHORT_INFO,
     PUNS_SHORT,
-    FINISHED
+    SUMMARY,
+    FINISHED;
 }

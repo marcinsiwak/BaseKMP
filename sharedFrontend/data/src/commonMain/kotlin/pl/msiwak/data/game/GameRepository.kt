@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import pl.msiwak.common.model.GameSession
+import pl.msiwak.common.model.GameState
 import pl.msiwak.common.model.WebSocketEvent
 import pl.msiwak.network.service.GameService
 
@@ -37,7 +38,7 @@ class GameRepository(
     }
 
     suspend fun finishGame() {
-        gameService.finishGame()
+        gameService.disconnectPlayer()
     }
 
     suspend fun connectPlayer(playerName: String) {
@@ -56,6 +57,7 @@ class GameRepository(
 
     private suspend fun managePlayerConnection() {
         with(currentGameSession.value ?: return) {
+            if (gameState == GameState.SUMMARY)  return
             val currentPlayer = players.first { player -> player.id == gameService.getUserId() }
             findGame()?.let {
                 gameService.connectPlayer(currentPlayer.name)

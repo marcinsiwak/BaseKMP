@@ -48,7 +48,7 @@ fun FinishScreen(viewModel: FinishViewModel = koinInject()) {
                 }
             }
             Button(onClick = {
-
+                viewModel.onUiAction(FinishUiAction.OnPlayAgainClicked)
             }) {
                 Text(text = "Go to lobby")
             }

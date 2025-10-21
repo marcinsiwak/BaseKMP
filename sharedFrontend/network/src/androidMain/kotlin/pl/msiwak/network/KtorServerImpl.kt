@@ -39,12 +39,13 @@ class KtorServerImpl : KtorServer {
     override fun startServer(host: String, port: Int) {
         if (server != null) return
         server = embeddedServer(CIO, port = port, host = host) {
+
             configureServer()
         }.start(wait = true)
     }
 
-    override fun stopServer() {
-        server?.stop(1000, 2000)
+    override suspend fun stopServer() {
+        server?.stopSuspend(1000, 2000)
         server = null
         println("OUTPUT: Server stopped")
     }
@@ -110,6 +111,15 @@ class KtorServerImpl : KtorServer {
         mutex.withLock {
             activeSessions[userId]?.close(CloseReason(CloseReason.Codes.NORMAL, "Closed by server"))
             activeSessions.remove(userId)
+        }
+    }
+
+    override suspend fun closeAllSockets() {
+        mutex.withLock {
+            activeSessions.values.forEach {
+                it.close(CloseReason(CloseReason.Codes.NORMAL, "Closed by server"))
+            }
+            activeSessions.clear()
         }
     }
 }
