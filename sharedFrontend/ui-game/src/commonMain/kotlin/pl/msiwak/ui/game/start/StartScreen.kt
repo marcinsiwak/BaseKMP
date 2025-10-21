@@ -3,7 +3,6 @@ package pl.msiwak.ui.game.start
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,9 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
-import pl.msiwak.destination.NavDestination
 
 @Composable
 fun StartScreen(
@@ -72,31 +69,11 @@ fun StartScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                Button(
+                    onClick = { viewModel.onUiAction(StartUiAction.Join) },
+                    enabled = !state.value.isLoading && state.value.playerName.isNotBlank()
                 ) {
-                    Button(
-                        onClick = {
-                            scope.launch {
-                                viewModel.onUiAction(StartUiAction.CreateGame)
-                            }
-                        },
-                        modifier = Modifier.weight(1f),
-                        enabled = !state.value.isLoading && state.value.playerName.isNotBlank()
-                    ) {
-                        Text("Create Game")
-                    }
-
-                    Button(
-                        onClick = {
-                            viewModel.onUiAction(StartUiAction.JoinGame)
-                        },
-                        modifier = Modifier.weight(1f),
-                        enabled = !state.value.isLoading && state.value.playerName.isNotBlank()
-                    ) {
-                        Text("Join Game")
-                    }
+                    Text("Join")
                 }
 
                 Button(
