@@ -1,10 +1,11 @@
 package pl.msiwak.network
 
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
+import pl.msiwak.common.model.GameSession
+import pl.msiwak.common.model.GameState
 import pl.msiwak.common.model.WebSocketEvent
 import pl.msiwak.gamemanager.GameManager
 
@@ -19,49 +20,57 @@ class ServerManager(
 
     suspend fun observeGameSession() {
         gameManager.currentGameSession.filterNotNull().collectLatest { gameSession ->
-            ktorServer.sendMessageToAll(
-                json.encodeToString<WebSocketEvent>(
-                    WebSocketEvent.UpdateGameSession(gameSession)
+            if (gameSession.gameState == GameState.FINISHED) {
+                ktorServer.closeAllSockets()
+            } else {
+                ktorServer.sendMessageToAll(
+                    json.encodeToString<WebSocketEvent>(
+                        WebSocketEvent.ServerActions.UpdateGameSession(gameSession)
+                    )
                 )
-            )
+            }
         }
     }
 
     suspend fun observeMessages() {
         ktorServer.messages.map {
             if (it.startsWith("Client disconnected: ")) {
-                WebSocketEvent.PlayerClientDisconnected(it.substringAfter("Client disconnected: "))
+                WebSocketEvent.ClientActions.PlayerClientDisconnected(it.substringAfter("Client disconnected: "))
             } else {
                 json.decodeFromString<WebSocketEvent>(it)
             }
         }
-            .collect { event ->
+            .collectLatest { event ->
                 when (event) {
-                    is WebSocketEvent.PlayerConnected -> gameManager.joinGame(event.player)
+                    is WebSocketEvent.ClientActions.PlayerConnected -> gameManager.joinGame(event.player)
 
-                    is WebSocketEvent.PlayerClientDisconnected -> {
+                    is WebSocketEvent.ClientActions.PlayerClientDisconnected -> {
 //                        gameManager.leaveGame(event.id)
                         gameManager.disablePlayer(event.id)
                         ktorServer.closeSocker(event.id)
                     }
 
-                    is WebSocketEvent.GameLobby -> {
-                        gameManager.getGameSession()?.let {
-                            ktorServer.sendMessage(
-                                event.id,
-                                json.encodeToString<WebSocketEvent>(
-                                    WebSocketEvent.UpdateGameSession(it)
-                                )
-                            )
-                        }
-                    }
-
-                    is WebSocketEvent.UpdateGameSession -> {
+                    is WebSocketEvent.ServerActions.UpdateGameSession -> {
                         gameManager.getGameSession()?.let {
                             ktorServer.sendMessageToAll(
                                 json.encodeToString<WebSocketEvent>(event)
                             )
                         }
+                    }
+                    is WebSocketEvent.ClientActions.SetPlayerReady -> {
+                        gameManager.setPlayerReady(event.id)
+                    }
+                    is WebSocketEvent.ClientActions.AddCard -> {
+                        gameManager.addCardToGame(event.id, event.cardText)
+                    }
+                    is WebSocketEvent.ClientActions.ContinueGame -> {
+                        gameManager.continueGame()
+                    }
+                    is WebSocketEvent.ClientActions.JoinTeam -> {
+                        gameManager.joinTeam(event.id, event.teamName)
+                    }
+                    is WebSocketEvent.ClientActions.SetCorrectAnswer -> {
+                        gameManager.setCorrectAnswer(event.cardText)
                     }
 
                     else -> Unit
@@ -73,11 +82,11 @@ class ServerManager(
         ktorServer.startServer(host, port)
     }
 
-    suspend fun createGame(adminId: String, ipAddress: String?) {
-        gameManager.createGame(adminId, ipAddress)
+    suspend fun createGame(adminId: String, ipAddress: String?, gameSession: GameSession?) {
+        gameManager.createGame(adminId, ipAddress, gameSession)
     }
 
-    fun stopServer() {
+    suspend fun stopServer() {
         ktorServer.stopServer()
     }
 

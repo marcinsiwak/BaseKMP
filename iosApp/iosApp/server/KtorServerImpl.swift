@@ -28,8 +28,10 @@ class KtorServerImpl: KtorServer {
         httpServer.start(host: host, port: port)
     }
     
-    func stopServer() {
-        httpServer.server.stop()
+    func stopServer() async throws {
+        if(httpServer.server != nil) {
+            httpServer.server.stop()
+        }
     }
     
     func sendMessage(userId: String, message: String) async throws {
@@ -42,6 +44,10 @@ class KtorServerImpl: KtorServer {
 
     func sendMessageToAll(message: String) async throws {
         httpServer.sendMessageToAll(message: message)
+    }
+    
+    func closeAllSockets() async throws {
+        httpServer.closeAllSockets()
     }
 }
 
@@ -99,6 +105,13 @@ public extension HttpServer {
         if let socket = sockets[userId] {
             socket.close(immediately: false)               // graceful close (code 1000)
             sockets.removeValue(forKey: userId)
+        }
+    }
+
+    func closeAllSockets() {
+        sockets.forEach { (key: String, socket: any WebSocket) in
+            socket.close(immediately: false)
+            sockets.removeValue(forKey: key)
         }
     }
 }

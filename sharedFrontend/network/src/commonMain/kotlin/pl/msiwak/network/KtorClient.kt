@@ -46,13 +46,12 @@ class KtorClient(engine: EngineProvider) {
             port = port,
             path = "/ws?id=${player.id}"
         ) {
-            send(json.encodeToString<WebSocketEvent>(WebSocketEvent.PlayerConnected(player)))
+            send(json.encodeToString<WebSocketEvent>(WebSocketEvent.ClientActions.PlayerConnected(player)))
             launch {
                 webSocketClientEvent.collect { message ->
                     when (message) {
-                        is WebSocketEvent.PlayerClientDisconnected, is WebSocketEvent.GameLobby -> {
-                            send(json.encodeToString<WebSocketEvent>(message))
-                        }
+                        is WebSocketEvent.ClientActions -> send(json.encodeToString<WebSocketEvent>(message))
+
                         else -> Unit
                     }
                 }
@@ -85,21 +84,20 @@ class KtorClient(engine: EngineProvider) {
             when (it) {
                 is ClosedReceiveChannelException -> {
                     when (val reason = closeReason.await()?.knownReason) {
-                        CloseReason.Codes.GOING_AWAY -> {
+                        CloseReason.Codes.GOING_AWAY, CloseReason.Codes.NORMAL -> {
                             println("OUTPUT: Connection closed normally player disconnected")
                         }
 
-                        CloseReason.Codes.CLOSED_ABNORMALLY -> {
-                            println("OUTPUT: Connection closed abnormally")
-                            _webSocketEvent.emit(WebSocketEvent.ServerDown)
+                        else -> {
+                            println("OUTPUT: Connection closed with reason: $reason")
+                            _webSocketEvent.emit(WebSocketEvent.ClientActions.ServerDownDetected)
                         }
-
-                        else -> println("OUTPUT: Connection closed with reason: $reason")
                     }
                 }
+
                 is CancellationException -> {
                     println("OUTPUT: listenForResponse cancelled: ${it.message}")
-                    _webSocketEvent.emit(WebSocketEvent.ServerDown)
+                    _webSocketEvent.emit(WebSocketEvent.ClientActions.ServerDownDetected)
                 }
 
                 else -> println("OUTPUT: Error in listenForResponse: ${it.message}")
@@ -108,7 +106,7 @@ class KtorClient(engine: EngineProvider) {
     }
 
     suspend fun disconnect(playerId: String) {
-        val event: WebSocketEvent = WebSocketEvent.PlayerClientDisconnected(playerId)
+        val event: WebSocketEvent = WebSocketEvent.ClientActions.PlayerClientDisconnected(playerId)
         _webSocketClientEvent.emit(event)
     }
 }

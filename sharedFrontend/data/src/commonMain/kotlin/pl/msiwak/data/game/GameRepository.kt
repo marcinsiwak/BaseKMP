@@ -3,8 +3,10 @@ package pl.msiwak.data.game
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import pl.msiwak.common.model.GameSession
+import pl.msiwak.common.model.GameState
 import pl.msiwak.common.model.WebSocketEvent
 import pl.msiwak.network.service.GameService
 
@@ -15,23 +17,14 @@ class GameRepository(
     val currentGameSession: StateFlow<GameSession?> = _currentGameSession.asStateFlow()
 
     suspend fun observeWebSocketEvents() {
-        gameService.observeWebSocketEvents().collect {
+        gameService.observeWebSocketEvents().collectLatest {
             when (it) {
-                is WebSocketEvent.UpdateGameSession -> _currentGameSession.value = it.gameSession
-                WebSocketEvent.ServerDown -> {
-                    with(currentGameSession.value ?: return@collect) {
-                        val currentPlayer = players.first { player -> player.id == gameService.getUserId() }
-                        val playerToBeAdmin = players.first { player -> player.id != adminId }
-                        if (playerToBeAdmin.id == currentPlayer.id) {
-                            gameService.createGame(playerToBeAdmin.name)
-                        } else {
-                            findGame()
-                            gameService.connectPlayer(currentPlayer.name)
-                        }
-                    }
+                is WebSocketEvent.ServerActions.UpdateGameSession -> {
+                    _currentGameSession.value = it.gameSession
                 }
+                WebSocketEvent.ClientActions.ServerDownDetected -> managePlayerConnection()
 
-                else -> {}
+                else -> Unit
             }
         }
     }
@@ -45,7 +38,7 @@ class GameRepository(
     }
 
     suspend fun finishGame() {
-        gameService.finishGame()
+        gameService.disconnectPlayer()
     }
 
     suspend fun connectPlayer(playerName: String) {
@@ -61,4 +54,22 @@ class GameRepository(
     }
 
     suspend fun sendClientEvent(webSocketEvent: WebSocketEvent) = gameService.sendClientEvent(webSocketEvent)
+
+    private suspend fun managePlayerConnection() {
+        with(currentGameSession.value ?: return) {
+            if (gameState == GameState.SUMMARY)  return
+            val currentPlayer = players.first { player -> player.id == gameService.getUserId() }
+            findGame()?.let {
+                gameService.connectPlayer(currentPlayer.name)
+                return
+            }
+            val playerToBeAdmin = players.first { player -> player.id != adminId }
+            if (playerToBeAdmin.id == currentPlayer.id) {
+                gameService.createGame(playerToBeAdmin.name, this)
+            } else {
+                findGame()
+                gameService.connectPlayer(currentPlayer.name)
+            }
+        }
+    }
 }

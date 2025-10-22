@@ -6,26 +6,38 @@ import kotlinx.serialization.Serializable
 sealed class WebSocketEvent() {
 
     @Serializable
-    data class UpdateGameSession(val gameSession: GameSession) : WebSocketEvent()
+    sealed class ClientActions : WebSocketEvent() {
+
+        // connection events
+        @Serializable
+        data class PlayerConnected(val player: Player) : ClientActions()
+
+        @Serializable
+        data class PlayerClientDisconnected(val id: String) : ClientActions()
+
+        @Serializable
+        data object ServerDownDetected : ClientActions()
+
+        // game events
+        @Serializable
+        data class SetPlayerReady(val id: String) : ClientActions()
+
+        @Serializable
+        data class JoinTeam(val id: String, val teamName: String) : ClientActions()
+
+        @Serializable
+        data class AddCard(val id: String, val cardText: String) : ClientActions()
+
+        @Serializable
+        data class SetCorrectAnswer(val cardText: String) : ClientActions()
+
+        @Serializable
+        data object ContinueGame : ClientActions()
+    }
 
     @Serializable
-    data class PlayerConnected(val player: Player) : WebSocketEvent()
-
-    @Serializable
-    data class DisplayCurrentUsers(val currentPlayers: List<Player>) : WebSocketEvent()
-
-    @Serializable
-    data class PlayerDisconnected(val currentPlayers: List<Player>) : WebSocketEvent()
-
-    @Serializable
-    data class PlayerClientDisconnected(val id: String) : WebSocketEvent()
-
-    @Serializable
-    data object Error : WebSocketEvent()
-
-    @Serializable
-    data class GameLobby(val id: String) : WebSocketEvent()
-
-    @Serializable
-    data object ServerDown : WebSocketEvent()
+    sealed class ServerActions : WebSocketEvent() {
+        @Serializable
+        data class UpdateGameSession(val gameSession: GameSession) : ServerActions()
+    }
 }

@@ -29,6 +29,7 @@ class StartViewModel(
         _uiState.update { it.copy(isLoading = false) }
     }
     private var findGameJob: Job? = null
+    private var joinJob: Job? = null
 
     init {
         findGame()
@@ -44,6 +45,18 @@ class StartViewModel(
             is StartUiAction.OnPlayerNameChanged -> updatePlayerName(action.name)
             is StartUiAction.JoinGame -> joinGame()
             is StartUiAction.Refresh -> findGame()
+            is StartUiAction.Join -> join()
+        }
+    }
+
+    private fun join() {
+        if (joinJob?.isActive == true) return
+        joinJob = viewModelScope.launch(errorHandler) {
+            findGameIPAddressUseCase()?.let {
+                joinGame()
+            } ?: run {
+                createGame()
+            }
         }
     }
 
@@ -60,7 +73,7 @@ class StartViewModel(
             _uiState.update { it.copy(isLoading = true) }
             createGameUseCase(uiState.value.playerName)
             _uiState.update { it.copy(isLoading = false) }
-            navigator.navigate(NavDestination.GameDestination.GameScreen)
+            navigator.navigate(NavDestination.GameDestination.LobbyScreen)
         }
     }
 
@@ -71,7 +84,7 @@ class StartViewModel(
                 playerName = uiState.value.playerName
             )
             _uiState.update { it.copy(isLoading = false) }
-            navigator.navigate(NavDestination.GameDestination.GameScreen)
+            navigator.navigate(NavDestination.GameDestination.LobbyScreen)
         }
     }
 

@@ -7,23 +7,21 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import pl.msiwak.common.model.WebSocketEvent
 import pl.msiwak.domain.game.DisconnectUseCase
-import pl.msiwak.domain.game.GetUserIdUseCase
+import pl.msiwak.domain.game.JoinTeamUseCase
 import pl.msiwak.domain.game.ObserveGameSessionUseCase
-import pl.msiwak.domain.game.ObserveWebSocketEventsUseCase
-import pl.msiwak.domain.game.SendClientEventUseCase
+import pl.msiwak.domain.game.SetPlayerReadyUseCase
 import pl.msiwak.navigator.Navigator
 
 class LobbyViewModel(
-    private val observeWebSocketEventsUseCase: ObserveWebSocketEventsUseCase,
     private val disconnectUseCase: DisconnectUseCase,
-    private val sendClientEventUseCase: SendClientEventUseCase,
-    private val getUserIdUseCase: GetUserIdUseCase,
     private val observeGameSessionUseCase: ObserveGameSessionUseCase,
-    private val navigator: Navigator
+    private val navigator: Navigator,
+    private val setPlayerReadyUseCase: SetPlayerReadyUseCase,
+    private val joinTeamUseCase: JoinTeamUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LobbyState())
@@ -35,12 +33,7 @@ class LobbyViewModel(
 
     init {
         viewModelScope.launch(errorHandler) {
-//            launch {
-//                observeWebSocketEventsUseCase()
-//            }
-            launch {
-                observeGameSession()
-            }
+            launch { observeGameSession() }
         }
     }
 
@@ -54,12 +47,39 @@ class LobbyViewModel(
                 disconnectUseCase()
                 navigator.navigateUp()
             }
+
+            LobbyUiAction.SetReady -> viewModelScope.launch(errorHandler) {
+                setPlayerReadyUseCase()
+            }
+
+            is LobbyUiAction.JoinTeam -> viewModelScope.launch {
+                joinTeamUseCase(action.teamName)
+            }
         }
     }
 
     private suspend fun observeGameSession() {
-        observeGameSessionUseCase().collectLatest { gameSession ->
-            _uiState.update { it.copy(players = gameSession?.players ?: emptyList(), gameIpAddress = gameSession?.gameServerIpAddress) }
+        observeGameSessionUseCase().filterNotNull().collectLatest { gameSession ->
+            with(gameSession) {
+                _uiState.update {
+                    it.copy(
+                        playersWithoutTeam = players.filter { player ->
+                            teams.none { team ->
+                                team.playerIds.contains(
+                                    player.id
+                                )
+                            }
+                        },
+                        gameIpAddress = gameServerIpAddress,
+                        teams = teams.map { team ->
+                            TeamItem(
+                                team.name,
+                                players.filter { player -> team.playerIds.contains(player.id) }
+                            )
+                        }
+                    )
+                }
+            }
         }
     }
 }
