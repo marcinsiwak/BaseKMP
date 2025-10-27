@@ -17,6 +17,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.koin.compose.koinInject
@@ -27,11 +28,11 @@ fun RoundInfoScreen(viewModel: RoundInfoViewModel = koinInject()) {
 
     val viewState = viewModel.uiState.collectAsState().value
 
-    Scaffold { paddingValues ->
+    Scaffold(
+        backgroundColor = Color.Transparent
+    ) { paddingValues ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(GameColors.Background),
+            modifier = Modifier.fillMaxSize(),
             horizontalAlignment = CenterHorizontally,
             verticalArrangement = Center
         ) {

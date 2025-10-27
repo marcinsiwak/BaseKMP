@@ -4,7 +4,7 @@ import androidx.compose.ui.graphics.Color
 
 object GameColors {
     // Primary Colors
-    val Primary = Color(0xFF6B5B95)
+    val Primary = Color(0xFF555555)
     val PrimaryVariant = Color(0xFF5A4A7C)
     val OnPrimary = Color(0xFFFFFFFF)
 
@@ -43,9 +43,9 @@ object GameColors {
     val TextOnCard = Color(0xFF2C2438)
 
     // Button Colors
-    val ButtonPrimary = Color(0xFF6B5B95)
+    val ButtonPrimary = Color(0xFF555555)
     val ButtonSecondary = Color(0xFF8B7B9B)
-    val ButtonDisabled = Color(0xFF5A5269)
+    val ButtonDisabled = Color(0xFF777777)
     val ButtonText = Color(0xFFFFFFFF)
     val ButtonTextDisabled = Color(0x61FFFFFF)
 

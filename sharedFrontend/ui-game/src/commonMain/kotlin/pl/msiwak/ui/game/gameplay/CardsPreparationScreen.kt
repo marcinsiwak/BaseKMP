@@ -38,6 +38,7 @@ import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.dp
 import cardsthegame.sharedfrontend.common_resources.generated.resources.Res
@@ -62,7 +63,7 @@ fun CardsPreparationScreen(viewModel: CardsPreparationViewModel = koinInject()) 
 
     val composition by rememberLottieComposition {
         LottieCompositionSpec.JsonString(
-            Res.readBytes("files/bowl_shake_1.json").decodeToString()
+            Res.readBytes("files/bowl_shake.json").decodeToString()
         )
     }
     val progress by animateLottieCompositionAsState(
@@ -86,13 +87,13 @@ fun CardsPreparationScreen(viewModel: CardsPreparationViewModel = koinInject()) 
     }
 
     Scaffold(
-        modifier = Modifier.imePadding()
+        modifier = Modifier.imePadding(),
+        backgroundColor = Color.Transparent
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .background(GameColors.Background)
                 .padding(top = 32.dp)
                 .onSizeChanged {
                     coroutineScope.launch {

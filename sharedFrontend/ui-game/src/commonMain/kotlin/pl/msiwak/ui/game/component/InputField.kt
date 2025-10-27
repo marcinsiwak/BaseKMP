@@ -1,17 +1,23 @@
 package pl.msiwak.ui.game.component
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
-import androidx.compose.material.TextFieldDefaults
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import cardsthegame.sharedfrontend.common_resources.generated.resources.Res
+import cardsthegame.sharedfrontend.common_resources.generated.resources.img_background
+import cardsthegame.sharedfrontend.common_resources.generated.resources.img_input_background
+import org.jetbrains.compose.resources.painterResource
 
 
 val PlaceholderTextColor = Color(0xFF888888) // Medium gray for placeholder
@@ -25,31 +31,23 @@ fun InputField(
     placeholder: String,
     enabled: Boolean = true
 ) {
-    TextField(
-        value = value,
-        onValueChange = onValueChange,
-        placeholder = {
-            Text(
-                text = placeholder,
-                color = PlaceholderTextColor,
-                fontSize = 16.sp // Adjust font size as needed
-            )
-        },
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 32.dp) // Example padding from screen edges
-            .clip(RoundedCornerShape(24.dp)), // Rounded corners for the entire field
-        singleLine = true,
-        colors = TextFieldDefaults.textFieldColors(
-            backgroundColor = Color.White,
-            textColor = InputTextColor,
-            cursorColor = InputTextColor, // Color of the blinking cursor
-            focusedIndicatorColor = Color.Transparent, // Removes default underline
-            unfocusedIndicatorColor = Color.Transparent, // Removes default underline
-            errorIndicatorColor = Color.Transparent,
-            disabledIndicatorColor = Color.Transparent
-        ),
-        enabled = enabled,
-        shape = RoundedCornerShape(24.dp) // Redundant with clip, but good for consistency
-    )
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center
+    ) {
+        Image(
+            modifier = Modifier.wrapContentSize(),
+            painter = painterResource(Res.drawable.img_input_background),
+            contentDescription = null
+        )
+
+        BasicTextField(
+            modifier = Modifier.matchParentSize()
+                .wrapContentHeight()
+                .padding(24.dp)
+                .align(Alignment.Center),
+            value = value,
+            onValueChange = onValueChange
+        )
+    }
 }

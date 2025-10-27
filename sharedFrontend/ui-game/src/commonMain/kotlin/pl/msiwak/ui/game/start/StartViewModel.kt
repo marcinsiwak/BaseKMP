@@ -52,11 +52,13 @@ class StartViewModel(
     private fun join() {
         if (joinJob?.isActive == true) return
         joinJob = viewModelScope.launch(errorHandler) {
+            _uiState.update { it.copy(isLoading = true) }
             findGameIPAddressUseCase()?.let {
                 joinGame()
             } ?: run {
                 createGame()
             }
+            _uiState.update { it.copy(isLoading = false) }
         }
     }
 
