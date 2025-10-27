@@ -1,6 +1,5 @@
 package pl.msiwak.ui.game.round
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import org.koin.compose.koinInject
 import pl.msiwak.cardsthegame.common.resources.GameColors
 import pl.msiwak.ui.game.component.CardItem
+import pl.msiwak.ui.game.component.CustomButton
 
 @Composable
 fun RoundScreen(viewModel: RoundViewModel = koinInject()) {
@@ -36,11 +36,11 @@ fun RoundScreen(viewModel: RoundViewModel = koinInject()) {
         ) {
             Text(
                 text = viewState.text,
-                color = GameColors.TextPrimary
+                color = GameColors.OnPrimary
             )
             Text(
                 text = "Time: ${viewState.timeRemaining}",
-                color = GameColors.TextPrimary
+                color = GameColors.OnPrimary
             )
 
             if (viewState.isPlayerRound) {
@@ -53,58 +53,34 @@ fun RoundScreen(viewModel: RoundViewModel = koinInject()) {
 
                 if (viewState.isTimerRunning) {
 
-                    Button(
-                        modifier = Modifier.padding(top = 16.dp),
+                    CustomButton(
+                        modifier = Modifier.padding(16.dp),
                         onClick = {
                             viewModel.onUiAction(RoundUiAction.OnCorrectClick)
                         },
-                        colors = androidx.compose.material.ButtonDefaults.buttonColors(
-                            backgroundColor = GameColors.ButtonPrimary,
-                            contentColor = GameColors.ButtonText
-                        )
-                    ) {
-                        Text(
-                            text = "Correct",
-                            color = GameColors.ButtonText
-                        )
-                    }
+                        text = "Correct"
+                    )
 
-                    Button(
-                        modifier = Modifier.padding(top = 16.dp),
+                    CustomButton(
+                        modifier = Modifier.padding(horizontal = 16.dp),
                         onClick = {
                             viewModel.onUiAction(RoundUiAction.OnSkipClick)
                         },
-                        colors = ButtonDefaults.buttonColors(
-                            backgroundColor = GameColors.ButtonSecondary,
-                            contentColor = GameColors.ButtonText
-                        )
-                    ) {
-                        Text(
-                            text = "Skip",
-                            color = GameColors.ButtonText
-                        )
-                    }
+                        text = "Skip"
+                    )
                 } else {
-                    Button(
-                        modifier = Modifier.padding(top = 16.dp),
+                    CustomButton(
+                        modifier = Modifier.padding(16.dp),
                         onClick = {
                             viewModel.onUiAction(RoundUiAction.OnRoundFinished)
                         },
-                        colors = ButtonDefaults.buttonColors(
-                            backgroundColor = GameColors.ButtonPrimary,
-                            contentColor = GameColors.ButtonText
-                        )
-                    ) {
-                        Text(
-                            text = "Finish",
-                            color = GameColors.ButtonText
-                        )
-                    }
+                        text = "Finish Round"
+                    )
                 }
             } else {
                 Text(
                     text = "${viewState.currentPlayerName} TURN",
-                    color = GameColors.TextPrimary
+                    color = GameColors.OnPrimary
                 )
             }
         }

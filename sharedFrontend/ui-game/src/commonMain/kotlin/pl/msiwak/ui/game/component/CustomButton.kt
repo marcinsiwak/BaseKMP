@@ -3,6 +3,7 @@ package pl.msiwak.ui.game.component
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
@@ -25,23 +26,14 @@ fun CustomButton(
     enabled: Boolean = true,
     text: String
 ) {
-    Box(
-        modifier = modifier,
-        contentAlignment = Alignment.Center
-    ) {
-        Image(
-            modifier = Modifier.wrapContentSize(),
-            painter = painterResource(Res.drawable.img_item_backround),
-            contentDescription = null
-        )
-
+    CustomBackground(
+        modifier = modifier
+    ) { contentHeight ->
         Text(
-            modifier = Modifier.matchParentSize()
-                .wrapContentHeight()
-                .align(Alignment.Center)
+            modifier = Modifier.fillMaxWidth()
                 .clip(RoundedCornerShape(24.dp))
                 .clickable { onClick() }
-                .padding(vertical = 16.dp)
+                .padding(vertical = contentHeight / 4)
             ,
             text = text,
             textAlign = Center

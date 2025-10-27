@@ -16,6 +16,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.koinInject
 import pl.msiwak.cardsthegame.common.resources.GameLightColorScheme
+import pl.msiwak.cardsthegame.common.resources.MyTypography
 import pl.msiwak.navigation.AppNavHost
 import pl.msiwak.navigator.NavigationEvent
 
@@ -34,7 +35,8 @@ fun App(
         }
     }
     MaterialTheme(
-        colors = GameLightColorScheme
+        colors = GameLightColorScheme,
+        typography = MyTypography()
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             Image(

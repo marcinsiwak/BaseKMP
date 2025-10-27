@@ -4,12 +4,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -30,39 +32,50 @@ fun TeamItemComponent(
     players: List<Player>,
     onClick: (() -> Unit) = {}
 ) {
-    Column(
+    CustomBackground(
         modifier = modifier
-            .fillMaxWidth()
-            .defaultMinSize(minHeight = 120.dp)
-            .clip(RoundedCornerShape(24.dp))
-            .clickable {
-                onClick()
-            }
-            .border(1.dp, Color.Black, RoundedCornerShape(24.dp))
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        Text(
-            text = teamName,
-            color = Color.White,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-
-        FlowRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start),
+        Box(
+            Modifier.fillMaxWidth()
         ) {
-            players.forEachIndexed { index, player ->
-                TeamPlayerItemComponent(
-                    playerName = player.name,
-//                    avatarIcon = avatarIcon,
-                    backgroundColor = Color.Transparent
-                )
-            }
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .defaultMinSize(minHeight = 140.dp)
+                    .padding(vertical = 12.dp)
+                    .clip(RoundedCornerShape(42.dp))
+                    .clickable { onClick() }
+                    .padding(vertical = 16.dp)
+                    .align(Alignment.Center),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
 
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start),
+                    verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.Top)
+                ) {
+                    (players + players + players + players + players).forEachIndexed { index, player ->
+                        TeamPlayerItemComponent(
+                            playerName = player.name,
+//                    avatarIcon = avatarIcon,
+                            backgroundColor = Color.Transparent
+                        )
+                    }
+
+                }
+            }
+            Text(
+                modifier = Modifier
+                    .padding(start = 4.dp, top = 4.dp)
+                    .background(Color.Black, shape = CircleShape)
+                    .padding(horizontal = 8.dp)
+                    .align(Alignment.TopStart),
+                text = teamName,
+                fontSize = 12.sp,
+                color = Color.White
+            )
         }
     }
 }
@@ -92,9 +105,8 @@ fun TeamPlayerItemComponent(
 
         Text(
             text = playerName,
-            color = Color.White,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Medium
+            color = Color.Black,
+            fontSize = 12.sp
         )
     }
 }

@@ -6,7 +6,7 @@ object GameColors {
     // Primary Colors
     val Primary = Color(0xFF555555)
     val PrimaryVariant = Color(0xFF5A4A7C)
-    val OnPrimary = Color(0xFFFFFFFF)
+    val OnPrimary = Color.Black
 
     // Secondary Colors
     val Secondary = Color(0xFF8B7B9B)

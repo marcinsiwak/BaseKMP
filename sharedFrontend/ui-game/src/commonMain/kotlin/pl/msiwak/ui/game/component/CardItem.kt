@@ -14,6 +14,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import cardsthegame.sharedfrontend.common_resources.generated.resources.Res
 import cardsthegame.sharedfrontend.common_resources.generated.resources.ic_card
+import cardsthegame.sharedfrontend.common_resources.generated.resources.img_input_background
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
@@ -24,7 +25,7 @@ fun CardItem(modifier: Modifier = Modifier, text: String) {
     ) {
         Image(
             modifier = Modifier.wrapContentSize(),
-            painter = painterResource(Res.drawable.ic_card),
+            painter = painterResource(Res.drawable.img_input_background),
             contentDescription = null
         )
 

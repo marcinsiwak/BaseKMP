@@ -7,9 +7,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Button
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -21,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import org.koin.compose.koinInject
 import pl.msiwak.cardsthegame.common.resources.GameColors
+import pl.msiwak.ui.game.component.CustomButton
 import pl.msiwak.ui.game.component.TeamItemComponent
 
 @Composable
@@ -45,7 +43,7 @@ fun LobbyScreen(
 
             state.value.teams.fastForEach {
                 TeamItemComponent(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    modifier = Modifier.padding(horizontal = 16.dp),
                     teamName = it.name,
                     players = it.players
                 ) {
@@ -74,22 +72,18 @@ fun LobbyScreen(
                 state.value.playersWithoutTeam.fastForEach {
                     Text(
                         text = it.name,
-                        color = GameColors.OnPrimary
+                        color = Color.Black
                     )
                 }
             }
-            Button(
-                shape = CircleShape,
-                modifier = Modifier.padding(vertical = 36.dp).size(120.dp),
+
+            CustomButton(
+                modifier = Modifier.padding(vertical = 36.dp, horizontal = 16.dp),
                 onClick = {
                     viewModel.onUiAction(LobbyUiAction.SetReady)
-                }
-            ) {
-                Text(
-                    "Ready",
-                    color = GameColors.ButtonText
-                )
-            }
+                },
+                text = "Ready"
+            )
         }
     }
 }
