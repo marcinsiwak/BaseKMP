@@ -2,6 +2,8 @@ package pl.msiwak.ui.game.component
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
@@ -38,11 +40,12 @@ fun InputField(
         BasicTextField(
             modifier = Modifier.matchParentSize()
                 .wrapContentHeight()
-                .padding(24.dp)
+                .padding(horizontal = 16.dp)
                 .align(Alignment.Center),
             value = value,
             onValueChange = onValueChange,
-            textStyle = LocalTextStyle.current
+            textStyle = LocalTextStyle.current,
+            maxLines = 1
         )
     }
 }

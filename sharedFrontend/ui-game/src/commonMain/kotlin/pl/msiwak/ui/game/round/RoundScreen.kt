@@ -15,6 +15,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import cardsthegame.sharedfrontend.common_resources.generated.resources.Res
 import cardsthegame.sharedfrontend.common_resources.generated.resources.img_incorrect_button
@@ -22,7 +23,6 @@ import cardsthegame.sharedfrontend.common_resources.generated.resources.img_inco
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
 import pl.msiwak.cardsthegame.common.resources.GameColors
-import pl.msiwak.ui.game.component.CardItem
 import pl.msiwak.ui.game.component.CustomButton
 import pl.msiwak.ui.game.component.CustomClickButton
 
@@ -42,7 +42,7 @@ fun RoundScreen(viewModel: RoundViewModel = koinInject()) {
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = viewState.text,
+                text = "Round ${viewState.round}",
                 color = GameColors.OnPrimary,
                 style = MaterialTheme.typography.h3
             )
@@ -50,17 +50,28 @@ fun RoundScreen(viewModel: RoundViewModel = koinInject()) {
             Spacer(modifier = Modifier.weight(1f))
 
             Text(
-                modifier = Modifier.padding(16.dp),
-                text = "Time: ${viewState.timeRemaining}",
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 24.dp),
+                text = if (viewState.timeRemaining > 0) "Time: ${viewState.timeRemaining}" else "Time's up!",
                 color = GameColors.OnPrimary,
                 style = MaterialTheme.typography.h4
             )
 
             if (viewState.isPlayerRound) {
                 viewState.currentCard?.text?.let {
-                    CardItem(
-                        modifier = Modifier.padding(vertical = 32.dp),
-                        text = it
+                    Text(
+                        modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
+                        text = "Your card:",
+                        color = GameColors.OnPrimary,
+                        style = MaterialTheme.typography.h4,
+                        textAlign = TextAlign.Center
+                    )
+
+                    Text(
+                        modifier = Modifier.padding(vertical = 24.dp, horizontal = 24.dp),
+                        text = it,
+                        color = GameColors.OnPrimary,
+                        style = MaterialTheme.typography.h4,
+                        textAlign = TextAlign.Center
                     )
                 }
 
@@ -82,14 +93,6 @@ fun RoundScreen(viewModel: RoundViewModel = koinInject()) {
                             imagePressed = painterResource(Res.drawable.img_incorrect_button_pressed)
                         )
                     }
-                } else {
-                    CustomButton(
-                        modifier = Modifier.padding(16.dp),
-                        onClick = {
-                            viewModel.onUiAction(RoundUiAction.OnRoundFinished)
-                        },
-                        text = "Finish Round"
-                    )
                 }
             } else {
                 Text(
@@ -98,6 +101,15 @@ fun RoundScreen(viewModel: RoundViewModel = koinInject()) {
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
+            if (!viewState.isTimerRunning) {
+                CustomButton(
+                    modifier = Modifier.padding(24.dp),
+                    onClick = {
+                        viewModel.onUiAction(RoundUiAction.OnRoundFinished)
+                    },
+                    text = "Finish Round"
+                )
+            }
         }
     }
 }

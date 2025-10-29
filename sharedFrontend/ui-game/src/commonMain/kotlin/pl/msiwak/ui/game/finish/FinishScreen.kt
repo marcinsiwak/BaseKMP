@@ -3,9 +3,11 @@ package pl.msiwak.ui.game.finish
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -37,7 +39,8 @@ fun FinishScreen(viewModel: FinishViewModel = koinInject()) {
             Text(
                 modifier = Modifier.padding(bottom = 16.dp),
                 text = "SCOREBOARD",
-                color = GameColors.OnPrimary
+                color = GameColors.OnPrimary,
+                style = MaterialTheme.typography.h3
             )
             viewState.teams?.fastForEach {
                 Text(
@@ -53,8 +56,10 @@ fun FinishScreen(viewModel: FinishViewModel = koinInject()) {
                 }
             }
 
+            Spacer(modifier = Modifier.weight(1f))
+
             CustomButton(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 32.dp),
+                modifier = Modifier.padding(horizontal = 24.dp, vertical = 32.dp),
                 onClick = {
                     viewModel.onUiAction(FinishUiAction.OnPlayAgainClicked)
                 },

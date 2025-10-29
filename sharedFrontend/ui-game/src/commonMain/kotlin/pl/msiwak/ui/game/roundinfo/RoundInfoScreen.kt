@@ -34,7 +34,7 @@ fun RoundInfoScreen(viewModel: RoundInfoViewModel = koinInject()) {
             verticalArrangement = Center
         ) {
             Text(
-                text = "Round: ${viewState.round}",
+                text = "Round ${viewState.round}",
                 color = GameColors.OnPrimary,
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.h3

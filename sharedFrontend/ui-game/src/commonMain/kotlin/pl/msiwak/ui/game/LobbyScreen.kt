@@ -80,7 +80,7 @@ fun LobbyScreen(
             }
 
             CustomButton(
-                modifier = Modifier.padding(vertical = 36.dp, horizontal = 16.dp),
+                modifier = Modifier.padding(vertical = 36.dp, horizontal = 24.dp),
                 onClick = {
                     viewModel.onUiAction(LobbyUiAction.SetReady)
                 },

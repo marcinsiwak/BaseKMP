@@ -3,6 +3,7 @@ package pl.msiwak.ui.game.gameplay
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,11 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -36,7 +33,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.dp
 import cardsthegame.sharedfrontend.common_resources.generated.resources.Res
-import cardsthegame.sharedfrontend.common_resources.generated.resources.ic_arrow_up
+import cardsthegame.sharedfrontend.common_resources.generated.resources.img_send_button
+import cardsthegame.sharedfrontend.common_resources.generated.resources.img_send_button_pressed
 import io.github.alexzhirkevich.compottie.LottieCompositionSpec
 import io.github.alexzhirkevich.compottie.animateLottieCompositionAsState
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
@@ -46,7 +44,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
-import pl.msiwak.cardsthegame.common.resources.GameColors
+import pl.msiwak.ui.game.component.CustomClickButton
 import pl.msiwak.ui.game.component.InputField
 
 @OptIn(ExperimentalResourceApi::class)
@@ -127,28 +125,20 @@ fun CardsPreparationScreen(viewModel: CardsPreparationViewModel = koinInject()) 
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceAround
                 ) {
-
                     InputField(
-                        modifier = Modifier.focusRequester(focusRequester),
+                        modifier = Modifier.weight(1f).focusRequester(focusRequester),
                         value = viewState.text,
                         onValueChange = { viewModel.onUiAction(CardsPreparationUiAction.OnTextInput(it)) },
                         placeholder = "Your card idea...",
                     )
-                    Button(
-                        modifier = Modifier.size(64.dp).bringIntoViewRequester(bringIntoViewRequester),
+                    CustomClickButton(
+                        modifier = Modifier.height(IntrinsicSize.Min).bringIntoViewRequester(bringIntoViewRequester),
                         onClick = {
                             viewModel.onUiAction(CardsPreparationUiAction.OnAddCardClicked)
                         },
-                        shape = CircleShape,
-                        colors = ButtonDefaults.buttonColors(
-                            backgroundColor = GameColors.ButtonPrimary,
-                            contentColor = GameColors.ButtonText
-                        )
-                    ) {
-                        Icon(
-                            painterResource(Res.drawable.ic_arrow_up), null
-                        )
-                    }
+                        imageNormal = painterResource(Res.drawable.img_send_button),
+                        imagePressed = painterResource(Res.drawable.img_send_button_pressed)
+                    )
                 }
             }
         }

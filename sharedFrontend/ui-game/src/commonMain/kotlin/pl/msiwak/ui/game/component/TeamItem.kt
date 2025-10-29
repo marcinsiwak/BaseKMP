@@ -56,7 +56,7 @@ fun TeamItemComponent(
                     horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start),
                     verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.Top)
                 ) {
-                    (players + players + players + players + players).forEachIndexed { index, player ->
+                    players.forEachIndexed { index, player ->
                         TeamPlayerItemComponent(
                             playerName = player.name,
 //                    avatarIcon = avatarIcon,

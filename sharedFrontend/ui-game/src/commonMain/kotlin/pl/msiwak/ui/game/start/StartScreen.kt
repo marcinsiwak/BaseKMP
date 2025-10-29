@@ -62,7 +62,7 @@ fun StartScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 CustomButton(
-                    modifier = Modifier.padding(horizontal = 56.dp),
+                    modifier = Modifier.padding(horizontal = 24.dp),
                     text = "Join",
                     onClick = { viewModel.onUiAction(StartUiAction.Join) },
                     enabled = !state.value.isLoading && state.value.playerName.isNotBlank()
