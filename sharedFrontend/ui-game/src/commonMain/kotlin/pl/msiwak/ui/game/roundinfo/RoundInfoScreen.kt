@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -35,7 +36,8 @@ fun RoundInfoScreen(viewModel: RoundInfoViewModel = koinInject()) {
             Text(
                 text = "Round: ${viewState.round}",
                 color = GameColors.OnPrimary,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.h3
             )
 
             Text(
@@ -54,13 +56,15 @@ fun RoundInfoScreen(viewModel: RoundInfoViewModel = koinInject()) {
 
             Spacer(modifier = Modifier.weight(1f))
 
-            CustomButton(
-                modifier = Modifier.padding(vertical = 24.dp, horizontal = 16.dp),
-                text = "Start",
-                onClick = {
-                    viewModel.onUiAction(RoundInfoUiAction.OnStartRoundClick)
-                }
-            )
+            if (viewState.isPlayerRound) {
+                CustomButton(
+                    modifier = Modifier.padding(vertical = 24.dp, horizontal = 16.dp),
+                    text = "Start",
+                    onClick = {
+                        viewModel.onUiAction(RoundInfoUiAction.OnStartRoundClick)
+                    }
+                )
+            }
         }
     }
 }

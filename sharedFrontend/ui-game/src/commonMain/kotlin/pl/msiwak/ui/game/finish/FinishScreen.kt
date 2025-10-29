@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import org.koin.compose.koinInject
 import pl.msiwak.cardsthegame.common.resources.GameColors
+import pl.msiwak.ui.game.component.CustomButton
 
 @Composable
 fun FinishScreen(viewModel: FinishViewModel = koinInject()) {
@@ -29,31 +30,36 @@ fun FinishScreen(viewModel: FinishViewModel = koinInject()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 32.dp),
+                .padding(top = 64.dp),
             horizontalAlignment = CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Top
         ) {
             Text(
-                text = "FINISH ",
-                color = GameColors.TextPrimary
+                modifier = Modifier.padding(bottom = 16.dp),
+                text = "SCOREBOARD",
+                color = GameColors.OnPrimary
             )
             viewState.teams?.fastForEach {
                 Text(
+                    modifier = Modifier.padding(top = 16.dp),
                     text = "Team: ${it.name} - score: ${it.score}",
-                    color = GameColors.TextPrimary
+                    color = GameColors.OnPrimary
                 )
                 it.players.fastForEach { player ->
                     Text(
-                        text = "Player: ${player.name} - id: ${player.score}",
-                        color = GameColors.TextPrimary
+                        text = "Player: ${player.name} - ${player.score}",
+                        color = GameColors.OnPrimary
                     )
                 }
             }
-            Button(onClick = {
-                viewModel.onUiAction(FinishUiAction.OnPlayAgainClicked)
-            }) {
-                Text(text = "Go to lobby")
-            }
+
+            CustomButton(
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 32.dp),
+                onClick = {
+                    viewModel.onUiAction(FinishUiAction.OnPlayAgainClicked)
+                },
+                text = "Play again"
+            )
         }
     }
 }

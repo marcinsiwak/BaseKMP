@@ -50,6 +50,7 @@ class LobbyViewModel(
 
             LobbyUiAction.SetReady -> viewModelScope.launch(errorHandler) {
                 setPlayerReadyUseCase()
+                _uiState.update { it.copy(isReady = !it.isReady) }
             }
 
             is LobbyUiAction.JoinTeam -> viewModelScope.launch {

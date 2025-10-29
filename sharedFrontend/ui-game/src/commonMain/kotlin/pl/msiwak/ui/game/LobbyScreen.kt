@@ -25,7 +25,7 @@ import pl.msiwak.ui.game.component.TeamItemComponent
 fun LobbyScreen(
     viewModel: LobbyViewModel = koinInject()
 ) {
-    val state = viewModel.uiState.collectAsState()
+    val viewState = viewModel.uiState.collectAsState()
 
     Scaffold(
         backgroundColor = Color.Transparent
@@ -37,11 +37,11 @@ fun LobbyScreen(
             horizontalAlignment = CenterHorizontally
         ) {
             Text(
-                text = "Game id: ${state.value.gameIpAddress}",
+                text = "Game id: ${viewState.value.gameIpAddress}",
                 color = GameColors.OnPrimary
             )
 
-            state.value.teams.fastForEach {
+            viewState.value.teams.fastForEach {
                 TeamItemComponent(
                     modifier = Modifier.padding(horizontal = 16.dp),
                     teamName = it.name,
@@ -51,25 +51,19 @@ fun LobbyScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.weight(1f))
+            Text(
+                modifier = Modifier.padding(top = 24.dp),
+                text = "Choose a team",
+                color = GameColors.OnPrimary
+            )
 
-//            Row(
-//                modifier = Modifier.fillMaxWidth(),
-//                horizontalArrangement = Arrangement.Center
-//            ) {
-//                state.value.playersWithoutTeam.fastForEach {
-//                    Text(
-//                        text = "Player ${it.name} (${it.id})\nisActive: ${it.isActive}\nisReady: ${it.isReady}",
-//                        color = GameColors.OnPrimary
-//                    )
-//                }
-//            }
+            Spacer(modifier = Modifier.weight(1f))
 
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center
             ) {
-                state.value.playersWithoutTeam.fastForEach {
+                viewState.value.playersWithoutTeam.fastForEach {
                     Text(
                         text = it.name,
                         color = Color.Black
@@ -77,12 +71,20 @@ fun LobbyScreen(
                 }
             }
 
+            if (viewState.value.isReady) {
+                Text(
+                    modifier = Modifier.padding(top = 16.dp),
+                    text = "Wait for other players...",
+                    color = GameColors.OnPrimary
+                )
+            }
+
             CustomButton(
                 modifier = Modifier.padding(vertical = 36.dp, horizontal = 16.dp),
                 onClick = {
                     viewModel.onUiAction(LobbyUiAction.SetReady)
                 },
-                text = "Ready"
+                text = if (viewState.value.isReady) "Not ready" else "Ready",
             )
         }
     }

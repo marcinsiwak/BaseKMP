@@ -42,13 +42,38 @@ class RoundInfoViewModel(
                     it.copy(
                         isCurrentPlayerRound = currentPlayerId == getUserIdUseCase(),
                         currentPlayerName = players.find { player -> player.id == currentPlayerId }?.name ?: "",
+                        isPlayerRound = gameSession.currentPlayerId == getUserIdUseCase()
                     )
                 }
                 when (gameState) {
-                    GameState.TABOO_INFO -> _uiState.update { it.copy(round = 1, text = "TABOO: Players must describe the card without saying the card’s words or obvious related terms.") }
-                    GameState.PUNS_INFO -> _uiState.update { it.copy(round = 2, text = "PUNS: Players can say anything to describe the card (no direct use of the card’s words).") }
-                    GameState.TABOO_SHORT_INFO -> _uiState.update { it.copy(round = 3, text = "TABOO_SHORT: Players can say just one single word to describe the card.") }
-                    GameState.PUNS_SHORT_INFO -> _uiState.update { it.copy(round = 4, text = "PUNS_SHORT: Players act out the card with only one gesture, no words or sounds.") }
+                    GameState.TABOO_INFO -> _uiState.update {
+                        it.copy(
+                            round = 1,
+                            text = "TABOO: Players must describe the card without saying the card’s words or obvious related terms."
+                        )
+                    }
+
+                    GameState.PUNS_INFO -> _uiState.update {
+                        it.copy(
+                            round = 2,
+                            text = "PUNS: Players can say anything to describe the card (no direct use of the card’s words)."
+                        )
+                    }
+
+                    GameState.TABOO_SHORT_INFO -> _uiState.update {
+                        it.copy(
+                            round = 3,
+                            text = "TABOO_SHORT: Players can say just one single word to describe the card."
+                        )
+                    }
+
+                    GameState.PUNS_SHORT_INFO -> _uiState.update {
+                        it.copy(
+                            round = 4,
+                            text = "PUNS_SHORT: Players act out the card with only one gesture, no words or sounds."
+                        )
+                    }
+
                     else -> Unit
                 }
             }
