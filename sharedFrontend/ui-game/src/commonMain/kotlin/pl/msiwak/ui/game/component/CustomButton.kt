@@ -32,9 +32,8 @@ fun CustomButton(
         Text(
             modifier = Modifier.fillMaxWidth()
                 .clip(RoundedCornerShape(24.dp))
-                .clickable { onClick() }
-                .padding(vertical = contentHeight / 4)
-            ,
+                .clickable(enabled) { onClick() }
+                .padding(vertical = contentHeight / 4),
             text = text,
             textAlign = Center
         )

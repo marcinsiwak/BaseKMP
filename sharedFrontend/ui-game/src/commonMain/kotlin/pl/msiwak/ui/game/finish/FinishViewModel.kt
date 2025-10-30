@@ -2,6 +2,7 @@ package pl.msiwak.ui.game.finish
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,6 +27,7 @@ class FinishViewModel(
     init {
         viewModelScope.launch {
             observeGameSession()
+            startCountdownTimer()
         }
     }
 
@@ -56,6 +58,18 @@ class FinishViewModel(
                         )
                     }
                 }
+            }
+        }
+    }
+
+    private fun startCountdownTimer() {
+        val timeToPlayAgain = 5
+
+        viewModelScope.launch {
+            repeat(timeToPlayAgain) { i ->
+                delay(1000)
+                val newTimeRemaining = timeToPlayAgain - i - 1
+                _uiState.update { it.copy(timeRemaining = newTimeRemaining) }
             }
         }
     }

@@ -1,12 +1,10 @@
 package pl.msiwak.ui.game.finish
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
@@ -63,7 +61,13 @@ fun FinishScreen(viewModel: FinishViewModel = koinInject()) {
                 onClick = {
                     viewModel.onUiAction(FinishUiAction.OnPlayAgainClicked)
                 },
-                text = "Play again"
+                enabled = viewState.timeRemaining > 0,
+                text = if (viewState.timeRemaining > 0) {
+                    "Play again (${viewState.timeRemaining})"
+                } else {
+                    "Play again"
+                }
+
             )
         }
     }

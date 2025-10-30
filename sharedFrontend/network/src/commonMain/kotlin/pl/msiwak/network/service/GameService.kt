@@ -43,14 +43,10 @@ class GameService(
     }
 
     fun findGame(): Flow<String?> = flow<String?> {
-//        if (serverIp != null) {
-//            emit(serverIp)
-//            return@flow
-//        }
         emit(connectionManager.findGame(port = PORT) ?: throw GameNotFoundException())
-        delay(1000)
     }
         .retryWhen { cause, attempt ->
+            delay(1000)
             cause is GameNotFoundException && attempt < 5
         }
         .catch { emit(null) }
