@@ -42,12 +42,16 @@ class GameService(
         ktorClient.send(webSocketEvent)
     }
 
-    fun findGame(): Flow<String?> = flow<String?> {
+    fun findGame(): Flow<String?> = flow {
+        if (serverIp != null) {
+            emit(serverIp)
+            return@flow
+        }
         emit(connectionManager.findGame(port = PORT) ?: throw GameNotFoundException())
         delay(1000)
     }
         .retryWhen { cause, attempt ->
-            cause is GameNotFoundException && attempt < 4
+            cause is GameNotFoundException && attempt < 5
         }
         .catch { emit(null) }
         .onEach { serverIp = it }

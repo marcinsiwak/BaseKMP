@@ -35,8 +35,7 @@ fun StartScreen(
         backgroundColor = Color.Transparent
     ) { paddingValues ->
         Box(
-            modifier = Modifier
-                .fillMaxSize(),
+            modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
             Column(
