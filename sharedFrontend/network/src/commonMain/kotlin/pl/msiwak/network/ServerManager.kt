@@ -57,18 +57,23 @@ class ServerManager(
                             )
                         }
                     }
+
                     is WebSocketEvent.ClientActions.SetPlayerReady -> {
                         gameManager.setPlayerReady(event.id)
                     }
+
                     is WebSocketEvent.ClientActions.AddCard -> {
                         gameManager.addCardToGame(event.id, event.cardText)
                     }
+
                     is WebSocketEvent.ClientActions.ContinueGame -> {
                         gameManager.continueGame()
                     }
+
                     is WebSocketEvent.ClientActions.JoinTeam -> {
                         gameManager.joinTeam(event.id, event.teamName)
                     }
+
                     is WebSocketEvent.ClientActions.SetCorrectAnswer -> {
                         gameManager.setCorrectAnswer(event.cardText)
                     }

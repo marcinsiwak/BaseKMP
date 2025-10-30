@@ -24,7 +24,7 @@ class KtorServerImpl: KtorServer {
         HttpServer(subject: subject)
     }()
 
-    func startServer(host: String, port: Int32) {
+    func startServer(host: String, port: Int32) async throws {
         httpServer.start(host: host, port: port)
     }
     

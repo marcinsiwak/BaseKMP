@@ -42,11 +42,11 @@ class GameService(
         ktorClient.send(webSocketEvent)
     }
 
-    fun findGame(): Flow<String?> = flow {
-        if (serverIp != null) {
-            emit(serverIp)
-            return@flow
-        }
+    fun findGame(): Flow<String?> = flow<String?> {
+//        if (serverIp != null) {
+//            emit(serverIp)
+//            return@flow
+//        }
         emit(connectionManager.findGame(port = PORT) ?: throw GameNotFoundException())
         delay(1000)
     }
@@ -87,8 +87,10 @@ class GameService(
             launch { serverManager.startServer(ipAddress, PORT) }
             launch { serverManager.observeMessages() }
             launch { serverManager.observeGameSession() }
-            delay(1000) // add await for server to start
-            launch { createGameAndConnect(ipAddress, adminName, gameSession) }
+            launch {
+                delay(100)
+                createGameAndConnect(ipAddress, adminName, gameSession)
+            }
         }
     }
 
