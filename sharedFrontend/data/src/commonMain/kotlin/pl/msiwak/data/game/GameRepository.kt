@@ -22,6 +22,7 @@ class GameRepository(
                 is WebSocketEvent.ServerActions.UpdateGameSession -> {
                     _currentGameSession.value = it.gameSession
                 }
+
                 WebSocketEvent.ClientActions.ServerDownDetected -> managePlayerConnection()
 
                 else -> Unit
@@ -57,7 +58,7 @@ class GameRepository(
 
     private suspend fun managePlayerConnection() {
         with(currentGameSession.value ?: return) {
-            if (gameState == GameState.SUMMARY)  return
+            if (gameState == GameState.SUMMARY) return
             val currentPlayer = players.first { player -> player.id == gameService.getUserId() }
             findGame()?.let {
                 gameService.connectPlayer(currentPlayer.name)
@@ -67,8 +68,9 @@ class GameRepository(
             if (playerToBeAdmin.id == currentPlayer.id) {
                 gameService.createGame(playerToBeAdmin.name, this)
             } else {
-                findGame()
-                gameService.connectPlayer(currentPlayer.name)
+                findGame()?.let {
+                    gameService.connectPlayer(currentPlayer.name)
+                }
             }
         }
     }

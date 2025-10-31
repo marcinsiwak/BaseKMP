@@ -36,12 +36,11 @@ class KtorServerImpl : KtorServer {
 
     private val mutex = Mutex()
 
-    override fun startServer(host: String, port: Int) {
+    override suspend fun startServer(host: String, port: Int) {
         if (server != null) return
         server = embeddedServer(CIO, port = port, host = host) {
-
             configureServer()
-        }.start(wait = true)
+        }.startSuspend(wait = true)
     }
 
     override suspend fun stopServer() {

@@ -22,6 +22,7 @@ import pl.msiwak.domain.game.ObserveGameSessionUseCase
 import pl.msiwak.domain.game.SetCorrectAnswerUseCase
 import pl.msiwak.navigator.Navigator
 import kotlin.coroutines.cancellation.CancellationException
+import kotlin.math.round
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
@@ -93,10 +94,10 @@ class RoundViewModel(
                 }
 
                 when (gameState) {
-                    GameState.TABOO -> _uiState.update { it.copy(text = "TABOO game") }
-                    GameState.PUNS -> _uiState.update { it.copy(text = "PUNS game") }
-                    GameState.TABOO_SHORT -> _uiState.update { it.copy(text = "TABOO_SHORT game") }
-                    GameState.PUNS_SHORT -> _uiState.update { it.copy(text = "PUNS_SHORT game") }
+                    GameState.TABOO -> _uiState.update { it.copy(round = 1) }
+                    GameState.PUNS -> _uiState.update { it.copy(round = 2) }
+                    GameState.TABOO_SHORT -> _uiState.update { it.copy(round = 3) }
+                    GameState.PUNS_SHORT -> _uiState.update { it.copy(round = 4) }
                     else -> Unit
                 }
             }

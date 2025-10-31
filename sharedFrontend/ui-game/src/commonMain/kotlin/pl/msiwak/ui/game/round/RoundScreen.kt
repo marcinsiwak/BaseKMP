@@ -1,108 +1,113 @@
 package pl.msiwak.ui.game.round
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import cardsthegame.sharedfrontend.common_resources.generated.resources.Res
+import cardsthegame.sharedfrontend.common_resources.generated.resources.img_incorrect_button
+import cardsthegame.sharedfrontend.common_resources.generated.resources.img_incorrect_button_pressed
+import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
 import pl.msiwak.cardsthegame.common.resources.GameColors
-import pl.msiwak.ui.game.component.CardItem
+import pl.msiwak.ui.game.component.CustomButton
+import pl.msiwak.ui.game.component.CustomClickButton
 
 @Composable
 fun RoundScreen(viewModel: RoundViewModel = koinInject()) {
 
     val viewState = viewModel.uiState.collectAsState().value
 
-    Scaffold { paddingValues ->
+    Scaffold(
+        backgroundColor = Color.Transparent
+    ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(GameColors.Background)
-                .padding(top = 32.dp),
+                .padding(top = 64.dp),
             horizontalAlignment = CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = viewState.text,
-                color = GameColors.TextPrimary
+                text = "Round ${viewState.round}",
+                color = GameColors.OnPrimary,
+                style = MaterialTheme.typography.h3
             )
+
+            Spacer(modifier = Modifier.weight(1f))
+
             Text(
-                text = "Time: ${viewState.timeRemaining}",
-                color = GameColors.TextPrimary
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 24.dp),
+                text = if (viewState.timeRemaining > 0) "Time: ${viewState.timeRemaining}" else "Time's up!",
+                color = GameColors.OnPrimary,
+                style = MaterialTheme.typography.h4
             )
 
             if (viewState.isPlayerRound) {
                 viewState.currentCard?.text?.let {
-                    CardItem(
-                        modifier = Modifier.padding(vertical = 32.dp),
-                        text = it
+                    Text(
+                        modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
+                        text = "Your card:",
+                        color = GameColors.OnPrimary,
+                        style = MaterialTheme.typography.h4,
+                        textAlign = TextAlign.Center
+                    )
+
+                    Text(
+                        modifier = Modifier.padding(vertical = 24.dp, horizontal = 24.dp),
+                        text = it,
+                        color = GameColors.OnPrimary,
+                        style = MaterialTheme.typography.h4,
+                        textAlign = TextAlign.Center
                     )
                 }
 
                 if (viewState.isTimerRunning) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceAround,
+                    ) {
 
-                    Button(
-                        modifier = Modifier.padding(top = 16.dp),
-                        onClick = {
+                        CustomClickButton(onClick = {
                             viewModel.onUiAction(RoundUiAction.OnCorrectClick)
-                        },
-                        colors = androidx.compose.material.ButtonDefaults.buttonColors(
-                            backgroundColor = GameColors.ButtonPrimary,
-                            contentColor = GameColors.ButtonText
-                        )
-                    ) {
-                        Text(
-                            text = "Correct",
-                            color = GameColors.ButtonText
-                        )
-                    }
+                        })
 
-                    Button(
-                        modifier = Modifier.padding(top = 16.dp),
-                        onClick = {
-                            viewModel.onUiAction(RoundUiAction.OnSkipClick)
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            backgroundColor = GameColors.ButtonSecondary,
-                            contentColor = GameColors.ButtonText
-                        )
-                    ) {
-                        Text(
-                            text = "Skip",
-                            color = GameColors.ButtonText
-                        )
-                    }
-                } else {
-                    Button(
-                        modifier = Modifier.padding(top = 16.dp),
-                        onClick = {
-                            viewModel.onUiAction(RoundUiAction.OnRoundFinished)
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            backgroundColor = GameColors.ButtonPrimary,
-                            contentColor = GameColors.ButtonText
-                        )
-                    ) {
-                        Text(
-                            text = "Finish",
-                            color = GameColors.ButtonText
+                        CustomClickButton(
+                            onClick = {
+                                viewModel.onUiAction(RoundUiAction.OnSkipClick)
+                            },
+                            imageNormal = painterResource(Res.drawable.img_incorrect_button),
+                            imagePressed = painterResource(Res.drawable.img_incorrect_button_pressed)
                         )
                     }
                 }
             } else {
                 Text(
                     text = "${viewState.currentPlayerName} TURN",
-                    color = GameColors.TextPrimary
+                    color = GameColors.OnPrimary
+                )
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            if (!viewState.isTimerRunning) {
+                CustomButton(
+                    modifier = Modifier.padding(24.dp),
+                    onClick = {
+                        viewModel.onUiAction(RoundUiAction.OnRoundFinished)
+                    },
+                    text = "Finish Round"
                 )
             }
         }

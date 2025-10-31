@@ -2,6 +2,7 @@ package pl.msiwak
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
@@ -9,6 +10,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import pl.msiwak.common.model.GameState
 import pl.msiwak.destination.NavDestination
+import pl.msiwak.domain.game.FindGameIPAddressUseCase
 import pl.msiwak.domain.game.ObserveGameSessionUseCase
 import pl.msiwak.domain.game.ObserveWebSocketEventsUseCase
 import pl.msiwak.navigator.Navigator
@@ -16,10 +18,18 @@ import pl.msiwak.navigator.Navigator
 class MainViewModel(
     val navigator: Navigator,
     private val observeWebSocketEventsUseCase: ObserveWebSocketEventsUseCase,
-    private val observeGameSessionUseCase: ObserveGameSessionUseCase
+    private val observeGameSessionUseCase: ObserveGameSessionUseCase,
+    private val findGameIPAddressUseCase: FindGameIPAddressUseCase,
 ) : ViewModel() {
 
+    private val errorHandler = CoroutineExceptionHandler { _, throwable ->
+        print(throwable)
+    }
+
     init {
+        viewModelScope.launch(errorHandler) {
+            findGameIPAddressUseCase()
+        }
         viewModelScope.launch {
             observeWebSocketEventsUseCase()
         }
