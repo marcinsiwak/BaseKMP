@@ -3,6 +3,8 @@ package pl.msiwak.ui.game.graph
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import pl.msiwak.animation.customEnterTransition
+import pl.msiwak.animation.customExitTransition
 import pl.msiwak.destination.NavDestination
 import pl.msiwak.graph.NavigationGraph
 import pl.msiwak.ui.game.LobbyScreen
@@ -18,22 +20,40 @@ class GameGraph : NavigationGraph {
         navGraphBuilder: NavGraphBuilder
     ) {
         navGraphBuilder.navigation<NavDestination.GameDestination.Graph>(startDestination = NavDestination.GameDestination.StartScreen) {
-            composable<NavDestination.GameDestination.StartScreen> {
+            composable<NavDestination.GameDestination.StartScreen>(
+                enterTransition = customEnterTransition,
+                exitTransition = customExitTransition
+            ) {
                 StartScreen()
             }
-            composable<NavDestination.GameDestination.LobbyScreen> {
+            composable<NavDestination.GameDestination.LobbyScreen>(
+                enterTransition = customEnterTransition,
+                exitTransition = customExitTransition
+            ) {
                 LobbyScreen()
             }
-            composable<NavDestination.GameDestination.CardsPreparationScreen> {
+            composable<NavDestination.GameDestination.CardsPreparationScreen>(
+                enterTransition = customEnterTransition,
+                exitTransition = customExitTransition
+            ) {
                 CardsPreparationScreen()
             }
-            composable<NavDestination.GameDestination.RoundInfoScreen> {
+            composable<NavDestination.GameDestination.RoundInfoScreen>(
+                enterTransition = customEnterTransition,
+                exitTransition = customExitTransition
+            ) {
                 RoundInfoScreen()
             }
-            composable<NavDestination.GameDestination.RoundScreen> {
+            composable<NavDestination.GameDestination.RoundScreen>(
+                enterTransition = customEnterTransition,
+                exitTransition = customExitTransition
+            ) {
                 RoundScreen()
             }
-            composable<NavDestination.GameDestination.FinishScreen> {
+            composable<NavDestination.GameDestination.FinishScreen>(
+                enterTransition = customEnterTransition,
+                exitTransition = customExitTransition
+            ) {
                 FinishScreen()
             }
         }

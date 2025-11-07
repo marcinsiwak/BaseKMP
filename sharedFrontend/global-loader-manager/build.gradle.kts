@@ -16,32 +16,24 @@ kotlin {
     cocoapods {
         baseSetup()
         framework {
-            baseName = "ui-game"
+            baseName = "global-loader-manager"
         }
     }
 
     sourceSets {
         commonMain.dependencies {
-            implementation(projects.sharedFrontend.navigation)
-            implementation(projects.sharedFrontend.commonModel)
-            implementation(projects.sharedFrontend.commonResources)
-            implementation(projects.sharedFrontend.domain)
-            implementation(projects.sharedFrontend.gameManager)
-            implementation(projects.sharedFrontend.data)
-
+            implementation(libs.kotlinx.coroutines)
+            implementation(libs.koin.core)
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material)
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
-            implementation(libs.compose.navigation)
-            implementation(libs.koin.compose)
-            implementation(libs.compottie)
         }
     }
 }
 
 android {
-    namespace = "pl.msiwak.baseKMP.ui.game"
+    namespace = "pl.msiwak.cardsthegame.globalloadermanager"
 }

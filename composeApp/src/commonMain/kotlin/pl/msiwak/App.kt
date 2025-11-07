@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.navigation.compose.rememberNavController
@@ -17,6 +19,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.koinInject
 import pl.msiwak.cardsthegame.common.resources.GameLightColorScheme
 import pl.msiwak.cardsthegame.common.resources.MyTypography
+import pl.msiwak.globalloadermanager.component.GlobalLoader
 import pl.msiwak.navigation.AppNavHost
 import pl.msiwak.navigator.NavigationEvent
 
@@ -25,6 +28,8 @@ import pl.msiwak.navigator.NavigationEvent
 fun App(
     viewModel: MainViewModel = koinInject()
 ) {
+    val viewState = viewModel.viewState.collectAsState()
+
     val navController = rememberNavController()
     LaunchedEffect(key1 = Unit) {
         viewModel.navigator.navigationEvent.collectLatest { event ->
@@ -46,6 +51,12 @@ fun App(
                 contentScale = ContentScale.Crop
             )
             AppNavHost(navController)
+
+            if (viewState.value.isLoading) {
+                GlobalLoader(
+                    modifier = Modifier.align(Center)
+                )
+            }
         }
     }
 }

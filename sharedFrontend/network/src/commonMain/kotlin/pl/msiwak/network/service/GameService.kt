@@ -53,10 +53,10 @@ class GameService(
         .onEach { serverIp = it }
         .flowOn(Dispatchers.IO)
 
-    suspend fun connectPlayer(playerName: String) = withContext(Dispatchers.IO) {
+    suspend fun connectPlayer(playerName: String, electedIp: String? = null) = withContext(Dispatchers.IO) {
         deviceIpId = connectionManager.getLocalIpAddress()?.substringAfterLast(".")
             ?: throw Exception("Cannot get local IP address")
-        val ip = serverIp ?: throw GameNotFoundException()
+        val ip = (electedIp ?: serverIp) ?: throw GameNotFoundException()
         scope.launch {
             connectPlayerToGame(playerName, ip)
         }
@@ -74,16 +74,41 @@ class GameService(
         ktorClient.disconnect(deviceIpId)
     }
 
+    suspend fun startServer(gameSession: GameSession? = null) = withContext(Dispatchers.IO) {
+        val ipAddress = connectionManager.getLocalIpAddress() ?: throw Exception("Cannot get local IP address")
+        launch { serverManager.startServer(ipAddress, PORT) }
+        launch { serverManager.observeMessages() }
+        launch { serverManager.observeGameSession() }
+        launch {
+            delay(100)
+            deviceIpId = ipAddress.substringAfterLast(".")
+            serverManager.createGame(deviceIpId, ipAddress, gameSession)
+        }
+    }
+
     suspend fun createGame(adminName: String, gameSession: GameSession? = null) = withContext(Dispatchers.IO) {
         if (!scope.isActive) {
             scope = CoroutineScope(Dispatchers.IO)
         }
         val ipAddress = connectionManager.getLocalIpAddress() ?: throw Exception("Cannot get local IP address")
         scope.launch {
-            launch { serverManager.startServer(ipAddress, PORT) }
-            launch { serverManager.observeMessages() }
-            launch { serverManager.observeGameSession() }
             launch {
+                delay(100)
+                createGameAndConnect(ipAddress, adminName, gameSession)
+            }
+        }
+    }
+
+    suspend fun startServerAndCreateGame(adminName: String, gameSession: GameSession? = null) = withContext(Dispatchers.IO) {
+        if (!scope.isActive) {
+            scope = CoroutineScope(Dispatchers.IO)
+        }
+        val ipAddress = connectionManager.getLocalIpAddress() ?: throw Exception("Cannot get local IP address")
+        scope.launch {
+            launch {
+                launch { serverManager.startServer(ipAddress, PORT) }
+                launch { serverManager.observeMessages() }
+                launch { serverManager.observeGameSession() }
                 delay(100)
                 createGameAndConnect(ipAddress, adminName, gameSession)
             }
@@ -97,6 +122,8 @@ class GameService(
     }
 
     fun getUserId(): String = deviceIpId
+
+    fun getDeviceIpAddress(): String? = connectionManager.getLocalIpAddress()
 
 //    suspend fun finishGame() = withContext(Dispatchers.IO) {
 //        serverManager.stopServer()

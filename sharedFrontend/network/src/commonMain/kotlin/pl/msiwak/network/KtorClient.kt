@@ -12,11 +12,13 @@ import io.ktor.websocket.send
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import pl.msiwak.common.model.Player
 import pl.msiwak.common.model.WebSocketEvent
@@ -97,7 +99,9 @@ class KtorClient(engine: EngineProvider) {
 
                 is CancellationException -> {
                     println("OUTPUT: listenForResponse cancelled: ${it.message}")
-                    _webSocketEvent.emit(WebSocketEvent.ClientActions.ServerDownDetected)
+                    withContext(NonCancellable) {
+                        _webSocketEvent.emit(WebSocketEvent.ClientActions.ServerDownDetected)
+                    }
                 }
 
                 else -> println("OUTPUT: Error in listenForResponse: ${it.message}")

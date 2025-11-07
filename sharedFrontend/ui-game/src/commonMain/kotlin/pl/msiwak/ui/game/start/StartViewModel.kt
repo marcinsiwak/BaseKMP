@@ -9,17 +9,17 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import pl.msiwak.data.game.GameRepository
 import pl.msiwak.destination.NavDestination
-import pl.msiwak.domain.game.ConnectPlayerToGameUseCase
-import pl.msiwak.domain.game.CreateGameUseCase
 import pl.msiwak.domain.game.FindGameIPAddressUseCase
+import pl.msiwak.domain.game.JoinGameUseCase
 import pl.msiwak.navigator.Navigator
 
 class StartViewModel(
-    private val createGameUseCase: CreateGameUseCase,
-    private val connectPlayerToGameUseCase: ConnectPlayerToGameUseCase,
+    private val joinGameUseCase: JoinGameUseCase,
     private val findGameIPAddressUseCase: FindGameIPAddressUseCase,
-    private val navigator: Navigator
+    private val navigator: Navigator,
+    private val gameRepository: GameRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(StartState())
@@ -31,9 +31,6 @@ class StartViewModel(
     private var findGameJob: Job? = null
     private var joinJob: Job? = null
 
-    init {
-        findGame()
-    }
 
     fun onUiAction(action: StartUiAction) {
         when (action) {
@@ -41,9 +38,9 @@ class StartViewModel(
                 // Handle navigation back
             }
 
-            is StartUiAction.CreateGame -> createGame()
+            is StartUiAction.CreateGame -> Unit
             is StartUiAction.OnPlayerNameChanged -> updatePlayerName(action.name)
-            is StartUiAction.JoinGame -> joinGame()
+            is StartUiAction.JoinGame -> Unit
             is StartUiAction.Refresh -> findGame()
             is StartUiAction.Join -> join()
         }
@@ -53,12 +50,9 @@ class StartViewModel(
         if (joinJob?.isActive == true) return
         joinJob = viewModelScope.launch(errorHandler) {
             _uiState.update { it.copy(isLoading = true) }
-            findGameIPAddressUseCase()?.let {
-                joinGame()
-            } ?: run {
-                createGame()
-            }
+            joinGameUseCase(uiState.value.playerName)
             _uiState.update { it.copy(isLoading = false) }
+            navigator.navigate(NavDestination.GameDestination.LobbyScreen)
         }
     }
 
@@ -67,26 +61,6 @@ class StartViewModel(
         findGameJob = viewModelScope.launch(errorHandler) {
             val existingGameIpAddress = findGameIPAddressUseCase()
             _uiState.update { it.copy(gameIpAddress = existingGameIpAddress) }
-        }
-    }
-
-    private fun createGame() {
-        viewModelScope.launch(errorHandler) {
-            _uiState.update { it.copy(isLoading = true) }
-            createGameUseCase(uiState.value.playerName)
-            _uiState.update { it.copy(isLoading = false) }
-            navigator.navigate(NavDestination.GameDestination.LobbyScreen)
-        }
-    }
-
-    private fun joinGame() {
-        viewModelScope.launch(errorHandler) {
-            _uiState.update { it.copy(isLoading = true) }
-            connectPlayerToGameUseCase(
-                playerName = uiState.value.playerName
-            )
-            _uiState.update { it.copy(isLoading = false) }
-            navigator.navigate(NavDestination.GameDestination.LobbyScreen)
         }
     }
 

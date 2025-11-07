@@ -5,11 +5,20 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.util.Log
 import androidx.annotation.RequiresPermission
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import pl.msiwak.common.AppContext
 import java.io.IOException
+import java.net.DatagramPacket
+import java.net.DatagramSocket
 import java.net.Inet4Address
 import java.net.InetAddress
 import java.net.InetSocketAddress
@@ -32,6 +41,51 @@ class ConnectionManagerImpl : ConnectionManager {
             }
         }
         return null
+    }
+
+    override fun startUdpListener(port: Int): Flow<String> = callbackFlow {
+        val socket = DatagramSocket(port)
+        socket.soTimeout = 1000
+        println("[UDP] Started")
+
+        val buffer = ByteArray(1024)
+        val job = launch(Dispatchers.IO) {
+            try {
+                while (isActive) {
+                    try {
+                        val packet = DatagramPacket(buffer, buffer.size)
+                        socket.receive(packet)
+                        val sender = packet.address.hostAddress
+                        val message = String(packet.data, 0, packet.length)
+                        println("[UDP] Received from $sender: \"$message\"")
+                        if (!sender.isNullOrBlank()) {
+                            trySend(message)
+                        }
+                    } catch (e: SocketTimeoutException) {
+                        println("[UDP] error Received from: $e")
+                    }
+                }
+            } finally {
+                socket.close()
+            }
+        }
+
+        awaitClose {
+            job.cancel()
+        }
+    }
+
+    @RequiresPermission(Manifest.permission.ACCESS_NETWORK_STATE)
+    override suspend fun broadcastMessage(msg: String, port: Int) = withContext(Dispatchers.IO) {
+        val socket = DatagramSocket()
+        socket.broadcast = true
+        val data = msg.toByteArray()
+        val packet = DatagramPacket(
+            data, data.size,
+            InetAddress.getByName("255.255.255.255"), port
+        )
+        socket.send(packet)
+        socket.close()
     }
 
     @RequiresPermission(Manifest.permission.ACCESS_NETWORK_STATE)

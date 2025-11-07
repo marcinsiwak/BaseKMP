@@ -49,28 +49,28 @@ class RoundInfoViewModel(
                     GameState.TABOO_INFO -> _uiState.update {
                         it.copy(
                             round = 1,
-                            text = "TABOO: Players must describe the card without saying the card’s words or obvious related terms."
+                            text = "Guide your team to guess what’s on the card — just don’t use the forbidden words or anything too obvious"
                         )
                     }
 
                     GameState.PUNS_INFO -> _uiState.update {
                         it.copy(
                             round = 2,
-                            text = "PUNS: Players can say anything to describe the card (no direct use of the card’s words)."
+                            text = "No talking allowed! Act, gesture, or mime to get your team to guess the card."
                         )
                     }
 
                     GameState.TABOO_SHORT_INFO -> _uiState.update {
                         it.copy(
                             round = 3,
-                            text = "TABOO_SHORT: Players can say just one single word to describe the card."
+                            text = "One word, one shot! Say just a single word to describe the card—but no using the word itself or any obvious variations."
                         )
                     }
 
                     GameState.PUNS_SHORT_INFO -> _uiState.update {
                         it.copy(
                             round = 4,
-                            text = "PUNS_SHORT: Players act out the card with only one gesture, no words or sounds."
+                            text = "One move, that’s it! Use a single gesture to show what’s on the card—silence only."
                         )
                     }
 

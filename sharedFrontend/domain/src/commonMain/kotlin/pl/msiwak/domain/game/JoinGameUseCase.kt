@@ -1,5 +1,5 @@
 package pl.msiwak.domain.game
 
-interface CreateGameUseCase {
+interface JoinGameUseCase {
     suspend operator fun invoke(adminName: String)
 }

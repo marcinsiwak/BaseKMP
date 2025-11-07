@@ -96,7 +96,7 @@ fun RoundScreen(viewModel: RoundViewModel = koinInject()) {
                 }
             } else {
                 Text(
-                    text = "${viewState.currentPlayerName} TURN",
+                    text = "Now playing: ${viewState.currentPlayerName}",
                     color = GameColors.OnPrimary
                 )
             }

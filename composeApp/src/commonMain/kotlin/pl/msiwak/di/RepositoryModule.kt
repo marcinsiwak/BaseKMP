@@ -4,5 +4,5 @@ import org.koin.dsl.module
 import pl.msiwak.data.game.GameRepository
 
 internal val repositoryModule = module {
-    single { GameRepository(get()) }
+    single { GameRepository(get(), get(), get()) }
 }

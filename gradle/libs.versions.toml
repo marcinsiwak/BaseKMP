@@ -52,6 +52,7 @@ flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway_versi
 compottie = { module = "io.github.alexzhirkevich:compottie", version.ref = "compottie" }
 
 compose-navigation = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "compose-navigation" }
+compose-navigation-back = { module = "org.jetbrains.compose.ui:ui-backhandler", version = "compose-navigation-back" }
 kotlinx-serialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlin-datetime" }
 

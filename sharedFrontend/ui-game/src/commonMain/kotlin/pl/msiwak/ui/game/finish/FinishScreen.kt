@@ -61,7 +61,7 @@ fun FinishScreen(viewModel: FinishViewModel = koinInject()) {
                 onClick = {
                     viewModel.onUiAction(FinishUiAction.OnPlayAgainClicked)
                 },
-                enabled = viewState.timeRemaining > 0,
+                enabled = viewState.timeRemaining <= 0,
                 text = if (viewState.timeRemaining > 0) {
                     "Play again (${viewState.timeRemaining})"
                 } else {

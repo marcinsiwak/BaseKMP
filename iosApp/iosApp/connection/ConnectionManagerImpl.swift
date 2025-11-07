@@ -10,61 +10,190 @@ import Foundation
 import Network
 import ComposeApp
 import sharedFrontend
+import Combine
 
 class ConnectionManagerImpl: ConnectionManager {
+    
+    private let subject = PassthroughSubject<String, Never>()
+    private var listener: NWListener?
+
+    func getBroadcastAddress() -> String? {
+        var ifaddr: UnsafeMutablePointer<ifaddrs>?
+        guard getifaddrs(&ifaddr) == 0 else {
+            return nil
+        }
+        defer {
+            freeifaddrs(ifaddr)
+        }
+
+        var ptr = ifaddr
+        while ptr != nil {
+            defer {
+                ptr = ptr?.pointee.ifa_next
+            }
+            guard let interface = ptr?.pointee else {
+                continue
+            }
+
+            let addrFamily = interface.ifa_addr.pointee.sa_family
+            if addrFamily == UInt8(AF_INET) {
+                let name = String(cString: interface.ifa_name)
+                if name == "en0" { // Wi-Fi on iOS/macOS
+                    var addr = interface.ifa_addr.withMemoryRebound(to: sockaddr_in.self, capacity: 1) {
+                        $0.pointee
+                    }
+                    var netmask = interface.ifa_netmask.withMemoryRebound(to: sockaddr_in.self, capacity: 1) {
+                        $0.pointee
+                    }
+
+                    let broadcast = (addr.sin_addr.s_addr & netmask.sin_addr.s_addr) | ~netmask.sin_addr.s_addr
+                    var bcast = in_addr(s_addr: broadcast)
+
+                    var buffer = [CChar](repeating: 0, count: Int(INET_ADDRSTRLEN))
+                    inet_ntop(AF_INET, &bcast, &buffer, socklen_t(INET_ADDRSTRLEN))
+                    return String(cString: buffer)
+                }
+            }
+        }
+        return nil
+    }
+
+    func broadcastMessage(msg: String, port: Int32) async throws {
+        let data = msg.data(using: .utf8)!
+        let host = NWEndpoint.Host(getBroadcastAddress() ?? "")
+        let remotePort = NWEndpoint.Port(integerLiteral: UInt16(port))
+
+        let parameters = NWParameters.udp
+        let connection = NWConnection(
+            host: host,
+            port: remotePort,
+            using: parameters
+        )
+
+
+        connection.start(queue: .global())
+
+        connection.stateUpdateHandler = { newState in
+            switch newState {
+            case .ready:
+                connection.send(content: data, completion: .contentProcessed { error in
+                    if let error = error {
+                        print("❌ Error sending UDP message: \(error)")
+                    } else {
+                        print("✅ Message sent: \"\(msg)\"")
+                    }
+                    connection.cancel()
+                })
+
+            case .failed(let error):
+                print("❌ Connection failed with error: \(error)")
+                connection.cancel()
+
+            case .cancelled:
+                print("Connection closed.")
+
+            default:
+                break
+            }
+        }
+    }
+    
+    func startUdpListener(port: Int32) -> any Kotlinx_coroutines_coreFlow {
+        let params = NWParameters.udp
+        params.allowLocalEndpointReuse = true
+    
+
+
+        guard let portValue = NWEndpoint.Port(rawValue: UInt16(port)) else {
+            print("❌ Invalid port: \(port)")
+            return subject.asFlow()
+        }
+
+        do {
+            let listener = try NWListener(using: params, on: portValue)
+            self.listener = listener
+            
+            listener.newConnectionHandler = { connection in
+                connection.start(queue: .global())
+
+                connection.receiveMessage { data, _, _, error in
+                    if let error = error {
+                        print("UDP receive error: \(error)")
+                        return
+                    }
+                    if let data = data, let message = String(data: data, encoding: .utf8) {
+                        print("📨 Received: \(message)")
+                        self.subject.send(message)
+                    }
+                }
+            }
+        
+
+            listener.start(queue: .global())
+            print("👂 Listening for UDP messages on port \(port)")
+
+        } catch {
+            print("❌ Failed to start UDP listener on port \(port): \(error)")
+        }
+        return subject.asFlow()
+    }
+
     func findGame(port: Int32, completionHandler: @escaping (String?, (any Error)?) -> Void) {
         guard let ownIp = getLocalIpAddress(), !ownIp.isEmpty else {
             completionHandler(nil, nil)
-                return
+            return
+        }
+
+        let subnet = ownIp.split(separator: ".").dropLast().joined(separator: ".")
+
+        var didReturn = false // Track if we've already returned
+
+        for i in 1...254 {
+            let host = subnet + ".\(i)"
+            let nwEndpoint = NWEndpoint.Host(host)
+            guard let nwPort = NWEndpoint.Port(rawValue: UInt16(port)) else {
+                continue
             }
 
-            let subnet = ownIp.split(separator: ".").dropLast().joined(separator: ".")
+            let connection = NWConnection(host: nwEndpoint, port: nwPort, using: .tcp)
 
-            var didReturn = false // Track if we've already returned
-
-            for i in 1...254 {
-                let host = subnet + ".\(i)"
-                let nwEndpoint = NWEndpoint.Host(host)
-                guard let nwPort = NWEndpoint.Port(rawValue: UInt16(port)) else { continue }
-
-                let connection = NWConnection(host: nwEndpoint, port: nwPort, using: .tcp)
-
-                connection.stateUpdateHandler = { state in
-                    guard !didReturn else { return } // Skip if already found
-                    switch state {
-                    case .ready:
-                        print("✅ First responding host: \(host):\(port)")
-                        didReturn = true
-                        connection.cancel()
-                        completionHandler(host, nil)
-                    case .failed(_):
-                        connection.cancel()
-                    default:
-                        break
-                    }
-                }
-
-                connection.start(queue: .global())
-
-                // Timeout
-                DispatchQueue.global().asyncAfter(deadline: .now() + 1) {
-                    if !didReturn && connection.state != .ready {
-                        connection.cancel()
-                    }
-                }
-            }
-
-            // Safety fallback: return nil if no host responds
-            DispatchQueue.global().asyncAfter(deadline: .now() + 1) {
-                if !didReturn {
+            connection.stateUpdateHandler = { state in
+                guard !didReturn else {
+                    return
+                } // Skip if already found
+                switch state {
+                case .ready:
+                    print("✅ First responding host: \(host):\(port)")
                     didReturn = true
-                    completionHandler(nil, nil)
+                    connection.cancel()
+                    completionHandler(host, nil)
+                case .failed(_):
+                    connection.cancel()
+                default:
+                    break
                 }
             }
+
+            connection.start(queue: .global())
+
+            // Timeout
+            DispatchQueue.global().asyncAfter(deadline: .now() + 1) {
+                if !didReturn && connection.state != .ready {
+                    connection.cancel()
+                }
+            }
+        }
+
+        // Safety fallback: return nil if no host responds
+        DispatchQueue.global().asyncAfter(deadline: .now() + 1) {
+            if !didReturn {
+                didReturn = true
+                completionHandler(nil, nil)
+            }
+        }
     }
-    
-    
-    
+
+
     func getLocalIpAddress() -> String? {
         var address: String?
         var ifaddr: UnsafeMutablePointer<ifaddrs>?
@@ -72,11 +201,15 @@ class ConnectionManagerImpl: ConnectionManager {
         if getifaddrs(&ifaddr) == 0 {
             var ptr = ifaddr
             while ptr != nil {
-                defer { ptr = ptr?.pointee.ifa_next }
-                
-                guard let interface = ptr?.pointee else { continue }
+                defer {
+                    ptr = ptr?.pointee.ifa_next
+                }
+
+                guard let interface = ptr?.pointee else {
+                    continue
+                }
                 let addrFamily = interface.ifa_addr.pointee.sa_family
-                
+
                 // Only IPv4
                 if addrFamily == UInt8(AF_INET) {
                     let name = String(cString: interface.ifa_name)
@@ -96,11 +229,11 @@ class ConnectionManagerImpl: ConnectionManager {
                             NI_NUMERICHOST
                         ) == 0 {
                             let ip = String(cString: hostname)
-                            
+
                             // Ensure it's private LAN
                             if ip.hasPrefix("192.168.") ||
-                               ip.hasPrefix("10.") ||
-                               ip.range(of: #"^172\.(1[6-9]|2[0-9]|3[01])\."#, options: .regularExpression) != nil {
+                                   ip.hasPrefix("10.") ||
+                                   ip.range(of: #"^172\.(1[6-9]|2[0-9]|3[01])\."#, options: .regularExpression) != nil {
                                 address = ip
                                 break
                             }
@@ -112,5 +245,5 @@ class ConnectionManagerImpl: ConnectionManager {
         }
         return address
     }
-    
 }
+

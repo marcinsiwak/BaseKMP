@@ -27,6 +27,8 @@ class FinishViewModel(
     init {
         viewModelScope.launch {
             observeGameSession()
+        }
+        viewModelScope.launch {
             startCountdownTimer()
         }
     }
