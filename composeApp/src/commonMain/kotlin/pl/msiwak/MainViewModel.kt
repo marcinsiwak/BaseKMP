@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import pl.msiwak.cardsthegame.remoteconfig.RemoteConfig
 import pl.msiwak.common.model.GameState
 import pl.msiwak.destination.NavDestination
 import pl.msiwak.domain.game.ElectServerHostUseCase
@@ -27,7 +28,8 @@ class MainViewModel(
     private val observeGameSessionUseCase: ObserveGameSessionUseCase,
     private val electServerHostUseCase: ElectServerHostUseCase,
     private val observeHostIpUseCase: ObserveHostIpUseCase,
-    private val globalLoaderManager: GlobalLoaderManager
+    private val globalLoaderManager: GlobalLoaderManager,
+    private val remoteConfig: RemoteConfig
 ) : ViewModel() {
 
     private val _viewState = MutableStateFlow(MainState())
@@ -39,6 +41,7 @@ class MainViewModel(
 
     init {
         with(viewModelScope) {
+            launch { remoteConfig.fetch() }
             launch(errorHandler) { electServerHostUseCase() }
             launch { observeHostIpUseCase() }
             launch { observeWebSocketEventsUseCase() }

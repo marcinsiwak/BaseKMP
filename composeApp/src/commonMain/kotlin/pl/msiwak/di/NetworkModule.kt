@@ -15,5 +15,5 @@ internal val networkModule = module {
     single { GameService(get(), get(), get()) }
     single { ElectionService(get()) }
     single { ServerManager(get(), get()) }
-    single<GameManager> { GameManagerImpl() }
+    single<GameManager> { GameManagerImpl(get()) }
 }

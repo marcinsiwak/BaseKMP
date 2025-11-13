@@ -7,7 +7,6 @@ import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.cocoapods.CocoapodsExtension
-import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 
 class TargetConfigPlugin : Plugin<Project> {
     @OptIn(ExperimentalWasmDsl::class)
@@ -21,28 +20,7 @@ class TargetConfigPlugin : Plugin<Project> {
             iosX64()
             iosArm64()
             iosSimulatorArm64()
-            jvm()
             jvmToolchain(17)
-            wasmJs {
-                browser {
-                    val rootDirPath = project.rootDir.path
-                    val projectDirPath = project.projectDir.path
-                    outputModuleName.set("composeApp")
-
-                    commonWebpackConfig {
-                        if (outputFileName.isNullOrEmpty()) {
-                            outputFileName = "composeApp.js"
-                        }
-                        devServer = (devServer ?: KotlinWebpackConfig.DevServer()).apply {
-                            static = (static ?: mutableListOf()).apply {
-                                // Serve sources to debug inside browser
-                                add(rootDirPath)
-                                add(projectDirPath)
-                            }
-                        }
-                    }
-                }
-            }
         }
     }
 }

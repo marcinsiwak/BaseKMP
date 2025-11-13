@@ -31,7 +31,6 @@ kotlin {
                 implementation(libs.androidx.annotation.jvm)
             }
             commonMain.dependencies {
-                implementation(projects.shared.model)
                 implementation(projects.sharedFrontend.commonModel)
                 implementation(projects.sharedFrontend.gameManager)
 

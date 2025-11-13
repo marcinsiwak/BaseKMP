@@ -34,7 +34,7 @@ class CardsPreparationViewModel(
 
     fun onUiAction(action: CardsPreparationUiAction) {
         when (action) {
-            is CardsPreparationUiAction.OnTextInput -> _uiState.update { it.copy(text = action.text) }
+            is CardsPreparationUiAction.OnTextInput -> _uiState.update { it.copy(text = action.text, isSendEnabled = action.text.isNotBlank()) }
             is CardsPreparationUiAction.OnAddCardClicked -> viewModelScope.launch {
                 addCardUseCase(uiState.value.text)
                 _uiState.update { it.copy(text = "") }

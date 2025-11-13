@@ -30,6 +30,7 @@ fun TeamItemComponent(
     modifier: Modifier = Modifier,
     teamName: String,
     players: List<Player>,
+    isEnabled: Boolean = true,
     onClick: (() -> Unit) = {}
 ) {
     CustomBackground(
@@ -44,7 +45,7 @@ fun TeamItemComponent(
                     .defaultMinSize(minHeight = 140.dp)
                     .padding(vertical = 12.dp)
                     .clip(RoundedCornerShape(42.dp))
-                    .clickable { onClick() }
+                    .clickable(enabled = isEnabled) { onClick() }
                     .padding(vertical = 16.dp)
                     .align(Alignment.Center),
                 horizontalAlignment = Alignment.CenterHorizontally,

@@ -2,6 +2,8 @@ import Foundation
 import ComposeApp
 import sharedFrontend
 import SwiftUI
+import FirebaseCore
+import FirebaseCrashlytics
 
 class AppDelegate: NSObject, UIApplicationDelegate {
 
@@ -14,6 +16,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                     diProvider: DIProviderImpl.shared
                 )
             }
+            FirebaseApp.configure()
             
             return true
         }

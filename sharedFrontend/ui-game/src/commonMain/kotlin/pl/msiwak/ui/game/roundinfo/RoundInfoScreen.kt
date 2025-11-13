@@ -12,18 +12,28 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
+import cardsthegame.sharedfrontend.common_resources.generated.resources.Res
+import cardsthegame.sharedfrontend.common_resources.generated.resources.next_player
+import cardsthegame.sharedfrontend.common_resources.generated.resources.round
+import cardsthegame.sharedfrontend.common_resources.generated.resources.start
 import pl.msiwak.cardsthegame.common.resources.GameColors
 import pl.msiwak.ui.game.component.CustomButton
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun RoundInfoScreen(viewModel: RoundInfoViewModel = koinInject()) {
 
     val viewState = viewModel.uiState.collectAsState().value
+
+    BackHandler(enabled = true) {}
 
     Scaffold(
         backgroundColor = Color.Transparent
@@ -34,7 +44,7 @@ fun RoundInfoScreen(viewModel: RoundInfoViewModel = koinInject()) {
             verticalArrangement = Center
         ) {
             Text(
-                text = "Round ${viewState.round}",
+                text = stringResource(Res.string.round, viewState.round),
                 color = GameColors.OnPrimary,
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.h3

@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import pl.msiwak.domain.game.DisconnectUseCase
+import pl.msiwak.domain.game.GetUserIdUseCase
 import pl.msiwak.domain.game.JoinTeamUseCase
 import pl.msiwak.domain.game.ObserveGameSessionUseCase
 import pl.msiwak.domain.game.SetPlayerReadyUseCase
@@ -21,7 +22,8 @@ class LobbyViewModel(
     private val observeGameSessionUseCase: ObserveGameSessionUseCase,
     private val navigator: Navigator,
     private val setPlayerReadyUseCase: SetPlayerReadyUseCase,
-    private val joinTeamUseCase: JoinTeamUseCase
+    private val joinTeamUseCase: JoinTeamUseCase,
+    private val getUserIdUseCase: GetUserIdUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LobbyState())
@@ -77,7 +79,8 @@ class LobbyViewModel(
                                 team.name,
                                 players.filter { player -> team.playerIds.contains(player.id) }
                             )
-                        }
+                        },
+                        isButtonEnabled = teams.any { team ->  team.playerIds.contains(getUserIdUseCase()) }
                     )
                 }
             }

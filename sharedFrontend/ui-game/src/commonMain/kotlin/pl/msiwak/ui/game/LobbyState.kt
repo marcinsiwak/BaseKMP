@@ -7,5 +7,6 @@ data class LobbyState(
     val playersWithoutTeam: List<Player> = emptyList(),
     val gameIpAddress: String? = null,
     val teams: List<TeamItem> = emptyList(),
-    val isReady: Boolean = false
+    val isReady: Boolean = false,
+    val isButtonEnabled: Boolean = false,
 )

@@ -36,6 +36,7 @@ kotlin {
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
             implementation(libs.compose.navigation)
+            implementation(libs.compose.navigation.back)
             implementation(libs.koin.compose)
             implementation(libs.compottie)
         }

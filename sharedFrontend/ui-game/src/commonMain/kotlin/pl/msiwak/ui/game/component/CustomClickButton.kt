@@ -25,6 +25,7 @@ fun CustomClickButton(
     onClick: () -> Unit,
     imageNormal: Painter = painterResource(Res.drawable.img_correct_button),
     imagePressed: Painter = painterResource(Res.drawable.img_correct_button_pressed),
+    enabled: Boolean = true,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
@@ -32,6 +33,7 @@ fun CustomClickButton(
     Box(
         modifier = modifier
             .clickable(
+                enabled = enabled,
                 interactionSource = interactionSource,
                 indication = null,
                 onClick = onClick

@@ -25,7 +25,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -42,11 +44,14 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
+import cardsthegame.sharedfrontend.common_resources.generated.resources.card_idea_placeholder
+import cardsthegame.sharedfrontend.common_resources.generated.resources.cards_count
 import pl.msiwak.ui.game.component.CustomClickButton
 import pl.msiwak.ui.game.component.InputField
 
-@OptIn(ExperimentalResourceApi::class)
+@OptIn(ExperimentalResourceApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun CardsPreparationScreen(viewModel: CardsPreparationViewModel = koinInject()) {
 
@@ -76,6 +81,8 @@ fun CardsPreparationScreen(viewModel: CardsPreparationViewModel = koinInject()) 
             viewModel.onUiAction(CardsPreparationUiAction.OnAnimationFinished)
         }
     }
+
+    BackHandler(enabled = true) {}
 
     Scaffold(
         modifier = Modifier.imePadding(),
@@ -112,7 +119,7 @@ fun CardsPreparationScreen(viewModel: CardsPreparationViewModel = koinInject()) 
                 with(viewState.cardLimits) {
                     Text(
                         modifier = Modifier.padding(16.dp),
-                        text = "Cards: $first/$second",
+                        text = stringResource(Res.string.cards_count, first, second),
                         color = Color.Black
                     )
                 }
@@ -128,13 +135,14 @@ fun CardsPreparationScreen(viewModel: CardsPreparationViewModel = koinInject()) 
                         modifier = Modifier.weight(1f).focusRequester(focusRequester),
                         value = viewState.text,
                         onValueChange = { viewModel.onUiAction(CardsPreparationUiAction.OnTextInput(it)) },
-                        placeholder = "Your card idea...",
+                        placeholder = stringResource(Res.string.card_idea_placeholder),
                     )
                     CustomClickButton(
                         modifier = Modifier.height(IntrinsicSize.Min).bringIntoViewRequester(bringIntoViewRequester),
                         onClick = {
                             viewModel.onUiAction(CardsPreparationUiAction.OnAddCardClicked)
                         },
+                        enabled = viewState.isSendEnabled,
                         imageNormal = painterResource(Res.drawable.img_send_button),
                         imagePressed = painterResource(Res.drawable.img_send_button_pressed)
                     )

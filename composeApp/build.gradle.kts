@@ -1,4 +1,3 @@
-import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import pl.msiwak.convention.config.baseSetup
 
 plugins {
@@ -9,25 +8,34 @@ plugins {
     alias(libs.plugins.kotlinCocoapods)
     id("pl.msiwak.convention.target.config")
     id("pl.msiwak.convention.android.config")
+    id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
 }
 
 apply(from = "$rootDir/gradle/buildVariants.gradle")
+
+val versionMajor = 1
+val versionMinor = 0
+val versionPatch = 0
+val versionBuild = 0
+val versionCode = 1_000_000 * versionMajor + 10_000 * versionMinor + 100 * versionPatch + versionBuild
+
+val appVersionCode: Int = Integer.valueOf(versionCode)
 
 kotlin {
     cocoapods {
         baseSetup()
         podfile = project.file("../iosApp/Podfile")
-
         framework {
             baseName = "ComposeApp"
+            linkerOpts("-ObjC")
 
             export(projects.sharedFrontend.network)
         }
-    }
 
-    @OptIn(ExperimentalWasmDsl::class)
-    wasmJs {
-        binaries.executable()
+        pod("FirebaseCore", linkOnly = true)
+        pod("FirebaseCrashlytics", linkOnly = true)
+        pod("FirebaseRemoteConfig", linkOnly = true)
     }
 
     sourceSets {
@@ -49,6 +57,7 @@ kotlin {
             implementation(projects.sharedFrontend.domainImpl)
             implementation(projects.sharedFrontend.gameManager)
             implementation(projects.sharedFrontend.globalLoaderManager)
+            implementation(projects.sharedFrontend.remoteConfig)
             api(projects.sharedFrontend.network)
 
             implementation(libs.koin.core)
@@ -61,6 +70,7 @@ kotlin {
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
             implementation(libs.compose.navigation)
+            implementation(libs.firebase.gitlive.crashlytics)
         }
     }
 }
@@ -70,8 +80,8 @@ android {
 
     defaultConfig {
         applicationId = "pl.msiwak.cardsthegame"
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = appVersionCode
+        versionName = "$versionMajor.$versionMinor.$versionPatch"
     }
     buildTypes {
         getByName("release") {

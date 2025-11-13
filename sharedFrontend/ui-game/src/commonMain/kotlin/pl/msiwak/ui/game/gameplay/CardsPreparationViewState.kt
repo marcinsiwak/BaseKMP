@@ -6,5 +6,6 @@ data class CardsPreparationViewState(
     val text: String = "",
     val cards: List<Card> = emptyList(),
     val isAnimationPlaying: Boolean = false,
-    val cardLimits: Pair<Int, Int> = Pair(0, 0)
+    val cardLimits: Pair<Int, Int> = Pair(0, 0),
+    val isSendEnabled: Boolean = false
 )

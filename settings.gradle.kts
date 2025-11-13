@@ -30,8 +30,6 @@ dependencyResolutionManagement {
 }
 
 include(":composeApp")
-include(":shared")
-include(":shared:model")
 include(":sharedFrontend")
 include(":sharedFrontend:buildConfig")
 include(":sharedFrontend:navigation")
@@ -46,10 +44,4 @@ include(":sharedFrontend:domain")
 include(":sharedFrontend:domain-impl")
 include(":sharedFrontend:game-manager")
 include(":sharedFrontend:global-loader-manager")
-
-include(":server")
-include(":server:data")
-include(":server:domain")
-include(":server:database")
-include(":server:routing")
-include(":server:network")
+include(":sharedFrontend:remote-config")

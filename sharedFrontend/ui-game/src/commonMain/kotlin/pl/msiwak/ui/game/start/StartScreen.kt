@@ -16,20 +16,30 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
+import cardsthegame.sharedfrontend.common_resources.generated.resources.Res
+import cardsthegame.sharedfrontend.common_resources.generated.resources.game_title
+import cardsthegame.sharedfrontend.common_resources.generated.resources.join
+import cardsthegame.sharedfrontend.common_resources.generated.resources.player_name
 import pl.msiwak.ui.game.component.CustomButton
 import pl.msiwak.ui.game.component.InputField
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun StartScreen(
     viewModel: StartViewModel = koinInject()
 ) {
     val state = viewModel.uiState.collectAsState()
+
+    BackHandler(enabled = true) {}
 
     Scaffold(
         backgroundColor = Color.Transparent
@@ -43,7 +53,7 @@ fun StartScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text(
-                    text = "Cards The Game",
+                    text = stringResource(Res.string.game_title),
                     style = MaterialTheme.typography.h4,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center
@@ -54,7 +64,7 @@ fun StartScreen(
                 InputField(
                     value = state.value.playerName,
                     onValueChange = { viewModel.onUiAction(StartUiAction.OnPlayerNameChanged(it)) },
-                    placeholder = "Player Name",
+                    placeholder = stringResource(Res.string.player_name),
                     enabled = !state.value.isLoading
                 )
 
@@ -62,7 +72,7 @@ fun StartScreen(
 
                 CustomButton(
                     modifier = Modifier.padding(horizontal = 24.dp),
-                    text = "Join",
+                    text = stringResource(Res.string.join),
                     onClick = { viewModel.onUiAction(StartUiAction.Join) },
                     enabled = !state.value.isLoading && state.value.playerName.isNotBlank()
                 )

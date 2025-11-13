@@ -1,5 +1,6 @@
 package pl.msiwak.di
 
+import pl.msiwak.cardsthegame.remoteconfig.di.remoteConfigModule
 import pl.msiwak.globalloadermanager.di.globalLoaderManagerModule
 
 internal val appModule = listOf(
@@ -8,5 +9,6 @@ internal val appModule = listOf(
     useCaseModule,
     repositoryModule,
     networkModule,
-    globalLoaderManagerModule
+    globalLoaderManagerModule,
+    remoteConfigModule
 )

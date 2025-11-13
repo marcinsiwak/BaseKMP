@@ -13,7 +13,9 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -21,15 +23,25 @@ import cardsthegame.sharedfrontend.common_resources.generated.resources.Res
 import cardsthegame.sharedfrontend.common_resources.generated.resources.img_incorrect_button
 import cardsthegame.sharedfrontend.common_resources.generated.resources.img_incorrect_button_pressed
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
+import cardsthegame.sharedfrontend.common_resources.generated.resources.finish_round
+import cardsthegame.sharedfrontend.common_resources.generated.resources.now_playing
+import cardsthegame.sharedfrontend.common_resources.generated.resources.round
+import cardsthegame.sharedfrontend.common_resources.generated.resources.time_remaining
+import cardsthegame.sharedfrontend.common_resources.generated.resources.time_up
+import cardsthegame.sharedfrontend.common_resources.generated.resources.your_card
 import pl.msiwak.cardsthegame.common.resources.GameColors
 import pl.msiwak.ui.game.component.CustomButton
 import pl.msiwak.ui.game.component.CustomClickButton
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun RoundScreen(viewModel: RoundViewModel = koinInject()) {
 
     val viewState = viewModel.uiState.collectAsState().value
+
+    BackHandler(enabled = true) {}
 
     Scaffold(
         backgroundColor = Color.Transparent
@@ -42,7 +54,7 @@ fun RoundScreen(viewModel: RoundViewModel = koinInject()) {
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "Round ${viewState.round}",
+                text = stringResource(Res.string.round, viewState.round),
                 color = GameColors.OnPrimary,
                 style = MaterialTheme.typography.h3
             )
@@ -51,7 +63,7 @@ fun RoundScreen(viewModel: RoundViewModel = koinInject()) {
 
             Text(
                 modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 24.dp),
-                text = if (viewState.timeRemaining > 0) "Time: ${viewState.timeRemaining}" else "Time's up!",
+                text = if (viewState.timeRemaining > 0) stringResource(Res.string.time_remaining, viewState.timeRemaining) else stringResource(Res.string.time_up),
                 color = GameColors.OnPrimary,
                 style = MaterialTheme.typography.h4
             )
@@ -60,7 +72,7 @@ fun RoundScreen(viewModel: RoundViewModel = koinInject()) {
                 viewState.currentCard?.text?.let {
                     Text(
                         modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
-                        text = "Your card:",
+                        text = stringResource(Res.string.your_card),
                         color = GameColors.OnPrimary,
                         style = MaterialTheme.typography.h4,
                         textAlign = TextAlign.Center
@@ -96,7 +108,7 @@ fun RoundScreen(viewModel: RoundViewModel = koinInject()) {
                 }
             } else {
                 Text(
-                    text = "Now playing: ${viewState.currentPlayerName}",
+                    text = stringResource(Res.string.now_playing, viewState.currentPlayerName ?: ""),
                     color = GameColors.OnPrimary
                 )
             }
@@ -107,7 +119,7 @@ fun RoundScreen(viewModel: RoundViewModel = koinInject()) {
                     onClick = {
                         viewModel.onUiAction(RoundUiAction.OnRoundFinished)
                     },
-                    text = "Finish Round"
+                    text = stringResource(Res.string.finish_round)
                 )
             }
         }

@@ -17,6 +17,7 @@ ksp = "2.0.21-1.0.25"
 buildKonfig = "0.17.0"
 koin = "4.1.0-Beta1"
 compose-navigation = "2.9.0"
+compose-navigation-back = "1.9.3"
 exposed = "0.53.0"
 postgresql_driver_version = "42.7.2"
 flyway_version = "8.5.4"
@@ -26,6 +27,9 @@ detekt = "1.23.8"
 annotationJvm = "1.9.1"
 compottie = "2.0.0"
 kotlin-datetime = "0.7.1"
+firebaseGitlive = "2.4.0"
+google-services = "4.4.4"
+firebase-crashlytics = "3.0.6"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -52,7 +56,7 @@ flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway_versi
 compottie = { module = "io.github.alexzhirkevich:compottie", version.ref = "compottie" }
 
 compose-navigation = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "compose-navigation" }
-compose-navigation-back = { module = "org.jetbrains.compose.ui:ui-backhandler", version = "compose-navigation-back" }
+compose-navigation-back = { module = "org.jetbrains.compose.ui:ui-backhandler", version.ref = "compose-navigation-back" }
 kotlinx-serialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlin-datetime" }
 
@@ -78,6 +82,9 @@ ktor-server-json = { module = "io.ktor:ktor-serialization-kotlinx-json-jvm" }
 
 kotlinx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 
+firebase-gitlive-crashlytics = { module = "dev.gitlive:firebase-crashlytics", version.ref = "firebaseGitlive" }
+firebase-gitlive-remoteConfig = { module = "dev.gitlive:firebase-config", version.ref = "firebaseGitlive" }
+
 # Gradle scripts depdendecies
 gradle-ksp = { module = "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin", version.ref = "ksp" }
 gradle-kotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
@@ -99,3 +106,5 @@ buildKonfig = { id = "com.codingfeline.buildkonfig", version.ref = "buildKonfig"
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+googleServices = { id = "com.google.gms.google-services", version.ref = "google-services" }
+firebaseCrashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebase-crashlytics" }

@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import pl.msiwak.data.game.GameRepository
 import pl.msiwak.destination.NavDestination
 import pl.msiwak.domain.game.FindGameIPAddressUseCase
 import pl.msiwak.domain.game.JoinGameUseCase
@@ -18,8 +17,7 @@ import pl.msiwak.navigator.Navigator
 class StartViewModel(
     private val joinGameUseCase: JoinGameUseCase,
     private val findGameIPAddressUseCase: FindGameIPAddressUseCase,
-    private val navigator: Navigator,
-    private val gameRepository: GameRepository
+    private val navigator: Navigator
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(StartState())

@@ -22,7 +22,6 @@ kotlin {
         commonMain.dependencies {
             implementation(projects.sharedFrontend.network)
             implementation(projects.sharedFrontend.commonModel)
-            implementation(projects.shared.model)
             implementation(projects.sharedFrontend.globalLoaderManager)
 
             implementation(libs.kotlinx.coroutines)

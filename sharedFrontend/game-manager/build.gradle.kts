@@ -21,6 +21,8 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(projects.sharedFrontend.commonModel)
+            implementation(projects.sharedFrontend.remoteConfig)
+
             implementation(libs.kotlinx.coroutines)
             implementation(libs.koin.core)
 

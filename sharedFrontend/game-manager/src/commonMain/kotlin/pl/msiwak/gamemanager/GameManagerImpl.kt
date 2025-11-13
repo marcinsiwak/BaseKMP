@@ -6,11 +6,11 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import pl.msiwak.cardsthegame.remoteconfig.RemoteConfig
 import pl.msiwak.common.model.Card
 import pl.msiwak.common.model.GameSession
 import pl.msiwak.common.model.GameState
@@ -22,7 +22,9 @@ import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalTime::class, ExperimentalUuidApi::class)
-class GameManagerImpl : GameManager {
+class GameManagerImpl(
+    private val remoteConfig: RemoteConfig
+) : GameManager {
     private val _currentGameSession = MutableStateFlow<GameSession?>(null)
     override val currentGameSession: StateFlow<GameSession?> = _currentGameSession.asStateFlow()
 
@@ -126,10 +128,21 @@ class GameManagerImpl : GameManager {
                 player
             }
         } ?: emptyList()
+        val counts = currentGameSession.value?.teams?.map { it.playerIds.size }
+        val min = counts?.min() ?: 0
+        val max = counts?.max() ?: 0
         _currentGameSession.update {
             it?.copy(
                 players = updatedPlayers,
-                gameState = if (updatedPlayers.all { player -> player.isReady }) GameState.PREPARING_CARDS else it.gameState
+                gameState = if (
+                    updatedPlayers.size >= remoteConfig.getMinPlayers() &&
+                    updatedPlayers.all { player -> player.isReady } &&
+                    max - min <= 1
+                ) {
+                    GameState.PREPARING_CARDS
+                } else {
+                    it.gameState
+                }
             )
         }
     }
