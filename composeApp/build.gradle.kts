@@ -12,8 +12,6 @@ plugins {
     id("com.google.firebase.crashlytics")
 }
 
-apply(from = "$rootDir/gradle/buildVariants.gradle")
-
 val versionMajor = 1
 val versionMinor = 0
 val versionPatch = 0

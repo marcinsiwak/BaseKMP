@@ -8,8 +8,6 @@ plugins {
     id("pl.msiwak.convention.target.config")
 }
 
-apply(from = "$rootDir/gradle/buildVariants.gradle")
-
 kotlin {
     cocoapods {
         baseSetup()
