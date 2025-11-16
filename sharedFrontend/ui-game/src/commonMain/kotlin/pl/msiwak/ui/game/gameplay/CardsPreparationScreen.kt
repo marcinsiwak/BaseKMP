@@ -132,7 +132,7 @@ fun CardsPreparationScreen(viewModel: CardsPreparationViewModel = koinInject()) 
                     horizontalArrangement = Arrangement.SpaceAround
                 ) {
                     InputField(
-                        modifier = Modifier.weight(1f).focusRequester(focusRequester),
+                        modifier = Modifier.focusRequester(focusRequester),
                         value = viewState.text,
                         onValueChange = { viewModel.onUiAction(CardsPreparationUiAction.OnTextInput(it)) },
                         placeholder = stringResource(Res.string.card_idea_placeholder),
