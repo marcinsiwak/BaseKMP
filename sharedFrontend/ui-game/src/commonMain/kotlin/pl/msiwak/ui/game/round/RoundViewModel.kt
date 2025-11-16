@@ -14,15 +14,14 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
+import pl.msiwak.cardsthegame.remoteconfig.RemoteConfig
 import pl.msiwak.common.model.Card
 import pl.msiwak.common.model.GameState
 import pl.msiwak.domain.game.ContinueGameUseCase
 import pl.msiwak.domain.game.GetUserIdUseCase
 import pl.msiwak.domain.game.ObserveGameSessionUseCase
 import pl.msiwak.domain.game.SetCorrectAnswerUseCase
-import pl.msiwak.navigator.Navigator
 import kotlin.coroutines.cancellation.CancellationException
-import kotlin.math.round
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
@@ -31,7 +30,7 @@ class RoundViewModel(
     private val getUserIdUseCase: GetUserIdUseCase,
     private val continueGameUseCase: ContinueGameUseCase,
     private val setCorrectAnswerUseCase: SetCorrectAnswerUseCase,
-    val navigator: Navigator
+    private val remoteConfig: RemoteConfig
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RoundViewState())
@@ -124,7 +123,7 @@ class RoundViewModel(
         }
 
 
-        val roundDurationSeconds = 5
+        val roundDurationSeconds = remoteConfig.getRoundDefaultTime()
 
         val currentTime = Clock.System.now()
         val startInstant = currentRoundStartDate.toInstant(TimeZone.UTC)

@@ -28,6 +28,7 @@ kotlin {
             implementation(projects.sharedFrontend.domain)
             implementation(projects.sharedFrontend.gameManager)
             implementation(projects.sharedFrontend.data)
+            implementation(projects.sharedFrontend.remoteConfig)
 
             implementation(compose.runtime)
             implementation(compose.foundation)

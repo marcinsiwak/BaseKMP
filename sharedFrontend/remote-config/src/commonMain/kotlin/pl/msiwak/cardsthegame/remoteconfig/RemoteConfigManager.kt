@@ -7,10 +7,12 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 
 private const val MIN_PLAYERS_KEY = "min_players_number"
+private const val ROUND_TIME_KEY = "round_default_time"
 
 interface RemoteConfig {
     suspend fun fetch()
     fun getMinPlayers(): Long
+    fun getRoundDefaultTime(): Int
 }
 
 class RemoteConfigImpl : RemoteConfig {
@@ -25,5 +27,7 @@ class RemoteConfigImpl : RemoteConfig {
     }
 
     override fun getMinPlayers(): Long = remoteConfig.get<Long>(MIN_PLAYERS_KEY)
+
+    override fun getRoundDefaultTime(): Int = remoteConfig.get<Long>(ROUND_TIME_KEY).toInt()
 
 }
