@@ -30,10 +30,8 @@ fun CocoapodsExtension.baseSetup() {
     homepage = "https://github.com/marcinsiwak/BaseKMP"
     version = "1.0"
     ios.deploymentTarget = "16.2"
-    xcodeConfigurationToNativeBuildType["productionRelease"] =
+    xcodeConfigurationToNativeBuildType["release"] =
         org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType.RELEASE
-    xcodeConfigurationToNativeBuildType["productionDebug"] =
-        org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType.DEBUG
-    xcodeConfigurationToNativeBuildType["stagingDebug"] =
+    xcodeConfigurationToNativeBuildType["debug"] =
         org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType.DEBUG
 }

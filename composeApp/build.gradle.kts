@@ -1,4 +1,6 @@
 import pl.msiwak.convention.config.baseSetup
+import java.io.FileInputStream
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -81,9 +83,35 @@ android {
         versionCode = appVersionCode
         versionName = "$versionMajor.$versionMinor.$versionPatch"
     }
+    val signingPropertiesFile = rootProject.file("signing/release.properties")
+
+    signingConfigs {
+        with(signingPropertiesFile) {
+            if (!exists()) return@with
+
+            val releaseKeystoreProp = Properties()
+            releaseKeystoreProp.load(FileInputStream(this))
+            maybeCreate("release")
+            getByName("release") {
+                keyAlias = releaseKeystoreProp["keyAlias"] as String
+                keyPassword = releaseKeystoreProp["keyPassword"] as String
+                storeFile = rootProject.file(releaseKeystoreProp["storeFile"] as String)
+                storePassword = releaseKeystoreProp["storePassword"] as String
+            }
+        }
+    }
+
     buildTypes {
-        getByName("release") {
-            isMinifyEnabled = false
+        release {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.getByName("release")
+
+        }
+        debug {
+            applicationIdSuffix = ".debug"
+            matchingFallbacks.add("release")
         }
     }
 }

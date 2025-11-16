@@ -21,6 +21,7 @@ captures
 /iosApp/Podfile.lock
 /iosApp/Pods
 /composeApp/composeApp.podspec
+/signing/*
 
 /sharedFrontend/sharedFrontend.podspec
 /iosApp/iosApp.xcworkspace/xcshareddata/swiftpm/Package.resolved
