@@ -8,7 +8,7 @@
 
     <!-- StartScreen -->
     <string name="game_title">Cards The Game</string>
-    <string name="player_name">Player Name</string>
+    <string name="player_name">Player Name...</string>
     <string name="join">Join</string>
 
     <!-- FinishScreen -->
@@ -25,7 +25,7 @@
     <!-- RoundScreen -->
     <string name="round">Round %1$d</string>
     <string name="time_remaining">Time: %1$d</string>
-    <string name="time_up">Time\'s up!</string>
+    <string name="time_up">Time's up!</string>
     <string name="your_card">Your card:</string>
     <string name="now_playing">Now playing: %1$s</string>
     <string name="finish_round">Finish Round</string>
