@@ -1,10 +1,12 @@
 package pl.msiwak.data.game
 
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
+import pl.msiwak.common.error.LocalIpNotFoundException
 import pl.msiwak.common.model.GameSession
 import pl.msiwak.common.model.GameState
 import pl.msiwak.common.model.WebSocketEvent
@@ -41,12 +43,24 @@ class GameRepository(
     }
 
     suspend fun observeElectionHostIp() {
-        val localIP = gameService.getDeviceIpAddress() ?: throw Exception("Cannot get local IP address")
+        val localIP = getDeviceIpAddress()
+
         electionService.hostIp.collectLatest {
             hostIp = it
             println("Observed new host IP: $it")
             if (it == localIP) gameService.startServer(currentGameSession.value)
         }
+    }
+
+    private suspend fun getDeviceIpAddress(): String {
+        repeat(5) {
+            try {
+                return gameService.getDeviceIpAddress() ?: throw LocalIpNotFoundException()
+            } catch (_: LocalIpNotFoundException) {
+                delay(1000)
+            }
+        }
+        return gameService.getDeviceIpAddress() ?: throw LocalIpNotFoundException()
     }
 
     suspend fun findGame(): String? {

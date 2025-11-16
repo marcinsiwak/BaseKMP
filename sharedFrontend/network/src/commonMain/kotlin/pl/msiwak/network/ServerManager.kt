@@ -84,7 +84,11 @@ class ServerManager(
     }
 
     suspend fun startServer(host: String, port: Int) {
-        ktorServer.startServer(host, port)
+        runCatching {
+            ktorServer.startServer(host, port)
+        }.onFailure {
+            println("Server start failed: ${it.message}")
+        }
     }
 
     suspend fun createGame(adminId: String, ipAddress: String?, gameSession: GameSession?) {

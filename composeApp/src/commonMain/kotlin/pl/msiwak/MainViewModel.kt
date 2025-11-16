@@ -41,12 +41,12 @@ class MainViewModel(
 
     init {
         with(viewModelScope) {
-            launch { remoteConfig.fetch() }
+            launch(errorHandler) { remoteConfig.fetch() }
             launch(errorHandler) { electServerHostUseCase() }
-            launch { observeHostIpUseCase() }
-            launch { observeWebSocketEventsUseCase() }
-            launch { observeGameSession() }
-            launch {
+            launch(errorHandler) { observeHostIpUseCase() }
+            launch(errorHandler) { observeWebSocketEventsUseCase() }
+            launch(errorHandler) { observeGameSession() }
+            launch(errorHandler) {
                 globalLoaderManager.isLoading.collectLatest { isLoading ->
                     _viewState.update { it.copy(isLoading = isLoading) }
                 }
