@@ -2,6 +2,7 @@ package pl.msiwak.di
 
 import org.koin.dsl.module
 import pl.msiwak.domain.game.AddCardUseCase
+import pl.msiwak.domain.game.CheckWifiIsOnUseCase
 import pl.msiwak.domain.game.ConnectPlayerToGameUseCase
 import pl.msiwak.domain.game.ContinueGameUseCase
 import pl.msiwak.domain.game.DisconnectUseCase
@@ -18,6 +19,7 @@ import pl.msiwak.domain.game.SendClientEventUseCase
 import pl.msiwak.domain.game.SetCorrectAnswerUseCase
 import pl.msiwak.domain.game.SetPlayerReadyUseCase
 import pl.msiwak.domainimpl.game.AddCardUseCaseImpl
+import pl.msiwak.domainimpl.game.CheckWifiIsOnUseCaseImpl
 import pl.msiwak.domainimpl.game.ConnectPlayerToGameUseCaseImpl
 import pl.msiwak.domainimpl.game.ContinueGameUseCaseImpl
 import pl.msiwak.domainimpl.game.DisconnectUseCaseImpl
@@ -51,4 +53,5 @@ internal val useCaseModule = module {
     factory<SetCorrectAnswerUseCase> { SetCorrectAnswerUseCaseImpl(get()) }
     factory<ElectServerHostUseCase> { ElectServerHostUseCaseImpl(get()) }
     factory<ObserveHostIpUseCase> { ObserveHostIpUseCaseImpl(get()) }
+    factory<CheckWifiIsOnUseCase> { CheckWifiIsOnUseCaseImpl(get()) }
 }

@@ -3,6 +3,7 @@ package pl.msiwak
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,6 +16,7 @@ import kotlinx.coroutines.launch
 import pl.msiwak.cardsthegame.remoteconfig.RemoteConfig
 import pl.msiwak.common.model.GameState
 import pl.msiwak.destination.NavDestination
+import pl.msiwak.domain.game.CheckWifiIsOnUseCase
 import pl.msiwak.domain.game.ElectServerHostUseCase
 import pl.msiwak.domain.game.ObserveGameSessionUseCase
 import pl.msiwak.domain.game.ObserveHostIpUseCase
@@ -29,7 +31,8 @@ class MainViewModel(
     private val electServerHostUseCase: ElectServerHostUseCase,
     private val observeHostIpUseCase: ObserveHostIpUseCase,
     private val globalLoaderManager: GlobalLoaderManager,
-    private val remoteConfig: RemoteConfig
+    private val remoteConfig: RemoteConfig,
+    private val checkWifiIsOnUseCase: CheckWifiIsOnUseCase
 ) : ViewModel() {
 
     private val _viewState = MutableStateFlow(MainState())
@@ -41,16 +44,51 @@ class MainViewModel(
 
     init {
         with(viewModelScope) {
+            launch { _viewState.update { it.copy(isWifiDialogVisible = !checkWifiIsOnUseCase()) } }
             launch(errorHandler) { remoteConfig.fetch() }
-            launch(errorHandler) { electServerHostUseCase() }
-            launch(errorHandler) { observeHostIpUseCase() }
             launch(errorHandler) { observeWebSocketEventsUseCase() }
             launch(errorHandler) { observeGameSession() }
             launch(errorHandler) {
-                globalLoaderManager.isLoading.collectLatest { isLoading ->
-                    _viewState.update { it.copy(isLoading = isLoading) }
+                globalLoaderManager.globalLoaderState.collectLatest { loaderState ->
+                    _viewState.update {
+                        it.copy(
+                            isLoading = loaderState.isLoading,
+                            loaderMessage = loaderState.message
+                        )
+                    }
                 }
             }
+        }
+        initServerElection()
+    }
+
+    private fun initServerElection() {
+        with(viewModelScope) {
+            launch {
+                if (checkWifiIsOnUseCase()) {
+                    launch(errorHandler) { electServerHostUseCase() }
+                    launch(errorHandler) { observeHostIpUseCase() }
+                }
+            }
+        }
+    }
+
+    fun onUIAction(action: MainAction) {
+        when (action) {
+            MainAction.OnDialogConfirm -> {
+                viewModelScope.launch {
+                    _viewState.update { it.copy(isLoading = true, isWifiDialogVisible = false) }
+                    delay(500)
+                    if (checkWifiIsOnUseCase()) {
+                        initServerElection()
+                        _viewState.update { it.copy(isWifiDialogVisible = false, isLoading = false) }
+                    } else {
+                        _viewState.update { it.copy(isWifiDialogVisible = true) }
+                    }
+                }
+            }
+
+            MainAction.OnDialogDismiss -> _viewState.update { it.copy(isWifiDialogVisible = false) }
         }
     }
 

@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import pl.msiwak.common.error.LocalIpNotFoundException
 import pl.msiwak.common.model.GameSession
@@ -23,6 +24,8 @@ class GameRepository(
     val currentGameSession: StateFlow<GameSession?> = _currentGameSession.asStateFlow()
 
     private var hostIp: String? = null
+
+    suspend fun checkWifiIsOn() = electionService.checkWifiIsOn()
 
     suspend fun observeWebSocketEvents() {
         gameService.observeWebSocketEvents().collectLatest {
@@ -43,11 +46,13 @@ class GameRepository(
     }
 
     suspend fun observeElectionHostIp() {
+        globalLoaderManager.showLoading("Waiting for host")
         val localIP = getDeviceIpAddress()
 
-        electionService.hostIp.collectLatest {
+        electionService.hostIp.filterNotNull().collectLatest {
             hostIp = it
             println("Observed new host IP: $it")
+            globalLoaderManager.hideLoading()
             if (it == localIP) gameService.startServer(currentGameSession.value)
         }
     }

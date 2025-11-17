@@ -33,6 +33,8 @@ class ElectionService(
         println("ElectionService Error: ${throwable.message}")
     }
 
+    suspend fun checkWifiIsOn() = connectionManager.checkWifiIsOn().isRunning
+
     suspend fun startElection() = withContext(Dispatchers.IO) {
         hostElectionScope.launch(errorHandler) {
             connectionManager.startUdpListener(port = 60000).collectLatest { message ->

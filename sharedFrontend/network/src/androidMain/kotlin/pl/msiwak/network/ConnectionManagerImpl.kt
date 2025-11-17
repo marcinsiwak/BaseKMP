@@ -25,7 +25,17 @@ import java.net.InetSocketAddress
 import java.net.Socket
 import java.net.SocketTimeoutException
 
+
 class ConnectionManagerImpl : ConnectionManager {
+
+    @RequiresPermission(Manifest.permission.ACCESS_NETWORK_STATE)
+    override suspend fun checkWifiIsOn(): WifiState {
+        val context = AppContext.get()
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val mWifi = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI)
+
+        return WifiState(isRunning = mWifi?.isConnected ?: false)
+    }
 
     @RequiresPermission(Manifest.permission.ACCESS_NETWORK_STATE)
     override fun getLocalIpAddress(): String? {

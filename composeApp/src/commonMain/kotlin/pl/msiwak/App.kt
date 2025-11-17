@@ -1,16 +1,27 @@
 package pl.msiwak
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.compose.rememberNavController
 import cardsthegame.sharedfrontend.common_resources.generated.resources.Res
 import cardsthegame.sharedfrontend.common_resources.generated.resources.img_background
@@ -57,8 +68,32 @@ fun App(
 
             if (viewState.value.isLoading) {
                 GlobalLoader(
-                    modifier = Modifier.align(Center)
+                    modifier = Modifier.align(Center),
+                    message = viewState.value.loaderMessage
                 )
+            }
+            if (viewState.value.isWifiDialogVisible) {
+                Dialog(
+                    properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false),
+                    onDismissRequest = { viewModel.onUIAction(MainAction.OnDialogDismiss) }
+                ) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth().background(Color.White).padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = "Turn on Wifi",
+                        )
+                        Button(
+                            onClick = {
+                                viewModel.onUIAction(MainAction.OnDialogConfirm)
+                            }
+                        ) {
+                            Text(text = "Done")
+                        }
+                    }
+                }
             }
         }
     }

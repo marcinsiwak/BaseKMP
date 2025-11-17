@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import pl.msiwak.destination.NavDestination
+import pl.msiwak.domain.game.CheckWifiIsOnUseCase
 import pl.msiwak.domain.game.FindGameIPAddressUseCase
 import pl.msiwak.domain.game.JoinGameUseCase
 import pl.msiwak.navigator.Navigator

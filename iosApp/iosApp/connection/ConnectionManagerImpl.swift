@@ -13,9 +13,22 @@ import sharedFrontend
 import Combine
 
 class ConnectionManagerImpl: ConnectionManager {
+    func checkWifiIsOn(completionHandler: @escaping (WifiState?, (any Error)?) -> Void) {
+        let monitor = NWPathMonitor()
+        let queue = DispatchQueue.global(qos: .background)
+
+        monitor.pathUpdateHandler = { path in
+            completionHandler(WifiState(isRunning: path.usesInterfaceType(.wifi)), nil)
+            monitor.cancel()
+        }
+
+        monitor.start(queue: queue)
+    }
+    
     
     private let subject = PassthroughSubject<String, Never>()
     private var listener: NWListener?
+
 
     func getBroadcastAddress() -> String? {
         var ifaddr: UnsafeMutablePointer<ifaddrs>?
