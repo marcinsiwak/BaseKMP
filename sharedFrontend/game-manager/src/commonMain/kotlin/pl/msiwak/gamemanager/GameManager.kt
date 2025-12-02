@@ -8,7 +8,7 @@ interface GameManager {
     val currentGameSession: StateFlow<GameSession?>
 
     suspend fun createGame(adminId: String, ipAddress: String?, gameSession: GameSession?)
-    suspend fun joinGame(player: Player)
+    suspend fun joinGame(playerId: String)
     suspend fun leaveGame(playerId: String)
     suspend fun disablePlayer(playerId: String)
     suspend fun startGame(gameId: String)
@@ -25,4 +25,5 @@ interface GameManager {
     suspend fun continueGame()
     suspend fun joinTeam(userId: String, teamName: String)
     suspend fun setCorrectAnswer(cardText: String)
+    suspend fun addPlayerName(userId: String, name: String)
 }

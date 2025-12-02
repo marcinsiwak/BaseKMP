@@ -20,6 +20,7 @@ kotlin {
         commonMain.dependencies {
             implementation(projects.sharedFrontend.data)
             implementation(projects.sharedFrontend.commonModel)
+            implementation(projects.libConnection)
             implementation(libs.kotlinx.coroutines)
         }
     }

@@ -26,6 +26,44 @@
     },
     {
       "client_info": {
+        "mobilesdk_app_id": "1:865241316319:android:082e0965fc02448b2ba26a",
+        "android_client_info": {
+          "package_name": "pl.msiwak.cardsthegame.android"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDZ2a8KB_IQ7mBXXqkgZYC6suG3vntRcsI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:865241316319:android:2fe8ccf230e5db2a2ba26a",
+        "android_client_info": {
+          "package_name": "pl.msiwak.cardsthegame.android.debug"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDZ2a8KB_IQ7mBXXqkgZYC6suG3vntRcsI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:865241316319:android:ee24f1e95f8a9af52ba26a",
         "android_client_info": {
           "package_name": "pl.msiwak.cardsthegame.debug"

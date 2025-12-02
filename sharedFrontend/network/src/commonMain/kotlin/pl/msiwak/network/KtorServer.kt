@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.Flow
 interface KtorServer {
 
     val messages: Flow<String>
-    suspend fun startServer(host: String, port: Int)
+    fun startServer(host: String, port: Int)
     suspend fun stopServer()
 
     suspend fun sendMessage(userId: String, message: String)

@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Player(
     val id: String,
-    val name: String,
+    val name: String? = null,
     val isActive: Boolean = false,
     val isReady: Boolean = false,
     val hasPlayedThisRound: Boolean = false,

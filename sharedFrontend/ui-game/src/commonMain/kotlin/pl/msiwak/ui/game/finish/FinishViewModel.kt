@@ -12,13 +12,15 @@ import kotlinx.coroutines.launch
 import pl.msiwak.destination.NavDestination
 import pl.msiwak.domain.game.FinishGameUseCase
 import pl.msiwak.domain.game.ObserveGameSessionUseCase
+import pl.msiwak.domain.game.PlayAgainUseCase
 import pl.msiwak.navigator.Navigator
 import pl.msiwak.ui.game.TeamItem
 
 class FinishViewModel(
     private val observeGameSessionUseCase: ObserveGameSessionUseCase,
     private val finishGameUseCase: FinishGameUseCase,
-    private val navigator: Navigator
+    private val navigator: Navigator,
+    private val playAgainUseCase: PlayAgainUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(FinishViewState())
@@ -27,6 +29,7 @@ class FinishViewModel(
     init {
         viewModelScope.launch {
             observeGameSession()
+            finishGameUseCase()
         }
         viewModelScope.launch {
             startCountdownTimer()
@@ -36,7 +39,7 @@ class FinishViewModel(
     fun onUiAction(action: FinishUiAction) {
         when (action) {
             is FinishUiAction.OnPlayAgainClicked -> viewModelScope.launch {
-                finishGameUseCase()
+                launch {  playAgainUseCase() }
                 navigator.navigate(NavDestination.GameDestination.StartScreen)
             }
         }

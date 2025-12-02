@@ -17,7 +17,7 @@ class KtorServerImpl: KtorServer {
     private let subject = PassthroughSubject<String, Never>()
 
     lazy var messages: Kotlinx_coroutines_coreFlow = {
-           subject.asFlow()
+        subject.asFlow()
        }()
 
     lazy var httpServer: HttpServer = {
@@ -25,6 +25,10 @@ class KtorServerImpl: KtorServer {
     }()
 
     func startServer(host: String, port: Int32) async throws {
+        if(httpServer.server != nil && httpServer.server.isRunning) {
+            return
+         }
+        subject.send("Server started")
         httpServer.start(host: host, port: port)
     }
     
@@ -38,7 +42,7 @@ class KtorServerImpl: KtorServer {
         httpServer.sendMessage(userId: userId, message: message)
     }
 
-    func closeSocker(userId: String) async throws {
+    func closeSocket(userId: String) async throws {
         httpServer.closeSocket(userId: userId)
     }
 
@@ -48,6 +52,10 @@ class KtorServerImpl: KtorServer {
     
     func closeAllSockets() async throws {
         httpServer.closeAllSockets()
+    }
+    
+    func isRunning() -> Bool {
+        return httpServer.server != nil && httpServer.server.isRunning
     }
 }
 
@@ -75,7 +83,6 @@ public extension HttpServer {
     }
     
     func setupServer(port: Int32){
-        
         self.server = Server()
         
         server.delegate = self
@@ -96,6 +103,7 @@ public extension HttpServer {
     }
     
     func sendMessageToAll(message: String) {
+        print("message to all \(sockets)")
         sockets.values.forEach { socket in
             socket.send(text: message)
         }
@@ -126,26 +134,21 @@ extension HttpServer: ServerDelegate {
 extension HttpServer: ServerWebSocketDelegate {
     
     public func server(_ server: Telegraph.Server, webSocketDidDisconnect webSocket: any Telegraph.WebSocket, error: (any Error)?) {
-        print("Websocket client disconnected")
+        print("Websocket client disconnected \(webSocket)")
+        print("Websocket client disconnected \(webSocket)")
         if let key = sockets.first(where: { $0.value === webSocket })?.key {
-            sockets.removeValue(forKey: key)
+             sockets.removeValue(forKey: key)
             subject?.send("Client disconnected: \(key)")
         }
     }
     
     public func server(_ server: Telegraph.Server, webSocketDidConnect webSocket: any Telegraph.WebSocket, handshake: Telegraph.HTTPRequest) {
-        let id = handshake.uri.queryItems?.first(where: { item in
-            item.name == "id"
-        })?.value
-
-        let userId = id ?? "0.0.0.0"
-        
-        if sockets[userId] == nil {
-            print("Websocket client connected:", id ?? "Unknown")
-            sockets[userId] = webSocket
+        guard let id = handshake.uri.queryItems?.first(where: { $0.name == "id" })?.value else {
+            print("Websocket connection rejected: missing id")
+            return
         }
-        
-
+            print("Websocket client connected:", id)
+            sockets[id] = webSocket
     }
     
     
@@ -162,28 +165,4 @@ extension HttpServer: ServerWebSocketDelegate {
       print("WebSocket message sent:", message)
     }
     
-}
-
-
-
-
-extension Publisher {
-    func asFlow<T>() -> Kotlinx_coroutines_coreFlow where Output == T, Failure == Never {
-        return Kotlinx_coroutines_coreFlowAdapter(publisher: self)
-    }
-}
-
-class Kotlinx_coroutines_coreFlowAdapter<T>: Kotlinx_coroutines_coreFlow {
-    private var cancellable: AnyCancellable?
-    private let publisher: AnyPublisher<T, Never>
-
-    init<P: Publisher>(publisher: P) where P.Output == T, P.Failure == Never {
-        self.publisher = publisher.eraseToAnyPublisher()
-    }
-
-    func collect(collector: Kotlinx_coroutines_coreFlowCollector, completionHandler: @escaping (Error?) -> Void) {
-        cancellable = publisher.sink { value in
-            collector.emit(value: value) { _ in }
-        }
-    }
 }

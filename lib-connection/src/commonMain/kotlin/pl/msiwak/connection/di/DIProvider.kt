@@ -1,7 +1,7 @@
-package pl.msiwak.di
+package pl.msiwak.connection.di
 
-import pl.msiwak.network.ConnectionManager
-import pl.msiwak.network.KtorServer
+import pl.msiwak.connection.ConnectionManager
+import pl.msiwak.connection.KtorServer
 
 interface DIProvider {
     fun provideKtorServerImpl(): KtorServer

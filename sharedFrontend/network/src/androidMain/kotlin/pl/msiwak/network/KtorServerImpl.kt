@@ -18,10 +18,12 @@ import io.ktor.websocket.close
 import io.ktor.websocket.readText
 import io.ktor.websocket.send
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -36,15 +38,15 @@ class KtorServerImpl : KtorServer {
 
     private val mutex = Mutex()
 
-    override suspend fun startServer(host: String, port: Int) {
+    override fun startServer(host: String, port: Int) {
         if (server != null) return
         server = embeddedServer(CIO, port = port, host = host) {
             configureServer()
-        }.startSuspend(wait = true)
+        }.start(wait = true)
     }
 
     override suspend fun stopServer() {
-        server?.stopSuspend(1000, 2000)
+        server?.stopSuspend(1000, 1000)
         server = null
         println("OUTPUT: Server stopped")
     }
@@ -59,14 +61,15 @@ class KtorServerImpl : KtorServer {
             webSocket("/ws") {
                 val userId = call.request.queryParameters["id"] ?: "0.0.0.0"
 
-                activeSessions[userId]?.close(
-                    CloseReason(CloseReason.Codes.NORMAL, "Another session opened")
-                )
+                println("OUTPUT: KtorServerImpl: ${activeSessions.map { it.key }}")
+//                activeSessions[userId]?.close(
+//                    CloseReason(CloseReason.Codes.NORMAL, "Another session opened")
+//                )
 
                 activeSessions[userId] = this
 
                 runCatching {
-                    while (true) {
+                    while (isActive) {
                         when (val frame = incoming.receive()) {
                             is Frame.Text -> {
                                 val receivedText = frame.readText()
@@ -86,8 +89,9 @@ class KtorServerImpl : KtorServer {
                                 "Another session opened"
                             )
                         )
+                        activeSessions.remove(userId)
                         _messages.emit("Client disconnected: $userId")
-                        this@withContext.coroutineContext.cancelChildren()
+                        cancel()
                     }
                 }
             }

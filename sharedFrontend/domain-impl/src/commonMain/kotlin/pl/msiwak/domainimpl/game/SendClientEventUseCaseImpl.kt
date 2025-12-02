@@ -1,6 +1,6 @@
 package pl.msiwak.domainimpl.game
 
-import pl.msiwak.common.model.WebSocketEvent
+import pl.msiwak.connection.model.WebSocketEvent
 import pl.msiwak.data.game.GameRepository
 import pl.msiwak.domain.game.SendClientEventUseCase
 

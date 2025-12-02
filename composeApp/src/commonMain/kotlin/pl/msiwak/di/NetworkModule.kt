@@ -13,7 +13,7 @@ internal val networkModule = module {
     single { EngineProvider() }
     single { KtorClient(get()) }
     single { GameService(get(), get(), get()) }
-    single { ElectionService(get()) }
+    single { ElectionService(get(), get()) }
     single { ServerManager(get(), get()) }
     single<GameManager> { GameManagerImpl(get()) }
 }

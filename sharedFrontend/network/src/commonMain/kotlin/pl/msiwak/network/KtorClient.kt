@@ -14,14 +14,18 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
+import pl.msiwak.common.model.GameActions
 import pl.msiwak.common.model.Player
-import pl.msiwak.common.model.WebSocketEvent
+import pl.msiwak.connection.model.ClientActions
+import pl.msiwak.connection.model.WebSocketEvent
 import pl.msiwak.network.engine.EngineProvider
 
 class KtorClient(engine: EngineProvider) {
@@ -42,23 +46,31 @@ class KtorClient(engine: EngineProvider) {
     }
 
     suspend fun connect(host: String, port: Int, player: Player) {
-        client.webSocket(
-            method = HttpMethod.Get,
-            host = host,
-            port = port,
-            path = "/ws?id=${player.id}"
-        ) {
-            send(json.encodeToString<WebSocketEvent>(WebSocketEvent.ClientActions.PlayerConnected(player)))
-            launch {
-                webSocketClientEvent.collect { message ->
-                    when (message) {
-                        is WebSocketEvent.ClientActions -> send(json.encodeToString<WebSocketEvent>(message))
+        runCatching {
+            client.webSocket(
+                method = HttpMethod.Get,
+                host = host,
+                port = port,
+                path = "/ws?id=${player.id}"
+            ) {
+//                send(json.encodeToString<WebSocketEvent>(ClientActions.UserConnected(player.id)))
+                launch {
+                    webSocketClientEvent.collect { message ->
+                        when (message) {
+                            is GameActions -> send(json.encodeToString<WebSocketEvent>(message))
 
-                        else -> Unit
+                            else -> Unit
+                        }
                     }
                 }
+                listenForResponse()
             }
-            listenForResponse()
+        }.onFailure {
+            println("OUTPUT: KtorClient connect failed: ${it.message}")
+            if (it.message?.contains("-1009") == true) {
+                delay(1000)
+                connect(host, port, player)
+            }
         }
     }
 
@@ -70,7 +82,7 @@ class KtorClient(engine: EngineProvider) {
 
     private suspend fun DefaultClientWebSocketSession.listenForResponse() {
         runCatching {
-            while (true) {
+            while (isActive) {
                 when (val frame = incoming.receive()) {
                     is Frame.Text -> {
                         val text = frame.readText()
@@ -92,7 +104,7 @@ class KtorClient(engine: EngineProvider) {
 
                         else -> {
                             println("OUTPUT: Connection closed with reason: $reason")
-                            _webSocketEvent.emit(WebSocketEvent.ClientActions.ServerDownDetected)
+                            _webSocketEvent.emit(ClientActions.ServerDownDetected)
                         }
                     }
                 }
@@ -100,7 +112,7 @@ class KtorClient(engine: EngineProvider) {
                 is CancellationException -> {
                     println("OUTPUT: listenForResponse cancelled: ${it.message}")
                     withContext(NonCancellable) {
-                        _webSocketEvent.emit(WebSocketEvent.ClientActions.ServerDownDetected)
+                        _webSocketEvent.emit(ClientActions.ServerDownDetected)
                     }
                 }
 
@@ -110,7 +122,7 @@ class KtorClient(engine: EngineProvider) {
     }
 
     suspend fun disconnect(playerId: String) {
-        val event: WebSocketEvent = WebSocketEvent.ClientActions.PlayerClientDisconnected(playerId)
+        val event: WebSocketEvent = ClientActions.UserDisconnected(playerId)
         _webSocketClientEvent.emit(event)
     }
 }

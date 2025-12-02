@@ -18,14 +18,13 @@ import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
-import org.jetbrains.compose.resources.stringResource
-import org.koin.compose.koinInject
 import cardsthegame.sharedfrontend.common_resources.generated.resources.Res
 import cardsthegame.sharedfrontend.common_resources.generated.resources.choose_team
-import cardsthegame.sharedfrontend.common_resources.generated.resources.game_id
 import cardsthegame.sharedfrontend.common_resources.generated.resources.not_ready
 import cardsthegame.sharedfrontend.common_resources.generated.resources.ready
 import cardsthegame.sharedfrontend.common_resources.generated.resources.wait_for_players
+import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
 import pl.msiwak.cardsthegame.common.resources.GameColors
 import pl.msiwak.ui.game.component.CustomButton
 import pl.msiwak.ui.game.component.TeamItemComponent
@@ -48,8 +47,15 @@ fun LobbyScreen(
                 .padding(top = 32.dp),
             horizontalAlignment = CenterHorizontally
         ) {
+
+//            Text(
+//                text = stringResource(Res.string.game_id, viewState.value.gameIpAddress ?: ""),
+//                color = GameColors.OnPrimary
+//            )
+
             Text(
-                text = stringResource(Res.string.game_id, viewState.value.gameIpAddress ?: ""),
+                modifier = Modifier.padding(16.dp),
+                text = "You need at least 4 players to start. Teams should be equal or differ by one player",
                 color = GameColors.OnPrimary
             )
 
@@ -78,7 +84,7 @@ fun LobbyScreen(
             ) {
                 viewState.value.playersWithoutTeam.fastForEach {
                     Text(
-                        text = it.name,
+                        text = it.name.orEmpty(),
                         color = Color.Black
                     )
                 }

@@ -17,7 +17,7 @@ plugins {
 val versionMajor = 1
 val versionMinor = 0
 val versionPatch = 0
-val versionBuild = 1
+val versionBuild = 4
 val versionCode = 1_000_000 * versionMajor + 10_000 * versionMinor + 100 * versionPatch + versionBuild
 
 val appVersionCode: Int = Integer.valueOf(versionCode)
@@ -30,7 +30,9 @@ kotlin {
             baseName = "ComposeApp"
             linkerOpts("-ObjC")
 
-            export(projects.sharedFrontend.network)
+//            export(projects.sharedFrontend.network)
+            export(projects.sharedFrontend.commonModel)
+            export(projects.libConnection)
         }
 
         pod("FirebaseCore", linkOnly = true)
@@ -58,6 +60,7 @@ kotlin {
             implementation(projects.sharedFrontend.gameManager)
             implementation(projects.sharedFrontend.globalLoaderManager)
             implementation(projects.sharedFrontend.remoteConfig)
+            implementation(projects.libConnection)
             api(projects.sharedFrontend.network)
 
             implementation(libs.koin.core)

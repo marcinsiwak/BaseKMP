@@ -59,7 +59,7 @@ fun TeamItemComponent(
                 ) {
                     players.forEachIndexed { index, player ->
                         TeamPlayerItemComponent(
-                            playerName = player.name,
+                            playerName = player.name.orEmpty(),
 //                    avatarIcon = avatarIcon,
                             backgroundColor = Color.Transparent
                         )

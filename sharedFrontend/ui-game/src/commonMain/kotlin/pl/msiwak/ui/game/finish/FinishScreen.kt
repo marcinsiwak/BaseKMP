@@ -60,7 +60,7 @@ fun FinishScreen(viewModel: FinishViewModel = koinInject()) {
                 )
                 it.players.fastForEach { player ->
                     Text(
-                        text = stringResource(Res.string.player_score, player.name, player.score),
+                        text = stringResource(Res.string.player_score, player.name.orEmpty(), player.score),
                         color = GameColors.OnPrimary
                     )
                 }

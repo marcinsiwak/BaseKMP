@@ -51,49 +51,79 @@ class GameManagerImpl(
     }
 
     override suspend fun createGame(adminId: String, ipAddress: String?, gameSession: GameSession?) {
+        val time = Clock.System.now().toEpochMilliseconds()
         if (gameSession != null) {
             _currentGameSession.value = gameSession.copy(
                 adminId = adminId,
                 gameServerIpAddress = ipAddress,
                 players = gameSession.players.map { if (it.id != ipAddress) it.copy(isActive = false) else it },
+                lastUpdateTimestamp = time
             )
         } else {
             _currentGameSession.value =
-                GameSession(gameId = Uuid.random().toString(), adminId = adminId, gameServerIpAddress = ipAddress)
+                GameSession(
+                    gameId = Uuid.random().toString(),
+                    adminId = adminId,
+                    gameServerIpAddress = ipAddress,
+                    lastUpdateTimestamp = time
+                )
         }
     }
 
-    override suspend fun joinGame(player: Player) {
+    override suspend fun joinGame(playerId: String) {
+        val time = Clock.System.now().toEpochMilliseconds()
+        val newPlayer = Player(playerId, isActive = true)
+
         with(currentGameSession.value ?: throw IllegalStateException("Game has not been created yet")) {
-            if (players.any { it.id == player.id }) {
-                val updatedPlayers = players.map { if (it.id == player.id) it.copy(isActive = true) else it }
-                _currentGameSession.update { it?.copy(players = updatedPlayers) }
+            if (players.any { it.id == playerId }) {
+                val updatedPlayers = players.map { if (it.id == playerId) it.copy(isActive = true) else it }
+                _currentGameSession.update { it?.copy(players = updatedPlayers, lastUpdateTimestamp = time) }
             } else {
-                _currentGameSession.update { it?.copy(players = players + player) }
+                _currentGameSession.update { it?.copy(players = players + newPlayer, lastUpdateTimestamp = time) }
             }
+        }
+        println("OUTPUT: Players joined: ${currentGameSession.value!!.players}")
+
+    }
+
+    override suspend fun addPlayerName(userId: String, name: String) {
+        val time = Clock.System.now().toEpochMilliseconds()
+
+        with(currentGameSession.value ?: throw IllegalStateException("Game has not been created yet")) {
+            val updatedPlayers = players.map { if (it.id == userId) it.copy(name = name) else it }
+            _currentGameSession.update { it?.copy(players = updatedPlayers, lastUpdateTimestamp = time) }
         }
     }
 
     override suspend fun leaveGame(playerId: String) {
+        val time = Clock.System.now().toEpochMilliseconds()
+
         _currentGameSession.update {
-            it?.copy(players = it.players.filter { player -> player.id != playerId })
+            it?.copy(players = it.players.filter { player -> player.id != playerId }, lastUpdateTimestamp = time)
         }
     }
 
     override suspend fun disablePlayer(playerId: String) {
+        val time = Clock.System.now().toEpochMilliseconds()
+
         _currentGameSession.update {
-            it?.copy(players = it.players.map { player ->
-                if (player.id == playerId) {
-                    player.copy(isActive = false)
-                } else {
-                    player
-                }
-            })
+            it?.copy(
+                players = it.players.map { player ->
+                    if (player.id == playerId) {
+                        player.copy(isActive = false)
+                    } else {
+                        player
+                    }
+                },
+                lastUpdateTimestamp = time
+            )
         }
     }
 
     override suspend fun startGame(gameId: String) {
-        _currentGameSession.update { it?.copy(isStarted = true) }
+        val time = Clock.System.now().toEpochMilliseconds()
+
+        _currentGameSession.update { it?.copy(isStarted = true, lastUpdateTimestamp = time) }
     }
 
     override suspend fun nextRound(gameId: String) {
@@ -117,10 +147,14 @@ class GameManagerImpl(
     }
 
     override suspend fun updateAdminId(id: String) {
-        _currentGameSession.update { it?.copy(adminId = id) }
+        val time = Clock.System.now().toEpochMilliseconds()
+
+        _currentGameSession.update { it?.copy(adminId = id, lastUpdateTimestamp = time) }
     }
 
     override suspend fun setPlayerReady(id: String) {
+        val time = Clock.System.now().toEpochMilliseconds()
+
         val updatedPlayers = currentGameSession.value?.players?.map { player ->
             if (player.id == id) {
                 player.copy(isReady = !player.isReady)
@@ -142,12 +176,15 @@ class GameManagerImpl(
                     GameState.PREPARING_CARDS
                 } else {
                     it.gameState
-                }
+                },
+                lastUpdateTimestamp = time
             )
         }
     }
 
     override suspend fun addCardToGame(userId: String, cardText: String) {
+        val time = Clock.System.now().toEpochMilliseconds()
+
         val gameSession = currentGameSession.value ?: return
         val playerCards = gameSession.cards.filter { it.playerId == userId }
         val cardsPerPlayerLimit = gameSession.cardsPerPlayer
@@ -161,43 +198,49 @@ class GameManagerImpl(
                     players = gameSession.players,
                     gameState = GameState.TABOO_INFO,
                     currentPlayerId = gameSession.teams.first().playerIds.first(),
-                    cards = updatedCards
+                    cards = updatedCards,
+                    lastUpdateTimestamp = time
                 )
             } else {
-                it?.copy(players = gameSession.players, cards = updatedCards)
+                it?.copy(players = gameSession.players, cards = updatedCards, lastUpdateTimestamp = time)
             }
         }
     }
 
     override suspend fun continueGame() {
+        val time = Clock.System.now().toEpochMilliseconds()
         val gameSession = currentGameSession.value ?: return
         val currentGameState = gameSession.gameState
         when (currentGameState) {
             GameState.TABOO_INFO -> _currentGameSession.update {
                 it?.copy(
                     gameState = GameState.TABOO,
-                    currentRoundStartDate = Clock.System.now().toLocalDateTime(TimeZone.UTC)
+                    currentRoundStartDate = Clock.System.now().toLocalDateTime(TimeZone.UTC),
+                    lastUpdateTimestamp = time
                 )
             }
 
             GameState.PUNS_INFO -> _currentGameSession.update {
                 it?.copy(
                     gameState = GameState.PUNS,
-                    currentRoundStartDate = Clock.System.now().toLocalDateTime(TimeZone.UTC)
+                    currentRoundStartDate = Clock.System.now().toLocalDateTime(TimeZone.UTC),
+                    lastUpdateTimestamp = time
                 )
             }
 
             GameState.TABOO_SHORT_INFO -> _currentGameSession.update {
                 it?.copy(
                     gameState = GameState.TABOO_SHORT,
-                    currentRoundStartDate = Clock.System.now().toLocalDateTime(TimeZone.UTC)
+                    currentRoundStartDate = Clock.System.now().toLocalDateTime(TimeZone.UTC),
+                    lastUpdateTimestamp = time
                 )
             }
 
             GameState.PUNS_SHORT_INFO -> _currentGameSession.update {
                 it?.copy(
                     gameState = GameState.PUNS_SHORT,
-                    currentRoundStartDate = Clock.System.now().toLocalDateTime(TimeZone.UTC)
+                    currentRoundStartDate = Clock.System.now().toLocalDateTime(TimeZone.UTC),
+                    lastUpdateTimestamp = time
                 )
             }
 
@@ -218,13 +261,16 @@ class GameManagerImpl(
     }
 
     private fun handleGameContinuation(nextGameState: GameState, fallbackGameState: GameState) {
+        val time = Clock.System.now().toEpochMilliseconds()
+
         _currentGameSession.update {
             if (it?.cards?.all { card -> !card.isAvailable } == true) {
                 it.copy(
                     currentPlayerId = it.nextPlayer(),
                     cards = it.cards.map { card -> card.copy(isAvailable = true) },
                     gameState = nextGameState,
-                    currentRoundStartDate = Clock.System.now().toLocalDateTime(TimeZone.UTC)
+                    currentRoundStartDate = Clock.System.now().toLocalDateTime(TimeZone.UTC),
+                    lastUpdateTimestamp = time
                 )
 
             } else {
@@ -232,27 +278,34 @@ class GameManagerImpl(
                     currentPlayerId = if (fallbackGameState == GameState.SUMMARY) null else it.nextPlayer(),
                     gameState = fallbackGameState,
                     teams = if (fallbackGameState == GameState.SUMMARY) it.teams.sortedByDescending { team -> team.score } else it.teams,
-                    currentRoundStartDate = Clock.System.now().toLocalDateTime(TimeZone.UTC)
+                    currentRoundStartDate = Clock.System.now().toLocalDateTime(TimeZone.UTC),
+                    lastUpdateTimestamp = time
                 )
             }
         }
     }
 
     override suspend fun joinTeam(userId: String, teamName: String) {
+        val time = Clock.System.now().toEpochMilliseconds()
+
         _currentGameSession.update {
             it?.copy(
                 teams = it.teams.map { team ->
                     if (team.name == teamName) {
-                        team.copy(playerIds = team.playerIds + userId)
+                        if (team.playerIds.contains(userId)) return
+                        team.copy(playerIds = team.playerIds.plus(userId))
                     } else {
                         team.copy(playerIds = team.playerIds.filter { playerId -> playerId != userId })
                     }
-                }
+                },
+                lastUpdateTimestamp = time
             )
         }
     }
 
     override suspend fun setCorrectAnswer(cardText: String) {
+        val time = Clock.System.now().toEpochMilliseconds()
+
         _currentGameSession.update {
             val playerToUpdateScore = it?.players?.find { player -> player.id == it.currentPlayerId }
             val updatedPlayers = it?.players?.map { player ->
@@ -280,7 +333,8 @@ class GameManagerImpl(
                     }
                 },
                 players = updatedPlayers,
-                teams = updatedTeams
+                teams = updatedTeams,
+                lastUpdateTimestamp = time
             )
         }
     }

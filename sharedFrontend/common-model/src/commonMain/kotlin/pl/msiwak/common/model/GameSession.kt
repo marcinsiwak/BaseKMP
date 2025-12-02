@@ -2,6 +2,7 @@ package pl.msiwak.common.model
 
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
+import kotlin.time.Instant
 
 @Serializable
 data class GameSession(
@@ -15,7 +16,8 @@ data class GameSession(
     val currentPlayerId: String? = null,
     val teams: List<Team> = listOf(Team(id = 1, "A"), Team(id = 2, "B")),
     val cards: List<Card> = emptyList(),
-    val currentRoundStartDate: LocalDateTime? = null
+    val currentRoundStartDate: LocalDateTime? = null,
+    val lastUpdateTimestamp: Long? = null
 )
 
 @Serializable

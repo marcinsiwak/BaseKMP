@@ -1,10 +1,11 @@
 package pl.msiwak.network
 
 import kotlinx.coroutines.flow.Flow
+import pl.msiwak.common.model.WifiState
 
 interface ConnectionManager {
 
-    suspend fun checkWifiIsOn(): WifiState
+    fun observeWifiState(): Flow<WifiState>
 
     fun getLocalIpAddress(): String?
 
@@ -13,5 +14,3 @@ interface ConnectionManager {
     fun startUdpListener(port: Int = 60000): Flow<String>
     suspend fun broadcastMessage(msg: String, port: Int = 60000)
 }
-
-data class WifiState(val isRunning: Boolean)

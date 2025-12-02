@@ -4,58 +4,70 @@ package pl.msiwak.network.service
 
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import pl.msiwak.common.model.dispatcher.Dispatchers
+import pl.msiwak.globalloadermanager.GlobalLoaderManager
+import pl.msiwak.globalloadermanager.GlobalLoaderMessageType
 import pl.msiwak.network.ConnectionManager
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
 class ElectionService(
-    private val connectionManager: ConnectionManager
+    private val connectionManager: ConnectionManager,
+    private val globalLoaderManager: GlobalLoaderManager
 ) {
-    private var hostElectionScope = CoroutineScope(Dispatchers.IO)
     private var electionInProgress = false
     private val candidates = hashMapOf<String, DeviceCandidate>()
 
-    private val _hostIp = MutableStateFlow<String?>(null)
-    val hostIp: StateFlow<String?> = _hostIp.asStateFlow()
+    private val _hostIp = MutableSharedFlow<String>()
+    val hostIp: SharedFlow<String> = _hostIp.asSharedFlow()
+
+    private var currentHasGameSession = false
 
     private val errorHandler = CoroutineExceptionHandler { _, throwable ->
         println("ElectionService Error: ${throwable.message}")
     }
 
-    suspend fun checkWifiIsOn() = connectionManager.checkWifiIsOn().isRunning
+    fun observeWifiState() = connectionManager.observeWifiState().flowOn(Dispatchers.IO)
 
-    suspend fun startElection() = withContext(Dispatchers.IO) {
-        hostElectionScope.launch(errorHandler) {
-            connectionManager.startUdpListener(port = 60000).collectLatest { message ->
-                handleElectionMessage(message)
-                _hostIp.value = candidates.values.find { it.isHost }?.ipAddress
-                println("Candidates: ${candidates.mapValues { it.value }}")
-            }
-        }
-        hostElectionScope.launch(errorHandler) {
-            while (isActive) {
-                sendMessage()
-                delay(1000)
-            }
-        }
-        hostElectionScope.launch(errorHandler) {
-            while (isActive) {
-                delay(3000)
-                if (!electionInProgress && candidates.isNotEmpty() && candidates.values.none { it.isHost }) {
-                    conductElection()
+    suspend fun emitHostEmpty() = _hostIp.emit("")
+    private var electionJob: Job? = null
+    fun startElection() {
+        if (electionJob?.isActive == true) return
+        electionJob = CoroutineScope(Dispatchers.IO).launch {
+            launch(errorHandler + coroutineContext) {
+                connectionManager.startUdpListener(port = 60000).collectLatest { message ->
+                    handleElectionMessage(message)
+                    val host = candidates.values.find { it.isHost }?.ipAddress
+                    host?.let { _hostIp.emit(it) }
+                        ?: globalLoaderManager.showLoading(GlobalLoaderMessageType.MISSING_HOST)
+//                    println("Candidates: ${candidates.mapValues { it.value }}")
                 }
-                cleanupOldCandidates()
+            }
+            launch(errorHandler) {
+                while (isActive) {
+                    sendMessage()
+                    delay(1000)
+                }
+            }
+            launch(errorHandler) {
+                while (isActive) {
+                    delay(3000)
+                    if (!electionInProgress && candidates.isNotEmpty() && candidates.values.none { it.isHost }) {
+                        conductElection()
+                    }
+                    cleanupOldCandidates()
+                }
             }
         }
     }
@@ -68,14 +80,16 @@ class ElectionService(
                 ipAddress = senderIp,
                 networkNumber = senderIp.substringAfterLast(".").toInt(),
                 isHost = hostIp == senderIp,
-                lastSeen = Clock.System.now().toEpochMilliseconds()
+                lastSeen = Clock.System.now().toEpochMilliseconds(),
+                hasGameSession = hasGameSession
             )
             if (hostIp != null && hostIp != senderIp) {
                 candidates[hostIp] = DeviceCandidate(
                     ipAddress = hostIp,
                     networkNumber = hostIp.substringAfterLast(".").toInt(),
                     isHost = true,
-                    lastSeen = candidates[hostIp]?.lastSeen ?: 0
+                    lastSeen = candidates[hostIp]?.lastSeen ?: 0,
+                    hasGameSession = hasGameSession
                 )
             }
         }
@@ -84,10 +98,12 @@ class ElectionService(
     private fun conductElection() {
         electionInProgress = true
 
-        val winner = candidates.values.maxByOrNull { it.networkNumber } ?: run {
-            electionInProgress = false
-            return
-        }
+        val winner = candidates.values.filter { it.hasGameSession }.maxByOrNull { it.networkNumber }
+            ?: candidates.values.maxByOrNull { it.networkNumber }
+            ?: run {
+                electionInProgress = false
+                return
+            }
 
         candidates[winner.ipAddress] = winner.copy(isHost = true)
         electionInProgress = false
@@ -107,10 +123,15 @@ class ElectionService(
         val message = Json.encodeToString(
             ElectionMessage(
                 senderIp = ip,
-                hostIp = candidates.values.find { it.isHost }?.ipAddress
+                hostIp = candidates.values.find { it.isHost }?.ipAddress,
+                hasGameSession = currentHasGameSession
             )
         )
         connectionManager.broadcastMessage(port = 60000, msg = message)
+    }
+
+    fun setHasGameSession(hasGameSession: Boolean) {
+        currentHasGameSession = hasGameSession
     }
 
 }
@@ -119,11 +140,13 @@ data class DeviceCandidate(
     val ipAddress: String,
     val networkNumber: Int,
     val isHost: Boolean,
-    val lastSeen: Long
+    val lastSeen: Long,
+    val hasGameSession: Boolean
 )
 
 @Serializable
 data class ElectionMessage(
     val senderIp: String,
-    val hostIp: String? = null
+    val hostIp: String? = null,
+    val hasGameSession: Boolean
 )

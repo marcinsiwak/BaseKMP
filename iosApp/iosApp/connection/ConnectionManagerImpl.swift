@@ -13,22 +13,26 @@ import sharedFrontend
 import Combine
 
 class ConnectionManagerImpl: ConnectionManager {
-    func checkWifiIsOn(completionHandler: @escaping (WifiState?, (any Error)?) -> Void) {
-        let monitor = NWPathMonitor()
-        let queue = DispatchQueue.global(qos: .background)
 
-        monitor.pathUpdateHandler = { path in
-            completionHandler(WifiState(isRunning: path.usesInterfaceType(.wifi)), nil)
-            monitor.cancel()
-        }
-
-        monitor.start(queue: queue)
-    }
-    
-    
     private let subject = PassthroughSubject<String, Never>()
+    private let wifiStateSubject = PassthroughSubject<WifiState, Never>()
     private var listener: NWListener?
+    private let monitor = NWPathMonitor(requiredInterfaceType: .wifi)
+    private let queue = DispatchQueue.global(qos: .background)
 
+
+    func observeWifiState() -> any Kotlinx_coroutines_coreFlow {
+           monitor.pathUpdateHandler = { [weak self] path in
+               guard let self = self else { return }
+               let state = (path.status == .satisfied && path.usesInterfaceType(.wifi)) ? WifiState.connected : WifiState.disconnected
+               print("OUTPUT: \(state)")
+               DispatchQueue.main.async {
+                   self.wifiStateSubject.send(state)
+               }
+           }
+           monitor.start(queue: queue)
+        return wifiStateSubject.asFlow()
+    }
 
     func getBroadcastAddress() -> String? {
         var ifaddr: UnsafeMutablePointer<ifaddrs>?
@@ -93,7 +97,7 @@ class ConnectionManagerImpl: ConnectionManager {
                     if let error = error {
                         print("❌ Error sending UDP message: \(error)")
                     } else {
-                        print("✅ Message sent: \"\(msg)\"")
+                        // print("✅ Message sent: \"\(msg)\"")
                     }
                     connection.cancel()
                 })
@@ -103,19 +107,18 @@ class ConnectionManagerImpl: ConnectionManager {
                 connection.cancel()
 
             case .cancelled:
-                print("Connection closed.")
+                ""
+                // print("Connection closed.")
 
             default:
                 break
             }
         }
     }
-    
+
     func startUdpListener(port: Int32) -> any Kotlinx_coroutines_coreFlow {
         let params = NWParameters.udp
         params.allowLocalEndpointReuse = true
-    
-
 
         guard let portValue = NWEndpoint.Port(rawValue: UInt16(port)) else {
             print("❌ Invalid port: \(port)")
@@ -125,7 +128,7 @@ class ConnectionManagerImpl: ConnectionManager {
         do {
             let listener = try NWListener(using: params, on: portValue)
             self.listener = listener
-            
+
             listener.newConnectionHandler = { connection in
                 connection.start(queue: .global())
 
@@ -135,12 +138,11 @@ class ConnectionManagerImpl: ConnectionManager {
                         return
                     }
                     if let data = data, let message = String(data: data, encoding: .utf8) {
-                        print("📨 Received: \(message)")
+                        // print("📨 Received: \(message)")
                         self.subject.send(message)
                     }
                 }
             }
-        
 
             listener.start(queue: .global())
             print("👂 Listening for UDP messages on port \(port)")

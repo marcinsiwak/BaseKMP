@@ -38,7 +38,7 @@ import pl.msiwak.navigator.NavigationEvent
 @Composable
 @Preview
 fun App(
-    viewModel: MainViewModel = koinInject()
+    viewModel: MainViewModel2 = koinInject()
 ) {
     val viewState = viewModel.viewState.collectAsState()
 
@@ -91,6 +91,29 @@ fun App(
                             }
                         ) {
                             Text(text = "Done")
+                        }
+                    }
+                }
+            }
+            if (viewState.value.localIpIssueError) {
+                Dialog(
+                    properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false),
+                    onDismissRequest = { viewModel.onUIAction(MainAction.OnLocalIPErrorDialogDismiss) }
+                ) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth().background(Color.White).padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = "Issue with getting local IP address. Please check your internet connection and try again",
+                        )
+                        Button(
+                            onClick = {
+                                viewModel.onUIAction(MainAction.OnLocalIPErrorDialogConfirm)
+                            }
+                        ) {
+                            Text(text = "Try again")
                         }
                     }
                 }

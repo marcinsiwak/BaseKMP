@@ -5,6 +5,6 @@ import pl.msiwak.domain.game.ElectServerHostUseCase
 
 class ElectServerHostUseCaseImpl(private val gameRepository: GameRepository) : ElectServerHostUseCase {
     override suspend fun invoke() {
-        gameRepository.startElection()
+//        gameRepository.startElection()
     }
 }

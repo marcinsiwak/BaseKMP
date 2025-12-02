@@ -10,14 +10,14 @@ import kotlinx.coroutines.flow.update
  * It provides a centralized way to show and hide loading indicators.
  */
 class GlobalLoaderManager {
-    private val _globalLoaderState = MutableStateFlow(GlobalLoaderManagerState())
-    val globalLoaderState: StateFlow<GlobalLoaderManagerState> = _globalLoaderState.asStateFlow()
+    private val _globalLoaderState = MutableStateFlow(GlobalLoaderData())
+    val globalLoaderState: StateFlow<GlobalLoaderData> = _globalLoaderState.asStateFlow()
 
     /**
      * Shows the loading indicator.
      */
-    fun showLoading(message: String? = null) {
-        _globalLoaderState.update { it.copy(isLoading = true, message = message) }
+    fun showLoading(messageType: GlobalLoaderMessageType) {
+        _globalLoaderState.update { it.copy(isLoading = true, messageType = messageType) }
     }
 
     /**
@@ -28,4 +28,8 @@ class GlobalLoaderManager {
     }
 }
 
-data class GlobalLoaderManagerState(val isLoading: Boolean = false, val message: String? = null)
+data class GlobalLoaderData(val isLoading: Boolean = false, val messageType: GlobalLoaderMessageType? = null)
+
+enum class GlobalLoaderMessageType {
+    MISSING_HOST, DEFAULT
+}

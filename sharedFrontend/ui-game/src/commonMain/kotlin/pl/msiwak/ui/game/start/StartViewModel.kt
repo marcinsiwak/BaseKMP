@@ -10,14 +10,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import pl.msiwak.destination.NavDestination
-import pl.msiwak.domain.game.CheckWifiIsOnUseCase
-import pl.msiwak.domain.game.FindGameIPAddressUseCase
 import pl.msiwak.domain.game.JoinGameUseCase
 import pl.msiwak.navigator.Navigator
 
 class StartViewModel(
     private val joinGameUseCase: JoinGameUseCase,
-    private val findGameIPAddressUseCase: FindGameIPAddressUseCase,
     private val navigator: Navigator
 ) : ViewModel() {
 
@@ -25,7 +22,8 @@ class StartViewModel(
     val uiState: StateFlow<StartState> = _uiState.asStateFlow()
 
     private val errorHandler = CoroutineExceptionHandler { _, exception ->
-        _uiState.update { it.copy(isLoading = false) }
+        println("Exception: $exception")
+        _uiState.update { it.copy(isLoading = false, isErrorVisible = true) }
     }
     private var findGameJob: Job? = null
     private var joinJob: Job? = null
@@ -37,11 +35,9 @@ class StartViewModel(
                 // Handle navigation back
             }
 
-            is StartUiAction.CreateGame -> Unit
             is StartUiAction.OnPlayerNameChanged -> updatePlayerName(action.name)
-            is StartUiAction.JoinGame -> Unit
-            is StartUiAction.Refresh -> findGame()
             is StartUiAction.Join -> join()
+            StartUiAction.DismissDialog -> _uiState.update { it.copy(isErrorVisible = false) }
         }
     }
 
@@ -55,16 +51,7 @@ class StartViewModel(
         }
     }
 
-    private fun findGame() {
-        if (findGameJob?.isActive == true) return
-        findGameJob = viewModelScope.launch(errorHandler) {
-            val existingGameIpAddress = findGameIPAddressUseCase()
-            _uiState.update { it.copy(gameIpAddress = existingGameIpAddress) }
-        }
-    }
-
     private fun updatePlayerName(name: String) {
         _uiState.update { it.copy(playerName = name) }
     }
-
 }

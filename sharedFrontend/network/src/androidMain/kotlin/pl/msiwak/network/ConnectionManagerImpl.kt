@@ -3,8 +3,13 @@ package pl.msiwak.network
 import android.Manifest
 import android.content.Context
 import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
+import android.net.NetworkRequest.Builder
 import android.util.Log
 import androidx.annotation.RequiresPermission
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.awaitClose
@@ -16,6 +21,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import pl.msiwak.common.AppContext
+import pl.msiwak.common.model.WifiState
 import java.io.IOException
 import java.net.DatagramPacket
 import java.net.DatagramSocket
@@ -28,13 +34,50 @@ import java.net.SocketTimeoutException
 
 class ConnectionManagerImpl : ConnectionManager {
 
+    private val request: NetworkRequest
+        get() = Builder()
+            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+            .build()
+
     @RequiresPermission(Manifest.permission.ACCESS_NETWORK_STATE)
-    override suspend fun checkWifiIsOn(): WifiState {
+    override fun observeWifiState(): Flow<WifiState> {
         val context = AppContext.get()
         val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val mWifi = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI)
 
-        return WifiState(isRunning = mWifi?.isConnected ?: false)
+        val isWifi = with(connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)) {
+            if (this == null) return@with false
+            hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) && hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+        }
+
+        return callbackFlow {
+            if (isWifi) {
+                trySend(WifiState.CONNECTED)
+            } else {
+                trySend(WifiState.DISCONNECTED)
+            }
+
+            val callback = object : ConnectivityManager.NetworkCallback() {
+                override fun onAvailable(network: Network) {
+                    super.onAvailable(network)
+                    this@callbackFlow.trySend(WifiState.CONNECTED)
+
+                }
+
+                override fun onLost(network: Network) {
+                    super.onLost(network)
+                    this@callbackFlow.trySend(WifiState.DISCONNECTED)
+                }
+            }
+            connectivityManager.registerNetworkCallback(
+                request,
+                callback
+            )
+
+            awaitClose {
+                connectivityManager.unregisterNetworkCallback(callback)
+            }
+        }
     }
 
     @RequiresPermission(Manifest.permission.ACCESS_NETWORK_STATE)
@@ -86,16 +129,20 @@ class ConnectionManagerImpl : ConnectionManager {
     }
 
     @RequiresPermission(Manifest.permission.ACCESS_NETWORK_STATE)
-    override suspend fun broadcastMessage(msg: String, port: Int) = withContext(Dispatchers.IO) {
-        val socket = DatagramSocket()
-        socket.broadcast = true
-        val data = msg.toByteArray()
-        val packet = DatagramPacket(
-            data, data.size,
-            InetAddress.getByName("255.255.255.255"), port
-        )
-        socket.send(packet)
-        socket.close()
+    override suspend fun broadcastMessage(msg: String, port: Int): Unit = withContext(Dispatchers.IO) {
+        runCatching {
+            val socket = DatagramSocket()
+            socket.broadcast = true
+            val data = msg.toByteArray()
+            val packet = DatagramPacket(
+                data, data.size,
+                InetAddress.getByName("255.255.255.255"), port
+            )
+            socket.send(packet)
+            socket.close()
+        }.onFailure {
+            println("ERROR: ${it.message}")
+        }
     }
 
     @RequiresPermission(Manifest.permission.ACCESS_NETWORK_STATE)

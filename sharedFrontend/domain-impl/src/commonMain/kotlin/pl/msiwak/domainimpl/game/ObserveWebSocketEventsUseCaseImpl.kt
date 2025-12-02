@@ -6,5 +6,7 @@ import pl.msiwak.domain.game.ObserveWebSocketEventsUseCase
 class ObserveWebSocketEventsUseCaseImpl(
     private val gameRepository: GameRepository
 ) : ObserveWebSocketEventsUseCase {
-    override suspend fun invoke() = gameRepository.observeWebSocketEvents()
+    override suspend fun invoke() {
+//        gameRepository.observeWebSocketEvents()
+    }
 }

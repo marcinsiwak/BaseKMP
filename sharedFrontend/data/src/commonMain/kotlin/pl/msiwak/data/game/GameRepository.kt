@@ -1,110 +1,87 @@
 package pl.msiwak.data.game
 
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
-import pl.msiwak.common.error.LocalIpNotFoundException
+import kotlinx.coroutines.launch
+import pl.msiwak.common.model.GameActions
 import pl.msiwak.common.model.GameSession
 import pl.msiwak.common.model.GameState
-import pl.msiwak.common.model.WebSocketEvent
+import pl.msiwak.common.model.ServerGameActions
+import pl.msiwak.common.model.dispatcher.Dispatchers
+import pl.msiwak.connection.di.MyConnectionDI
+import pl.msiwak.connection.model.ClientActions
+import pl.msiwak.connection.model.ServerActions
+import pl.msiwak.connection.model.WebSocketEvent
 import pl.msiwak.globalloadermanager.GlobalLoaderManager
-import pl.msiwak.network.service.ElectionService
-import pl.msiwak.network.service.GameService
+import pl.msiwak.globalloadermanager.GlobalLoaderMessageType
 
 class GameRepository(
-    private val gameService: GameService,
-    private val electionService: ElectionService,
-    private val globalLoaderManager: GlobalLoaderManager
+    private val globalLoaderManager: GlobalLoaderManager,
+    private val serverManager: ServerManager
 ) {
+
+    private val myConnection = MyConnectionDI.getMyConnection()
     private val _currentGameSession = MutableStateFlow<GameSession?>(null)
     val currentGameSession: StateFlow<GameSession?> = _currentGameSession.asStateFlow()
 
-    private var hostIp: String? = null
+    init {
+        CoroutineScope(Dispatchers.IO).launch {
+            launch { observeClientMessages() }
+            launch {
+                myConnection.serverMessages.collectLatest { event ->
+                    when (event) {
+                        ServerActions.ServerStarted -> serverManager.start(
+                            this,
+                            currentGameSession.value
+                        )
+                    }
+                }
+            }
+            launch {
+                myConnection.isLoading.collectLatest { isLoading ->
+                    if (isLoading && (currentGameSession.value?.gameState != GameState.FINISHED && currentGameSession.value?.gameState != GameState.SUMMARY)) {
+                        globalLoaderManager.showLoading(GlobalLoaderMessageType.DEFAULT)
+                    } else {
+                        globalLoaderManager.hideLoading()
+                    }
+                }
+            }
+        }
+    }
 
-    suspend fun checkWifiIsOn() = electionService.checkWifiIsOn()
-
-    suspend fun observeWebSocketEvents() {
-        gameService.observeWebSocketEvents().collectLatest {
+    private suspend fun observeClientMessages() {
+        myConnection.clientMessages.collect {
             when (it) {
-                is WebSocketEvent.ServerActions.UpdateGameSession -> {
+                is ServerGameActions.UpdateGameSession -> {
                     _currentGameSession.value = it.gameSession
+                    globalLoaderManager.hideLoading()
                 }
 
-                WebSocketEvent.ClientActions.ServerDownDetected -> managePlayerConnection()
-
-                else -> Unit
+                is ClientActions.ServerDownDetected -> {
+                    globalLoaderManager.showLoading(
+                        GlobalLoaderMessageType.MISSING_HOST
+                    )
+                }
             }
         }
-    }
-
-    suspend fun startElection() {
-        electionService.startElection()
-    }
-
-    suspend fun observeElectionHostIp() {
-        globalLoaderManager.showLoading("Waiting for host")
-        val localIP = getDeviceIpAddress()
-
-        electionService.hostIp.filterNotNull().collectLatest {
-            hostIp = it
-            println("Observed new host IP: $it")
-            globalLoaderManager.hideLoading()
-            if (it == localIP) gameService.startServer(currentGameSession.value)
-        }
-    }
-
-    private suspend fun getDeviceIpAddress(): String {
-        repeat(5) {
-            try {
-                return gameService.getDeviceIpAddress() ?: throw LocalIpNotFoundException()
-            } catch (_: LocalIpNotFoundException) {
-                delay(1000)
-            }
-        }
-        return gameService.getDeviceIpAddress() ?: throw LocalIpNotFoundException()
-    }
-
-    suspend fun findGame(): String? {
-        return gameService.findGame().first()
     }
 
     suspend fun joinGame(playerName: String) {
-        hostIp ?: throw Exception("Host IP is not known")
-        gameService.connectPlayer(playerName, hostIp)
+        sendClientEvent(GameActions.AddPlayerName(getUserId(), playerName))
     }
 
     suspend fun finishGame() {
-        gameService.disconnectPlayer()
+        myConnection.disconnectUsers()
     }
 
-    suspend fun connectPlayer(playerName: String) {
-        gameService.connectPlayer(playerName)
-    }
 
-    suspend fun disconnectPlayer() {
-        return gameService.disconnectPlayer()
-    }
+    suspend fun connectPlayer() = myConnection.connect()
 
-    fun getUserId(): String {
-        return gameService.getUserId()
-    }
+    fun getUserId(): String = myConnection.getDeviceId()
 
-    suspend fun sendClientEvent(webSocketEvent: WebSocketEvent) = gameService.sendClientEvent(webSocketEvent)
 
-    private suspend fun managePlayerConnection() {
-        with(currentGameSession.value ?: return) {
-            if (gameState == GameState.SUMMARY) return
-            val currentPlayer = players.first { player -> player.id == gameService.getUserId() }
-            globalLoaderManager.showLoading()
-            findGame()?.let {
-                gameService.connectPlayer(currentPlayer.name)
-                globalLoaderManager.hideLoading()
-                return
-            }
-        }
-    }
+    suspend fun sendClientEvent(webSocketEvent: WebSocketEvent) = myConnection.sendFromClient(webSocketEvent)
 }

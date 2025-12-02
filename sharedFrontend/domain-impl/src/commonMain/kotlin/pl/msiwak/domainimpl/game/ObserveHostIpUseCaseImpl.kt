@@ -6,5 +6,7 @@ import pl.msiwak.domain.game.ObserveHostIpUseCase
 class ObserveHostIpUseCaseImpl(
     private val gameRepository: GameRepository
 ) : ObserveHostIpUseCase {
-    override suspend fun invoke() = gameRepository.observeElectionHostIp()
+    override suspend fun invoke()  {
+
+    }
 }
