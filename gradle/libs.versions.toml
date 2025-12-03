@@ -84,6 +84,7 @@ kotlinx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core",
 
 firebase-gitlive-crashlytics = { module = "dev.gitlive:firebase-crashlytics", version.ref = "firebaseGitlive" }
 firebase-gitlive-remoteConfig = { module = "dev.gitlive:firebase-config", version.ref = "firebaseGitlive" }
+firebase-gitlive-analytics = { module = "dev.gitlive:firebase-analytics", version.ref = "firebaseGitlive" }
 
 # Gradle scripts depdendecies
 gradle-ksp = { module = "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin", version.ref = "ksp" }

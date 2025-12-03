@@ -21,13 +21,11 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            commonMain.dependencies {
-                implementation(projects.sharedFrontend.commonModel)
+            implementation(projects.sharedFrontend.commonModel)
 
-                implementation(libs.koin.core)
-                implementation(libs.kotlinx.serialization)
-                implementation(libs.firebase.gitlive.remoteConfig)
-            }
+            implementation(libs.koin.core)
+            implementation(libs.kotlinx.serialization)
+            implementation(libs.firebase.gitlive.remoteConfig)
         }
     }
 }

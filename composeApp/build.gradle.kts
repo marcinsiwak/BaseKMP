@@ -38,6 +38,7 @@ kotlin {
         pod("FirebaseCore", linkOnly = true)
         pod("FirebaseCrashlytics", linkOnly = true)
         pod("FirebaseRemoteConfig", linkOnly = true)
+        pod("FirebaseAnalytics", linkOnly = true)
     }
 
     sourceSets {
@@ -74,6 +75,7 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
             implementation(libs.compose.navigation)
             implementation(libs.firebase.gitlive.crashlytics)
+            implementation(libs.firebase.gitlive.analytics)
         }
     }
 }

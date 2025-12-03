@@ -33,6 +33,7 @@ class MyConnectionImpl(
     private val electionService: ElectionService,
     private val connectionManager: ConnectionManager
 ) : MyConnection {
+
     private var electedHostIp: String? = null
     private var job: Job? = null
     private var serverJob: Job? = null
@@ -62,7 +63,8 @@ class MyConnectionImpl(
     }
 
     override suspend fun connect() {
-        currentHostIp?.let { ktorClient.connect(host = it, port = PORT, id = deviceId) } ?: throw Exception("Cannot connect to server")
+        currentHostIp?.let { ktorClient.connect(host = it, port = PORT, id = deviceId) }
+            ?: throw Exception("Cannot connect to server")
     }
 
     override suspend fun disconnectUsers() {

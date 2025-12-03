@@ -11,6 +11,7 @@ import Network
 import ComposeApp
 import sharedFrontend
 import Combine
+import FirebaseAnalytics
 
 class ConnectionManagerImpl: ConnectionManager {
 
@@ -26,6 +27,7 @@ class ConnectionManagerImpl: ConnectionManager {
                guard let self = self else { return }
                let state = (path.status == .satisfied && path.usesInterfaceType(.wifi)) ? WifiState.connected : WifiState.disconnected
                print("OUTPUT: \(state)")
+               Analytics.logEvent("test_connection", parameters: ["wifiState": state.name])
                DispatchQueue.main.async {
                    self.wifiStateSubject.send(state)
                }
@@ -96,7 +98,11 @@ class ConnectionManagerImpl: ConnectionManager {
                 connection.send(content: data, completion: .contentProcessed { error in
                     if let error = error {
                         print("❌ Error sending UDP message: \(error)")
+                        Analytics.logEvent("test_connection", parameters: ["UDP_SEND": "error"])
+
                     } else {
+                        Analytics.logEvent("test_connection", parameters: ["UDP_SEND": "success"])
+
                         // print("✅ Message sent: \"\(msg)\"")
                     }
                     connection.cancel()
@@ -104,9 +110,13 @@ class ConnectionManagerImpl: ConnectionManager {
 
             case .failed(let error):
                 print("❌ Connection failed with error: \(error)")
+                Analytics.logEvent("test_connection", parameters: ["UDP_SEND": "connection failed"])
+
                 connection.cancel()
 
             case .cancelled:
+                Analytics.logEvent("test_connection", parameters: ["UDP_SEND": "connection cancelled"])
+
                 ""
                 // print("Connection closed.")
 
@@ -122,6 +132,8 @@ class ConnectionManagerImpl: ConnectionManager {
 
         guard let portValue = NWEndpoint.Port(rawValue: UInt16(port)) else {
             print("❌ Invalid port: \(port)")
+            Analytics.logEvent("test_connection", parameters: ["UDP_LISTEN": "invalid port"])
+
             return subject.asFlow()
         }
 
@@ -135,10 +147,14 @@ class ConnectionManagerImpl: ConnectionManager {
                 connection.receiveMessage { data, _, _, error in
                     if let error = error {
                         print("UDP receive error: \(error)")
+                        Analytics.logEvent("test_connection", parameters: ["UDP_LISTEN": "receive error"])
+
                         return
                     }
                     if let data = data, let message = String(data: data, encoding: .utf8) {
                         // print("📨 Received: \(message)")
+                        Analytics.logEvent("test_connection", parameters: ["UDP_LISTEN": "received success"])
+
                         self.subject.send(message)
                     }
                 }
@@ -146,8 +162,11 @@ class ConnectionManagerImpl: ConnectionManager {
 
             listener.start(queue: .global())
             print("👂 Listening for UDP messages on port \(port)")
+            Analytics.logEvent("test_connection", parameters: ["UDP_LISTEN": "listener success"])
 
         } catch {
+            Analytics.logEvent("test_connection", parameters: ["UDP_LISTEN": "listener failed"])
+
             print("❌ Failed to start UDP listener on port \(port): \(error)")
         }
         return subject.asFlow()
@@ -258,6 +277,8 @@ class ConnectionManagerImpl: ConnectionManager {
             }
             freeifaddrs(ifaddr)
         }
+        Analytics.logEvent("test_connection", parameters: ["LOCAL_ADDRESS": address])
+
         return address
     }
 }

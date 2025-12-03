@@ -11,6 +11,7 @@ import sharedFrontend
 import ComposeApp
 import Telegraph
 import Combine
+import FirebaseAnalytics
 
 class KtorServerImpl: KtorServer {
 
@@ -28,12 +29,14 @@ class KtorServerImpl: KtorServer {
         if(httpServer.server != nil && httpServer.server.isRunning) {
             return
          }
+        Analytics.logEvent("test_connection", parameters: ["serverStarted": true])
         subject.send("Server started")
         httpServer.start(host: host, port: port)
     }
     
     func stopServer() async throws {
         if(httpServer.server != nil) {
+            Analytics.logEvent("test_connection", parameters: ["serverStoped": true])
             httpServer.server.stop()
         }
     }
@@ -147,6 +150,7 @@ extension HttpServer: ServerWebSocketDelegate {
             print("Websocket connection rejected: missing id")
             return
         }
+            Analytics.logEvent("test_connection", parameters: ["client_connected": true])
             print("Websocket client connected:", id)
             sockets[id] = webSocket
     }
@@ -154,6 +158,8 @@ extension HttpServer: ServerWebSocketDelegate {
     
     public func server(_ server: Server, webSocket: WebSocket, didReceiveMessage message: WebSocketMessage) {
       print("WebSocket message received:", message)
+        Analytics.logEvent("test_connection", parameters: ["websocket_received": message])
+
         let payload = message.payload
         if case let .text(message) = payload {
             subject?.send(message)
