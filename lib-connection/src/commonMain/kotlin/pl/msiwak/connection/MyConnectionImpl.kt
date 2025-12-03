@@ -25,7 +25,7 @@ import pl.msiwak.connection.model.WebSocketEvent
 import pl.msiwak.connection.model.WifiState
 import kotlin.reflect.KClass
 
-private const val PORT = 53287
+private const val PORT = 63287
 
 class MyConnectionImpl(
     private val ktorClient: KtorClient,
