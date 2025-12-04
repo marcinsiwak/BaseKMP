@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import sharedFrontend
 import ComposeApp
 import Telegraph
 import Combine
@@ -19,28 +18,28 @@ class KtorServerImpl: KtorServer {
 
     lazy var messages: Kotlinx_coroutines_coreFlow = {
         subject.asFlow()
-       }()
+    }()
 
     lazy var httpServer: HttpServer = {
         HttpServer(subject: subject)
     }()
 
     func startServer(host: String, port: Int32) async throws {
-        if(httpServer.server != nil && httpServer.server.isRunning) {
+        if (httpServer.server != nil && httpServer.server.isRunning) {
             return
-         }
+        }
         Analytics.logEvent("test_connection", parameters: ["serverStarted": true])
         subject.send("Server started")
         httpServer.start(host: host, port: port)
     }
-    
+
     func stopServer() async throws {
-        if(httpServer.server != nil) {
+        if (httpServer.server != nil) {
             Analytics.logEvent("test_connection", parameters: ["serverStoped": true])
             httpServer.server.stop()
         }
     }
-    
+
     func sendMessage(userId: String, message: String) async throws {
         httpServer.sendMessage(userId: userId, message: message)
     }
@@ -52,23 +51,23 @@ class KtorServerImpl: KtorServer {
     func sendMessageToAll(message: String) async throws {
         httpServer.sendMessageToAll(message: message)
     }
-    
+
     func closeAllSockets() async throws {
         httpServer.closeAllSockets()
     }
-    
+
     func isRunning() -> Bool {
         return httpServer.server != nil && httpServer.server.isRunning
     }
 }
 
 public class HttpServer: NSObject {
-    
+
     var sockets: [String: Telegraph.WebSocket] = [:]
 
     var server: Server!
     var websocketClient: WebSocketClient!
-    let PORT:Int = 3000
+    let PORT: Int = 3000
 
     var subject: PassthroughSubject<String, Never>?
 
@@ -78,33 +77,33 @@ public class HttpServer: NSObject {
 }
 
 public extension HttpServer {
-    
+
     func start(host: String, port: Int32) {
         DispatchQueue.global().async {
             self.setupServer(port: port)
         }
     }
-    
-    func setupServer(port: Int32){
+
+    func setupServer(port: Int32) {
         self.server = Server()
-        
+
         server.delegate = self
         server.webSocketDelegate = self
         // Can handle upto 5 requests concurrently
         server.concurrency = 5
-        
+
         do {
             try server.start(port: Int(port))
         } catch {
-            print("Error when starting error:" ,error.localizedDescription)
+            print("Error when starting error:", error.localizedDescription)
         }
-        
+
     }
-    
+
     func sendMessage(userId: String, message: String) {
         sockets[userId]?.send(text: message)
     }
-    
+
     func sendMessageToAll(message: String) {
         print("message to all \(sockets)")
         sockets.values.forEach { socket in
@@ -130,34 +129,34 @@ public extension HttpServer {
 
 extension HttpServer: ServerDelegate {
     public func serverDidStop(_ server: Telegraph.Server, error: (any Error)?) {
-        print("Server stopped:",error?.localizedDescription ?? "Unknown")
+        print("Server stopped:", error?.localizedDescription ?? "Unknown")
     }
 }
 
 extension HttpServer: ServerWebSocketDelegate {
-    
+
     public func server(_ server: Telegraph.Server, webSocketDidDisconnect webSocket: any Telegraph.WebSocket, error: (any Error)?) {
         print("Websocket client disconnected \(webSocket)")
         print("Websocket client disconnected \(webSocket)")
         if let key = sockets.first(where: { $0.value === webSocket })?.key {
-             sockets.removeValue(forKey: key)
+            sockets.removeValue(forKey: key)
             subject?.send("Client disconnected: \(key)")
         }
     }
-    
+
     public func server(_ server: Telegraph.Server, webSocketDidConnect webSocket: any Telegraph.WebSocket, handshake: Telegraph.HTTPRequest) {
         guard let id = handshake.uri.queryItems?.first(where: { $0.name == "id" })?.value else {
             print("Websocket connection rejected: missing id")
             return
         }
-            Analytics.logEvent("test_connection", parameters: ["client_connected": true])
-            print("Websocket client connected:", id)
-            sockets[id] = webSocket
+        Analytics.logEvent("test_connection", parameters: ["client_connected": true])
+        print("Websocket client connected:", id)
+        sockets[id] = webSocket
     }
-    
-    
+
+
     public func server(_ server: Server, webSocket: WebSocket, didReceiveMessage message: WebSocketMessage) {
-      print("WebSocket message received:", message)
+        print("WebSocket message received:", message)
         Analytics.logEvent("test_connection", parameters: ["websocket_received": message])
 
         let payload = message.payload
@@ -166,9 +165,9 @@ extension HttpServer: ServerWebSocketDelegate {
         }
     }
 
-    
+
     public func server(_ server: Server, webSocket: WebSocket, didSendMessage message: WebSocketMessage) {
-      print("WebSocket message sent:", message)
+        print("WebSocket message sent:", message)
     }
-    
+
 }

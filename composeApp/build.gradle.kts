@@ -1,4 +1,3 @@
-import pl.msiwak.convention.config.baseSetup
 import java.io.FileInputStream
 import java.util.Properties
 
@@ -7,7 +6,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
-    alias(libs.plugins.kotlinCocoapods)
+
     id("pl.msiwak.convention.target.config")
     id("pl.msiwak.convention.android.config")
     id("com.google.gms.google-services")
@@ -23,22 +22,36 @@ val versionCode = 1_000_000 * versionMajor + 10_000 * versionMinor + 100 * versi
 val appVersionCode: Int = Integer.valueOf(versionCode)
 
 kotlin {
-    cocoapods {
-        baseSetup()
-        podfile = project.file("../iosApp/Podfile")
-        framework {
-            baseName = "ComposeApp"
-            linkerOpts("-ObjC")
+//    cocoapods {
+//        baseSetup()
+//        podfile = project.file("../iosApp/Podfile")
+//        framework {
+//            baseName = "ComposeApp"
+//            linkerOpts("-ObjC")
+//
+////            export(projects.sharedFrontend.network)
+//            export(projects.sharedFrontend.commonModel)
+//            export(projects.libConnection)
+//        }
+//
+////        pod("FirebaseCore", linkOnly = true)
+////        pod("FirebaseCrashlytics", linkOnly = true)
+////        pod("FirebaseRemoteConfig", linkOnly = true)
+////        pod("FirebaseAnalytics", linkOnly = true)
+//    }
 
-//            export(projects.sharedFrontend.network)
+    listOf(
+        iosX64(),
+        iosArm64(),
+        iosSimulatorArm64()
+    ).forEach { iosTarget ->
+        iosTarget.binaries.framework {
+            baseName = "ComposeApp"
+            isStatic = true
+
             export(projects.sharedFrontend.commonModel)
             export(projects.libConnection)
         }
-
-        pod("FirebaseCore", linkOnly = true)
-        pod("FirebaseCrashlytics", linkOnly = true)
-        pod("FirebaseRemoteConfig", linkOnly = true)
-        pod("FirebaseAnalytics", linkOnly = true)
     }
 
     sourceSets {

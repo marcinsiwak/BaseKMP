@@ -9,7 +9,6 @@
 import Foundation
 import Network
 import ComposeApp
-import sharedFrontend
 import Combine
 import FirebaseAnalytics
 
@@ -23,16 +22,18 @@ class ConnectionManagerImpl: ConnectionManager {
 
 
     func observeWifiState() -> any Kotlinx_coroutines_coreFlow {
-           monitor.pathUpdateHandler = { [weak self] path in
-               guard let self = self else { return }
-               let state = (path.status == .satisfied && path.usesInterfaceType(.wifi)) ? WifiState.connected : WifiState.disconnected
-               print("OUTPUT: \(state)")
-               Analytics.logEvent("test_connection", parameters: ["wifiState": state.name])
-               DispatchQueue.main.async {
-                   self.wifiStateSubject.send(state)
-               }
-           }
-           monitor.start(queue: queue)
+        monitor.pathUpdateHandler = { [weak self] path in
+            guard let self = self else {
+                return
+            }
+            let state = (path.status == .satisfied && path.usesInterfaceType(.wifi)) ? WifiState.connected : WifiState.disconnected
+            print("OUTPUT: \(state)")
+            Analytics.logEvent("test_connection", parameters: ["wifiState": state.name])
+            DispatchQueue.main.async {
+                self.wifiStateSubject.send(state)
+            }
+        }
+        monitor.start(queue: queue)
         return wifiStateSubject.asFlow()
     }
 
@@ -101,8 +102,6 @@ class ConnectionManagerImpl: ConnectionManager {
                         Analytics.logEvent("test_connection", parameters: ["UDP_SEND": "error"])
 
                     } else {
-                        Analytics.logEvent("test_connection", parameters: ["UDP_SEND": "success"])
-
                         // print("✅ Message sent: \"\(msg)\"")
                     }
                     connection.cancel()
@@ -115,7 +114,7 @@ class ConnectionManagerImpl: ConnectionManager {
                 connection.cancel()
 
             case .cancelled:
-                Analytics.logEvent("test_connection", parameters: ["UDP_SEND": "connection cancelled"])
+//                Analytics.logEvent("test_connection", parameters: ["UDP_SEND": "connection cancelled"])
 
                 ""
                 // print("Connection closed.")
@@ -153,7 +152,7 @@ class ConnectionManagerImpl: ConnectionManager {
                     }
                     if let data = data, let message = String(data: data, encoding: .utf8) {
                         // print("📨 Received: \(message)")
-                        Analytics.logEvent("test_connection", parameters: ["UDP_LISTEN": "received success"])
+                        // Analytics.logEvent("test_connection", parameters: ["UDP_LISTEN": "received success"])
 
                         self.subject.send(message)
                     }

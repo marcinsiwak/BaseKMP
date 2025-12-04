@@ -1,9 +1,6 @@
-import pl.msiwak.convention.config.baseSetup
-
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
-    alias(libs.plugins.kotlinCocoapods)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.serialization)
@@ -12,10 +9,14 @@ plugins {
 }
 
 kotlin {
-    cocoapods {
-        baseSetup()
-        framework {
+    listOf(
+        iosX64(),
+        iosArm64(),
+        iosSimulatorArm64()
+    ).forEach { iosTarget ->
+        iosTarget.binaries.framework {
             baseName = "common-model"
+            isStatic = true
         }
     }
 

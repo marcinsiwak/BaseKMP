@@ -1,18 +1,18 @@
-import pl.msiwak.convention.config.baseSetup
-
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
-    alias(libs.plugins.kotlinCocoapods)
     alias(libs.plugins.serialization)
     id("pl.msiwak.convention.android.config")
     id("pl.msiwak.convention.target.config")
 }
 
 kotlin {
-    cocoapods {
-        baseSetup()
-        framework {
+    listOf(
+        iosX64(),
+        iosArm64(),
+        iosSimulatorArm64()
+    ).forEach { iosTarget ->
+        iosTarget.binaries.framework {
             baseName = "navigation"
         }
     }

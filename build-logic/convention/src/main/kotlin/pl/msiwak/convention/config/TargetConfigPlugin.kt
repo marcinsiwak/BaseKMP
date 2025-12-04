@@ -6,7 +6,6 @@ import org.gradle.kotlin.dsl.getByType
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
-import org.jetbrains.kotlin.gradle.plugin.cocoapods.CocoapodsExtension
 
 class TargetConfigPlugin : Plugin<Project> {
     @OptIn(ExperimentalWasmDsl::class)
@@ -23,15 +22,4 @@ class TargetConfigPlugin : Plugin<Project> {
             jvmToolchain(17)
         }
     }
-}
-
-fun CocoapodsExtension.baseSetup() {
-    summary = "Shared Module"
-    homepage = "https://github.com/marcinsiwak/BaseKMP"
-    version = "1.0"
-    ios.deploymentTarget = "16.2"
-    xcodeConfigurationToNativeBuildType["release"] =
-        org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType.RELEASE
-    xcodeConfigurationToNativeBuildType["debug"] =
-        org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType.DEBUG
 }

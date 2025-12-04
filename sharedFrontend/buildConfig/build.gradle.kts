@@ -3,26 +3,28 @@ import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING
 import com.codingfeline.buildkonfig.gradle.BuildKonfigExtension
 import com.codingfeline.buildkonfig.gradle.TargetConfigDsl
 import org.gradle.internal.extensions.stdlib.capitalized
-import org.jetbrains.kotlin.gradle.plugin.cocoapods.KotlinCocoapodsPlugin
-import pl.msiwak.convention.config.baseSetup
 import java.util.regex.Pattern
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
-    alias(libs.plugins.kotlinCocoapods)
     alias(libs.plugins.buildKonfig)
     id("pl.msiwak.convention.android.config")
     id("pl.msiwak.convention.target.config")
 }
 
 kotlin {
-    cocoapods {
-        baseSetup()
-        framework {
+    listOf(
+        iosX64(),
+        iosArm64(),
+        iosSimulatorArm64()
+    ).forEach { iosTarget ->
+        iosTarget.binaries.framework {
             baseName = "buildConfig"
+            isStatic = true
         }
     }
+
 }
 
 buildkonfig {
@@ -83,7 +85,7 @@ tasks.create("setupBuildKonfig") {
         gradle.startParameter.taskNames.contains("composeApp:wasmJsBrowserDevelopmentRun") -> "stagingDebug"
         gradle.startParameter.taskNames.contains("composeApp:wasmJsBrowserDistribution") -> "productionRelease"
         gradle.startParameter.taskNames.contains("composeApp:wasmJsBrowserProductionRun") -> "productionRelease"
-        androidKMPFlavor.isEmpty() -> project.findProperty(KotlinCocoapodsPlugin.CONFIGURATION_PROPERTY).toString()
+//        androidKMPFlavor.isEmpty() -> project.findProperty(KotlinCocoapodsPlugin.CONFIGURATION_PROPERTY).toString()
         else -> androidKMPFlavor
     }
     project.setProperty("buildkonfig.flavor", buildKonfigFlavor)

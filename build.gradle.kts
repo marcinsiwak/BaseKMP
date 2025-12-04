@@ -7,7 +7,6 @@ plugins {
     alias(libs.plugins.composeCompiler) apply false
     alias(libs.plugins.kotlinJvm) apply false
     alias(libs.plugins.kotlinMultiplatform) apply false
-    alias(libs.plugins.kotlinCocoapods) apply false
     alias(libs.plugins.ktlint)
     alias(libs.plugins.detekt)
     id("com.google.gms.google-services") version "4.4.4" apply false
