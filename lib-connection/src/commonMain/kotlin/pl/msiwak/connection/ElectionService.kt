@@ -129,6 +129,10 @@ class ElectionService(
     fun setHasGameSession(hasGameSession: Boolean) {
         currentHasGameSession = hasGameSession
     }
+
+    suspend fun clearHost() {
+        _hostIp.emit("")
+    }
 }
 
 data class DeviceCandidate(

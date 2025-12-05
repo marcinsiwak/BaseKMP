@@ -1,6 +1,7 @@
 package pl.msiwak.data.game
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
@@ -21,10 +22,15 @@ class ServerManager(
 
     private var localGameSession: GameSession? = null
 
+    private var startJob: Job? = null
+
     suspend fun start(scope: CoroutineScope, gameSession: GameSession?) = with(scope) {
         localGameSession = gameSession
-        launch { observeGameSession() }
-        launch { observeMessages() }
+        if (startJob?.isActive == true) return@with
+        startJob = launch {
+            launch { observeGameSession() }
+            launch { observeMessages() }
+        }
     }
 
     suspend fun observeGameSession() {
@@ -42,6 +48,7 @@ class ServerManager(
             .collectLatest { event ->
                 when (event) {
                     is ClientActions.UserConnected -> {
+                        println("OUTPUT: ${event.isHost}")
                         if (event.isHost) {
                             gameManager.createGame(event.id, null, localGameSession)
                         }

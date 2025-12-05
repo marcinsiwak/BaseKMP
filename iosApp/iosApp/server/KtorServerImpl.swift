@@ -11,6 +11,7 @@ import ComposeApp
 import Telegraph
 import Combine
 import FirebaseAnalytics
+import FirebaseCrashlytics
 
 class KtorServerImpl: KtorServer {
 
@@ -28,7 +29,7 @@ class KtorServerImpl: KtorServer {
         if (httpServer.server != nil && httpServer.server.isRunning) {
             return
         }
-        Analytics.logEvent("test_connection", parameters: ["serverStarted": true])
+        // Analytics.logEvent("test_connection", parameters: ["serverStarted": true])
         subject.send("Server started")
         httpServer.start(host: host, port: port)
     }
@@ -36,7 +37,7 @@ class KtorServerImpl: KtorServer {
     func stopServer() async throws {
         if (httpServer.server != nil) {
             Analytics.logEvent("test_connection", parameters: ["serverStoped": true])
-            httpServer.server.stop()
+            httpServer.server.stop(immediately: true)
         }
     }
 
@@ -77,7 +78,7 @@ public class HttpServer: NSObject {
 }
 
 public extension HttpServer {
-
+    
     func start(host: String, port: Int32) {
         DispatchQueue.global().async {
             self.setupServer(port: port)
@@ -95,6 +96,7 @@ public extension HttpServer {
         do {
             try server.start(port: Int(port))
         } catch {
+            FirebaseCrashlytics.Crashlytics.crashlytics().record(error: error)
             print("Error when starting error:", error.localizedDescription)
         }
 
@@ -129,6 +131,10 @@ public extension HttpServer {
 
 extension HttpServer: ServerDelegate {
     public func serverDidStop(_ server: Telegraph.Server, error: (any Error)?) {
+        if(error != nil) {
+            FirebaseCrashlytics.Crashlytics.crashlytics().record(error: error!)
+        }
+
         print("Server stopped:", error?.localizedDescription ?? "Unknown")
     }
 }
@@ -138,6 +144,9 @@ extension HttpServer: ServerWebSocketDelegate {
     public func server(_ server: Telegraph.Server, webSocketDidDisconnect webSocket: any Telegraph.WebSocket, error: (any Error)?) {
         print("Websocket client disconnected \(webSocket)")
         print("Websocket client disconnected \(webSocket)")
+        if(error != nil) {
+            FirebaseCrashlytics.Crashlytics.crashlytics().record(error: error!)
+        }
         if let key = sockets.first(where: { $0.value === webSocket })?.key {
             sockets.removeValue(forKey: key)
             subject?.send("Client disconnected: \(key)")
@@ -157,7 +166,7 @@ extension HttpServer: ServerWebSocketDelegate {
 
     public func server(_ server: Server, webSocket: WebSocket, didReceiveMessage message: WebSocketMessage) {
         print("WebSocket message received:", message)
-        Analytics.logEvent("test_connection", parameters: ["websocket_received": message])
+        // Analytics.logEvent("test_connection", parameters: ["websocket_received": message])
 
         let payload = message.payload
         if case let .text(message) = payload {

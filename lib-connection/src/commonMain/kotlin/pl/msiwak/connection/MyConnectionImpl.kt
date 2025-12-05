@@ -8,6 +8,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
@@ -15,6 +16,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 import kotlinx.serialization.KSerializer
 import pl.msiwak.connection.Json.json
@@ -48,11 +50,19 @@ class MyConnectionImpl(
 
     private var currentHostIp: String? = null
 
-    override val serverMessages: Flow<WebSocketEvent> = ktorServer.messages
+    private val scope = CoroutineScope(Dispatchers.IO)
+
+    override val serverMessages: SharedFlow<WebSocketEvent> = ktorServer.messages
         .map(::mapMessage)
         .onEach(::handleWebSocketEvent)
+        .shareIn(
+            scope = scope,
+            started = SharingStarted.Eagerly,
+            replay = 1
+        )
 
-    override val clientMessages: SharedFlow<WebSocketEvent> = ktorClient.webSocketEvent
+    override val clientMessages: Flow<WebSocketEvent> = ktorClient.webSocketEvent
+        .onEach(::handleClientWebSocketEvent)
 
     init {
         CoroutineScope(Dispatchers.IO).launch {
@@ -93,13 +103,14 @@ class MyConnectionImpl(
                 electionService.hostIp.distinctUntilChanged(),
                 { wifiState, hostIp -> wifiState to hostIp }
             )
-            .filter { (wifiState, _) -> wifiState.name == WifiState.CONNECTED.name }
+            .filter { (wifiState, hostIp) -> wifiState.name == WifiState.CONNECTED.name && hostIp.isNotBlank() }
             .map { (_, hostIp) -> hostIp }
             .collectLatest { hostIp ->
                 currentHostIp = hostIp
                 println("Observed new host IP: $hostIp")
                 electedHostIp = hostIp
                 if (hostIp == localIP) {
+                    println("is ktorServerRunning : ${ktorServer.isRunning()}")
                     if (!ktorServer.isRunning()) {
                         startServer()
                     }
@@ -157,9 +168,10 @@ class MyConnectionImpl(
     }
 
     private fun mapMessage(message: String): WebSocketEvent {
+        println("Map messages: $message")
         return when {
             message.startsWith("Client disconnected: ") -> ClientActions.UserDisconnected(message.substringAfter("Client disconnected: "))
-            message.startsWith("Server started") -> ServerActions.ServerStarted
+            message.contains("Server started") -> ServerActions.ServerStarted
             else -> json.decodeFromString<WebSocketEvent>(message)
         }
     }
@@ -167,7 +179,23 @@ class MyConnectionImpl(
     private suspend fun handleWebSocketEvent(webSocketEvent: WebSocketEvent) {
         when (webSocketEvent) {
             is ClientActions.UserDisconnected -> ktorServer.closeSocket(webSocketEvent.id)
-            is ClientActions.ServerDownDetected -> _isLoading.value = true
+            is ClientActions.ServerDownDetected -> {
+                _isLoading.value = true //to remove
+            }
+
+            else -> Unit
+        }
+    }
+
+    private suspend fun handleClientWebSocketEvent(webSocketEvent: WebSocketEvent) {
+        when (webSocketEvent) {
+            is ClientActions.UserDisconnected -> ktorServer.closeSocket(webSocketEvent.id)
+            is ClientActions.ServerDownDetected -> {
+                electionService.clearHost()
+                ktorServer.stopServer()
+                _isLoading.value = true
+            }
+
             else -> Unit
         }
     }

@@ -11,6 +11,7 @@ import Network
 import ComposeApp
 import Combine
 import FirebaseAnalytics
+import FirebaseCrashlytics
 
 class ConnectionManagerImpl: ConnectionManager {
 
@@ -75,6 +76,11 @@ class ConnectionManagerImpl: ConnectionManager {
                 }
             }
         }
+        
+        let error = NSError(domain: "app.error", code: 0, userInfo: [NSLocalizedDescriptionKey: "Address not found"])
+
+        FirebaseCrashlytics.Crashlytics.crashlytics().record(error: error)
+    
         return nil
     }
 
@@ -100,6 +106,11 @@ class ConnectionManagerImpl: ConnectionManager {
                     if let error = error {
                         print("❌ Error sending UDP message: \(error)")
                         Analytics.logEvent("test_connection", parameters: ["UDP_SEND": "error"])
+                        
+                        
+                        let error = NSError(domain: "app.error", code: 0, userInfo: [NSLocalizedDescriptionKey: "UDP_SEND error"])
+
+                        FirebaseCrashlytics.Crashlytics.crashlytics().record(error: error)
 
                     } else {
                         // print("✅ Message sent: \"\(msg)\"")
@@ -110,11 +121,16 @@ class ConnectionManagerImpl: ConnectionManager {
             case .failed(let error):
                 print("❌ Connection failed with error: \(error)")
                 Analytics.logEvent("test_connection", parameters: ["UDP_SEND": "connection failed"])
+                
+                
+                let error = NSError(domain: "app.error", code: 0, userInfo: [NSLocalizedDescriptionKey: "UDP_SEND failed"])
+
+                FirebaseCrashlytics.Crashlytics.crashlytics().record(error: error)
 
                 connection.cancel()
 
             case .cancelled:
-//                Analytics.logEvent("test_connection", parameters: ["UDP_SEND": "connection cancelled"])
+               // Analytics.logEvent("test_connection", parameters: ["UDP_SEND": "connection cancelled"])
 
                 ""
                 // print("Connection closed.")
@@ -132,6 +148,11 @@ class ConnectionManagerImpl: ConnectionManager {
         guard let portValue = NWEndpoint.Port(rawValue: UInt16(port)) else {
             print("❌ Invalid port: \(port)")
             Analytics.logEvent("test_connection", parameters: ["UDP_LISTEN": "invalid port"])
+            
+            
+            let error = NSError(domain: "app.error", code: 0, userInfo: [NSLocalizedDescriptionKey: "UDP_LISTEN INVALID PORT"])
+
+            FirebaseCrashlytics.Crashlytics.crashlytics().record(error: error)
 
             return subject.asFlow()
         }
@@ -147,6 +168,10 @@ class ConnectionManagerImpl: ConnectionManager {
                     if let error = error {
                         print("UDP receive error: \(error)")
                         Analytics.logEvent("test_connection", parameters: ["UDP_LISTEN": "receive error"])
+                        
+                        let error = NSError(domain: "app.error", code: 0, userInfo: [NSLocalizedDescriptionKey: "UDP_LISTEN RECEIVE ERROR"])
+
+                        FirebaseCrashlytics.Crashlytics.crashlytics().record(error: error)
 
                         return
                     }
@@ -165,6 +190,10 @@ class ConnectionManagerImpl: ConnectionManager {
 
         } catch {
             Analytics.logEvent("test_connection", parameters: ["UDP_LISTEN": "listener failed"])
+            
+            let error = NSError(domain: "app.error", code: 0, userInfo: [NSLocalizedDescriptionKey: "UDP_LISTEN LISTENER FAILED"])
+
+            FirebaseCrashlytics.Crashlytics.crashlytics().record(error: error)
 
             print("❌ Failed to start UDP listener on port \(port): \(error)")
         }
@@ -277,6 +306,11 @@ class ConnectionManagerImpl: ConnectionManager {
             freeifaddrs(ifaddr)
         }
         Analytics.logEvent("test_connection", parameters: ["LOCAL_ADDRESS": address])
+        
+        
+        let error = NSError(domain: "app.error", code: 0, userInfo: [NSLocalizedDescriptionKey: "LOCAL IP \(String(describing: address))"])
+
+        FirebaseCrashlytics.Crashlytics.crashlytics().record(error: error)
 
         return address
     }

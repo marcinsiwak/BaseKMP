@@ -12,8 +12,8 @@ interface MyConnection {
     val isWifiConnected: StateFlow<Boolean>
 
     val isLoading: StateFlow<Boolean>
-    val serverMessages: Flow<WebSocketEvent>
-    val clientMessages: SharedFlow<WebSocketEvent>
+    val serverMessages: SharedFlow<WebSocketEvent>
+    val clientMessages: Flow<WebSocketEvent>
     suspend fun send(id: String, webSocketEvent: WebSocketEvent)
     suspend fun sendToAll(webSocketEvent: WebSocketEvent)
     suspend fun sendFromClient(webSocketEvent: WebSocketEvent)

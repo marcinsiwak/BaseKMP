@@ -12,6 +12,7 @@ import io.ktor.websocket.send
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -21,6 +22,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import pl.msiwak.connection.Json.json
 import pl.msiwak.connection.engine.EngineProvider
 import pl.msiwak.connection.model.ClientActions
@@ -70,10 +72,11 @@ class KtorClient(engine: EngineProvider) {
         }.onFailure {
             _isConnected.value = false
             println("OUTPUT: KtorClient connect failed: ${it.message}")
-            if (it.message?.contains("-1009") == true) {
+            if (it.message?.contains("-1009") == true || it.message == "Connection refused") {
                 delay(1000)
                 connect(host, port, id)
             }
+
         }
     }
 
@@ -99,6 +102,7 @@ class KtorClient(engine: EngineProvider) {
             }
         }.onFailure {
             _isConnected.value = false
+
             when (it) {
                 is ClosedReceiveChannelException -> {
                     when (val reason = closeReason.await()?.knownReason) {
@@ -115,9 +119,9 @@ class KtorClient(engine: EngineProvider) {
 
                 is CancellationException -> {
                     println("OUTPUT: listenForResponse cancelled: ${it.message}")
-//                    withContext(NonCancellable) {
-//                        _webSocketEvent.emit(WebSocketEvent.ClientActions.ServerDownDetected)
-//                    }
+                    withContext(NonCancellable) {
+                        _webSocketEvent.emit(ClientActions.ServerDownDetected)
+                    }
                 }
 
                 else -> println("OUTPUT: Error in listenForResponse: ${it.message}")

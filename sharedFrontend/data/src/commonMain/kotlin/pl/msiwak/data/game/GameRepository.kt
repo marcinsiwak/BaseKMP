@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.launch
 import pl.msiwak.common.model.GameActions
 import pl.msiwak.common.model.GameSession
@@ -28,17 +29,17 @@ class GameRepository(
     val currentGameSession: StateFlow<GameSession?> = _currentGameSession.asStateFlow()
 
     init {
-        CoroutineScope(Dispatchers.IO).launch {
+        CoroutineScope(Dispatchers.IO).launch First@{
             launch { observeClientMessages() }
             launch {
-                myConnection.serverMessages.collectLatest { event ->
-                    when (event) {
-                        ServerActions.ServerStarted -> serverManager.start(
-                            this,
+                myConnection.serverMessages.filterIsInstance(ServerActions.ServerStarted::class)
+                    .collectLatest { event ->
+                        println("?????: $event")
+                        serverManager.start(
+                            this@First,
                             currentGameSession.value
                         )
                     }
-                }
             }
             launch {
                 myConnection.isLoading.collectLatest { isLoading ->
