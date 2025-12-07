@@ -61,8 +61,13 @@ class MyConnectionImpl(
             replay = 1
         )
 
-    override val clientMessages: Flow<WebSocketEvent> = ktorClient.webSocketEvent
+    override val clientMessages: SharedFlow<WebSocketEvent> = ktorClient.webSocketEvent
         .onEach(::handleClientWebSocketEvent)
+        .shareIn(
+            scope = scope,
+            started = SharingStarted.Eagerly,
+            replay = 1
+        )
 
     init {
         CoroutineScope(Dispatchers.IO).launch {
@@ -124,29 +129,14 @@ class MyConnectionImpl(
 
     fun startServer() {
         job?.cancel()
+        serverJob?.cancel()
         job = CoroutineScope(Dispatchers.IO).launch {
-//            launch { observeMessages() }
             val ipAddress = connectionManager.getLocalIpAddress() ?: throw Exception("Cannot get local IP address")
             if (serverJob?.isActive != true) {
                 serverJob = launch { ktorServer.startServer(ipAddress, PORT) }
             }
-//            launch {
-//                delay(1000)
-//                serverManager.observeGameSession()
-//            }
-//            launch {
-//                delay(1000)
-//                deviceIpId = ipAddress.substringAfterLast(".")
-//                serverManager.createGame(deviceIpId, ipAddress, gameSession)
-//                connectPlayer(ipAddress)
-//            }
         }
     }
-//
-//    fun connectPlayer(electedIp: String) = CoroutineScope(Dispatchers.IO).launch {
-//        deviceIpId = getDeviceIp().substringAfterLast(".")
-//        connectPlayerToGame(electedIp)
-//    }
 
     suspend fun getDeviceIp(): String {
         repeat(10) {
@@ -199,64 +189,4 @@ class MyConnectionImpl(
             else -> Unit
         }
     }
-
-//    private suspend fun connectPlayerToGame(ip: String) {
-//        val player = Player(id = deviceIpId, isActive = true)
-//        ktorClient.connect(host = ip, port = PORT, player = player)
-//    }
-
-
-//    suspend fun observeMessages() {
-//        ktorServer.messages.map {
-//            if (it.startsWith("Client disconnected: ")) {
-//                WebSocketEvent.ClientActions.UserDisconnected(it.substringAfter("Client disconnected: "))
-//            } else {
-//                json.decodeFromString<WebSocketEvent>(it)
-//            }
-//        }
-//            .collectLatest { event ->
-//                when (event) {
-//                    is WebSocketEvent.ClientActions.UserConnected -> gameManager.joinGame(event.player)
-//
-//                    is WebSocketEvent.ClientActions.UserDisconnected -> {
-////                        gameManager.leaveGame(event.id)
-//                        gameManager.disablePlayer(event.id)
-//                        ktorServer.closeSocker(event.id)
-//                    }
-//
-//                    is WebSocketEvent.ServerActions.UpdateGameSession -> {
-//                        gameManager.getGameSession()?.let {
-//                            ktorServer.sendMessageToAll(
-//                                json.encodeToString<WebSocketEvent>(event)
-//                            )
-//                        }
-//                    }
-//
-//                    is WebSocketEvent.ClientActions.SetPlayerReady -> {
-//                        gameManager.setPlayerReady(event.id)
-//                    }
-//
-//                    is WebSocketEvent.ClientActions.AddCard -> {
-//                        gameManager.addCardToGame(event.id, event.cardText)
-//                    }
-//
-//                    is WebSocketEvent.ClientActions.ContinueGame -> {
-//                        gameManager.continueGame()
-//                    }
-//
-//                    is WebSocketEvent.ClientActions.JoinTeam -> {
-//                        gameManager.joinTeam(event.id, event.teamName)
-//                    }
-//
-//                    is WebSocketEvent.ClientActions.SetCorrectAnswer -> {
-//                        gameManager.setCorrectAnswer(event.cardText)
-//                    }
-//
-//                    is WebSocketEvent.ClientActions.AddPlayerName -> {
-//                        gameManager.addPlayerName(event.id, event.name)
-//                    }
-//
-//                    else -> Unit
-//                }
-//            }
 }

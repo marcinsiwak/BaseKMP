@@ -36,8 +36,7 @@ import java.net.SocketTimeoutException
 
 class ConnectionManagerImpl : ConnectionManager {
 
-    private val scope = CoroutineScope(Dispatchers.IO)
-
+    private var networkIp: String? = null
     private val request: NetworkRequest
         get() = Builder()
             .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
@@ -94,7 +93,7 @@ class ConnectionManagerImpl : ConnectionManager {
         for (linkAddress in linkProperties.linkAddresses) {
             val address = linkAddress.address
             if (address is Inet4Address && !address.isLoopbackAddress) {
-                return address.hostAddress
+                return address.hostAddress.also { networkIp = it }
             }
         }
         return null
@@ -134,13 +133,14 @@ class ConnectionManagerImpl : ConnectionManager {
 
     @RequiresPermission(Manifest.permission.ACCESS_NETWORK_STATE)
     override suspend fun broadcastMessage(msg: String, port: Int): Unit = withContext(Dispatchers.IO) {
+        networkIp ?: run { getLocalIpAddress() }
         runCatching {
             val socket = DatagramSocket()
             socket.broadcast = true
             val data = msg.toByteArray()
             val packet = DatagramPacket(
                 data, data.size,
-                InetAddress.getByName("255.255.255.255"), port
+                InetAddress.getByName("${networkIp?.substringBeforeLast(".")}.255"), port
             )
             socket.send(packet)
             socket.close()

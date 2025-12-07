@@ -29,7 +29,7 @@ class KtorServerImpl: KtorServer {
         if (httpServer.server != nil && httpServer.server.isRunning) {
             return
         }
-        // Analytics.logEvent("test_connection", parameters: ["serverStarted": true])
+         Analytics.logEvent("test_connection", parameters: ["serverStarted": true])
         subject.send("Server started")
         httpServer.start(host: host, port: port)
     }

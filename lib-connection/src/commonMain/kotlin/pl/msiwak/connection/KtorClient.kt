@@ -36,7 +36,6 @@ class KtorClient(engine: EngineProvider) {
 
     private val _webSocketEvent = MutableSharedFlow<WebSocketEvent>()
     val webSocketEvent: SharedFlow<WebSocketEvent> = _webSocketEvent.asSharedFlow()
-
     private val _webSocketClientEvent = MutableSharedFlow<WebSocketEvent>()
     private val webSocketClientEvent: SharedFlow<WebSocketEvent> = _webSocketClientEvent.asSharedFlow()
 
@@ -102,7 +101,6 @@ class KtorClient(engine: EngineProvider) {
             }
         }.onFailure {
             _isConnected.value = false
-
             when (it) {
                 is ClosedReceiveChannelException -> {
                     when (val reason = closeReason.await()?.knownReason) {

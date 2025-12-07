@@ -20,7 +20,7 @@ class ConnectionManagerImpl: ConnectionManager {
     private var listener: NWListener?
     private let monitor = NWPathMonitor(requiredInterfaceType: .wifi)
     private let queue = DispatchQueue.global(qos: .background)
-
+    private var networkIp: String?
 
     func observeWifiState() -> any Kotlinx_coroutines_coreFlow {
         monitor.pathUpdateHandler = { [weak self] path in
@@ -86,7 +86,11 @@ class ConnectionManagerImpl: ConnectionManager {
 
     func broadcastMessage(msg: String, port: Int32) async throws {
         let data = msg.data(using: .utf8)!
-        let host = NWEndpoint.Host(getBroadcastAddress() ?? "")
+        if(networkIp == nil) {
+            networkIp = getLocalIpAddress()
+        }
+        let hostIp = networkIp?.split(separator: ".").dropLast().joined(separator: ".") ?? ""
+        let host = NWEndpoint.Host(hostIp + ".255")
         let remotePort = NWEndpoint.Port(integerLiteral: UInt16(port))
 
         let parameters = NWParameters.udp
@@ -106,8 +110,7 @@ class ConnectionManagerImpl: ConnectionManager {
                     if let error = error {
                         print("❌ Error sending UDP message: \(error)")
                         Analytics.logEvent("test_connection", parameters: ["UDP_SEND": "error"])
-                        
-                        
+
                         let error = NSError(domain: "app.error", code: 0, userInfo: [NSLocalizedDescriptionKey: "UDP_SEND error"])
 
                         FirebaseCrashlytics.Crashlytics.crashlytics().record(error: error)
@@ -312,6 +315,7 @@ class ConnectionManagerImpl: ConnectionManager {
 
         FirebaseCrashlytics.Crashlytics.crashlytics().record(error: error)
 
+        networkIp = address
         return address
     }
 }

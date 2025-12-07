@@ -13,7 +13,7 @@ interface MyConnection {
 
     val isLoading: StateFlow<Boolean>
     val serverMessages: SharedFlow<WebSocketEvent>
-    val clientMessages: Flow<WebSocketEvent>
+    val clientMessages: SharedFlow<WebSocketEvent>
     suspend fun send(id: String, webSocketEvent: WebSocketEvent)
     suspend fun sendToAll(webSocketEvent: WebSocketEvent)
     suspend fun sendFromClient(webSocketEvent: WebSocketEvent)
