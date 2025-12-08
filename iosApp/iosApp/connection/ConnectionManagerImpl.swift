@@ -109,7 +109,7 @@ class ConnectionManagerImpl: ConnectionManager {
                 connection.send(content: data, completion: .contentProcessed { error in
                     if let error = error {
                         print("❌ Error sending UDP message: \(error)")
-                        Analytics.logEvent("test_connection", parameters: ["UDP_SEND": "error"])
+                        Analytics.logEvent("test_connection", parameters: ["UDP_SEND": "error: \(error)"])
 
                         let error = NSError(domain: "app.error", code: 0, userInfo: [NSLocalizedDescriptionKey: "UDP_SEND error"])
 
@@ -123,7 +123,7 @@ class ConnectionManagerImpl: ConnectionManager {
 
             case .failed(let error):
                 print("❌ Connection failed with error: \(error)")
-                Analytics.logEvent("test_connection", parameters: ["UDP_SEND": "connection failed"])
+                Analytics.logEvent("test_connection", parameters: ["UDP_SEND": "connection failed: \(error)"])
                 
                 
                 let error = NSError(domain: "app.error", code: 0, userInfo: [NSLocalizedDescriptionKey: "UDP_SEND failed"])

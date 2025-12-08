@@ -123,8 +123,8 @@ public extension HttpServer {
     func closeAllSockets() {
         sockets.forEach { (key: String, socket: any WebSocket) in
             socket.close(immediately: false)
-            sockets.removeValue(forKey: key)
         }
+        sockets.removeAll()
     }
 }
 

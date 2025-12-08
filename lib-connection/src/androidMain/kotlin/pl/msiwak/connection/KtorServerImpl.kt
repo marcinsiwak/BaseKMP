@@ -117,18 +117,23 @@ class KtorServerImpl : KtorServer {
     }
 
     override suspend fun closeSocket(userId: String) {
-        mutex.withLock {
-            activeSessions[userId]?.close(CloseReason(CloseReason.Codes.NORMAL, "Closed by server"))
-            activeSessions.remove(userId)
+        val session = mutex.withLock {
+            val s = activeSessions.remove(userId)
+            s
         }
+        session?.close(CloseReason(CloseReason.Codes.NORMAL, "Closed by server"))
     }
 
     override suspend fun closeAllSockets() {
-        mutex.withLock {
-            activeSessions.values.forEach {
-                it.close(CloseReason(CloseReason.Codes.NORMAL, "Closed by server"))
-            }
+        val sessionsToClose = mutex.withLock {
+            val list = activeSessions.values.toList()
             activeSessions.clear()
+            list
+        }
+
+        // Close them OUTSIDE the lock
+        sessionsToClose.forEach {
+            it.close(CloseReason(CloseReason.Codes.NORMAL, "Closed by server"))
         }
     }
 }

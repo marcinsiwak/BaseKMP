@@ -48,7 +48,6 @@ class ServerManager(
             .collectLatest { event ->
                 when (event) {
                     is ClientActions.UserConnected -> {
-                        println("OUTPUT: ${event.isHost}")
                         if (event.isHost) {
                             gameManager.createGame(event.id, null, localGameSession)
                         }

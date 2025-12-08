@@ -23,5 +23,5 @@ internal val viewModelModule = module {
     viewModel { CardsPreparationViewModel(get(), get(), get(), get()) }
     viewModel { RoundInfoViewModel(get(), get(), get()) }
     viewModel { RoundViewModel(get(), get(), get(), get(), get()) }
-    viewModel { FinishViewModel(get(), get(), get(), get()) }
+    viewModel { FinishViewModel(get(), get(), get()) }
 }

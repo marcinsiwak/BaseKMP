@@ -18,7 +18,6 @@ import pl.msiwak.ui.game.TeamItem
 
 class FinishViewModel(
     private val observeGameSessionUseCase: ObserveGameSessionUseCase,
-    private val finishGameUseCase: FinishGameUseCase,
     private val navigator: Navigator,
     private val playAgainUseCase: PlayAgainUseCase
 ) : ViewModel() {
@@ -28,18 +27,15 @@ class FinishViewModel(
 
     init {
         viewModelScope.launch {
-            observeGameSession()
-            finishGameUseCase()
-        }
-        viewModelScope.launch {
-            startCountdownTimer()
+            launch { observeGameSession() }
+            launch { startCountdownTimer() }
         }
     }
 
     fun onUiAction(action: FinishUiAction) {
         when (action) {
             is FinishUiAction.OnPlayAgainClicked -> viewModelScope.launch {
-                launch {  playAgainUseCase() }
+                launch { playAgainUseCase() }
                 navigator.navigate(NavDestination.GameDestination.StartScreen)
             }
         }

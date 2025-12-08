@@ -54,7 +54,7 @@ class MyConnectionImpl(
 
     override val serverMessages: SharedFlow<WebSocketEvent> = ktorServer.messages
         .map(::mapMessage)
-        .onEach(::handleWebSocketEvent)
+//        .onEach(::handleWebSocketEvent)
         .shareIn(
             scope = scope,
             started = SharingStarted.Eagerly,
