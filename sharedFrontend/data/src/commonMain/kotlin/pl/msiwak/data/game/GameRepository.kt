@@ -35,10 +35,12 @@ class GameRepository(
                 myConnection.serverMessages.filterIsInstance(ServerActions.ServerStarted::class)
                     .collectLatest { event ->
                         println("?????: $event")
-                        serverManager.start(
-                            this@First,
-                            currentGameSession.value
-                        )
+                        when(event) {
+                            ServerActions.ServerStarted -> serverManager.start(
+                                this@First,
+                                currentGameSession.value
+                            )
+                        }
                     }
             }
             launch {
@@ -48,6 +50,11 @@ class GameRepository(
                     } else {
                         globalLoaderManager.hideLoading()
                     }
+                }
+            }
+            launch {
+                currentGameSession.collect {
+                    myConnection.setHasSession(it != null, it?.lastUpdateTimestamp ?: 0)
                 }
             }
         }

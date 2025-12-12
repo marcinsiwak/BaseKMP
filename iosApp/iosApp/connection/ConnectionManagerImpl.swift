@@ -79,7 +79,7 @@ class ConnectionManagerImpl: ConnectionManager {
         
         let error = NSError(domain: "app.error", code: 0, userInfo: [NSLocalizedDescriptionKey: "Address not found"])
 
-        FirebaseCrashlytics.Crashlytics.crashlytics().record(error: error)
+        // FirebaseCrashlytics.Crashlytics.crashlytics().record(error: error)
     
         return nil
     }
@@ -90,10 +90,25 @@ class ConnectionManagerImpl: ConnectionManager {
             networkIp = getLocalIpAddress()
         }
         let hostIp = networkIp?.split(separator: ".").dropLast().joined(separator: ".") ?? ""
-        let host = NWEndpoint.Host(hostIp + ".255")
+        let broadcastIp = getBroadcastAddress() ?? hostIp + ".255"
+        let host = NWEndpoint.Host(broadcastIp)
         let remotePort = NWEndpoint.Port(integerLiteral: UInt16(port))
-
+        
         let parameters = NWParameters.udp
+           
+           // Critical: Enable broadcast and set interface
+           parameters.allowLocalEndpointReuse = true
+           parameters.requiredInterfaceType = .wifi
+
+           // Set SO_BROADCAST option
+           let udpOptions = NWProtocolUDP.Options()
+           parameters.defaultProtocolStack.transportProtocol = udpOptions
+
+           if let ipOptions = parameters.defaultProtocolStack.internetProtocol as? NWProtocolIP.Options {
+               ipOptions.version = .v4
+           }
+           
+        
         let connection = NWConnection(
             host: host,
             port: remotePort,
@@ -113,7 +128,7 @@ class ConnectionManagerImpl: ConnectionManager {
 
                         let error = NSError(domain: "app.error", code: 0, userInfo: [NSLocalizedDescriptionKey: "UDP_SEND error"])
 
-                        FirebaseCrashlytics.Crashlytics.crashlytics().record(error: error)
+                        // FirebaseCrashlytics.Crashlytics.crashlytics().record(error: error)
 
                     } else {
                         // print("✅ Message sent: \"\(msg)\"")
@@ -128,7 +143,7 @@ class ConnectionManagerImpl: ConnectionManager {
                 
                 let error = NSError(domain: "app.error", code: 0, userInfo: [NSLocalizedDescriptionKey: "UDP_SEND failed"])
 
-                FirebaseCrashlytics.Crashlytics.crashlytics().record(error: error)
+                // FirebaseCrashlytics.Crashlytics.crashlytics().record(error: error)
 
                 connection.cancel()
 
@@ -155,7 +170,7 @@ class ConnectionManagerImpl: ConnectionManager {
             
             let error = NSError(domain: "app.error", code: 0, userInfo: [NSLocalizedDescriptionKey: "UDP_LISTEN INVALID PORT"])
 
-            FirebaseCrashlytics.Crashlytics.crashlytics().record(error: error)
+            // FirebaseCrashlytics.Crashlytics.crashlytics().record(error: error)
 
             return subject.asFlow()
         }
@@ -174,7 +189,7 @@ class ConnectionManagerImpl: ConnectionManager {
                         
                         let error = NSError(domain: "app.error", code: 0, userInfo: [NSLocalizedDescriptionKey: "UDP_LISTEN RECEIVE ERROR"])
 
-                        FirebaseCrashlytics.Crashlytics.crashlytics().record(error: error)
+                        // FirebaseCrashlytics.Crashlytics.crashlytics().record(error: error)
 
                         return
                     }
@@ -196,7 +211,7 @@ class ConnectionManagerImpl: ConnectionManager {
             
             let error = NSError(domain: "app.error", code: 0, userInfo: [NSLocalizedDescriptionKey: "UDP_LISTEN LISTENER FAILED"])
 
-            FirebaseCrashlytics.Crashlytics.crashlytics().record(error: error)
+            // FirebaseCrashlytics.Crashlytics.crashlytics().record(error: error)
 
             print("❌ Failed to start UDP listener on port \(port): \(error)")
         }
@@ -313,7 +328,7 @@ class ConnectionManagerImpl: ConnectionManager {
         
         let error = NSError(domain: "app.error", code: 0, userInfo: [NSLocalizedDescriptionKey: "LOCAL IP \(String(describing: address))"])
 
-        FirebaseCrashlytics.Crashlytics.crashlytics().record(error: error)
+        // FirebaseCrashlytics.Crashlytics.crashlytics().record(error: error)
 
         networkIp = address
         return address

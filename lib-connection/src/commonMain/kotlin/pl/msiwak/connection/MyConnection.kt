@@ -1,6 +1,5 @@
 package pl.msiwak.connection
 
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.KSerializer
@@ -26,4 +25,6 @@ interface MyConnection {
     fun isServerRunning(): Boolean
 
     fun setCustomEvents(events: List<Pair<KClass<out WebSocketEvent>, KSerializer<out WebSocketEvent>>>)
+
+    fun setHasSession(hasSession: Boolean, lastUpdate: Long)
 }

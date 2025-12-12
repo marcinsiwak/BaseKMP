@@ -71,7 +71,7 @@ class KtorClient(engine: EngineProvider) {
         }.onFailure {
             _isConnected.value = false
             println("OUTPUT: KtorClient connect failed: ${it.message}")
-            if (it.message?.contains("-1009") == true || it.message == "Connection refused") {
+            if (it.message?.contains("-1009") == true || it.message?.contains("-1004") == true || it.message == "Connection refused") {
                 delay(1000)
                 connect(host, port, id)
             }

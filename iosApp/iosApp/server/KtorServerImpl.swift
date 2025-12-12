@@ -96,7 +96,7 @@ public extension HttpServer {
         do {
             try server.start(port: Int(port))
         } catch {
-            FirebaseCrashlytics.Crashlytics.crashlytics().record(error: error)
+            // FirebaseCrashlytics.Crashlytics.crashlytics().record(error: error)
             print("Error when starting error:", error.localizedDescription)
         }
 
@@ -132,7 +132,7 @@ public extension HttpServer {
 extension HttpServer: ServerDelegate {
     public func serverDidStop(_ server: Telegraph.Server, error: (any Error)?) {
         if(error != nil) {
-            FirebaseCrashlytics.Crashlytics.crashlytics().record(error: error!)
+            // FirebaseCrashlytics.Crashlytics.crashlytics().record(error: error!)
         }
 
         print("Server stopped:", error?.localizedDescription ?? "Unknown")
@@ -145,7 +145,7 @@ extension HttpServer: ServerWebSocketDelegate {
         print("Websocket client disconnected \(webSocket)")
         print("Websocket client disconnected \(webSocket)")
         if(error != nil) {
-            FirebaseCrashlytics.Crashlytics.crashlytics().record(error: error!)
+            // FirebaseCrashlytics.Crashlytics.crashlytics().record(error: error!)
         }
         if let key = sockets.first(where: { $0.value === webSocket })?.key {
             sockets.removeValue(forKey: key)

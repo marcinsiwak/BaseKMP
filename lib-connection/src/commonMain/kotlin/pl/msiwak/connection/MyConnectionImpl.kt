@@ -5,7 +5,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -155,6 +154,10 @@ class MyConnectionImpl(
 
     override fun setCustomEvents(events: List<Pair<KClass<out WebSocketEvent>, KSerializer<out WebSocketEvent>>>) {
         Json.generateJson(events)
+    }
+
+    override fun setHasSession(hasSession: Boolean, lastUpdate: Long) {
+        electionService.setHasSession(hasSession, lastUpdate)
     }
 
     private fun mapMessage(message: String): WebSocketEvent {

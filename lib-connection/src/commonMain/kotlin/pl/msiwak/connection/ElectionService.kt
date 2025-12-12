@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -30,7 +29,8 @@ class ElectionService(
     private val _hostIp = MutableSharedFlow<String>()
     val hostIp: SharedFlow<String> = _hostIp.asSharedFlow()
 
-    private var currentHasGameSession = false
+    private var currentHasSession = false
+    private var currentLastUpdate: Long? = null // not used yet might be deleted
 
     private val errorHandler = CoroutineExceptionHandler { _, throwable ->
         println("ElectionService Error: ${throwable.message}")
@@ -77,7 +77,7 @@ class ElectionService(
                 networkNumber = senderIp.substringAfterLast(".").toInt(),
                 isHost = hostIp == senderIp,
                 lastSeen = Clock.System.now().toEpochMilliseconds(),
-                hasGameSession = hasGameSession
+                hasNewestSession = hasGameSession
             )
             if (hostIp != null && hostIp != senderIp) {
                 candidates[hostIp] = DeviceCandidate(
@@ -85,7 +85,7 @@ class ElectionService(
                     networkNumber = hostIp.substringAfterLast(".").toInt(),
                     isHost = true,
                     lastSeen = candidates[hostIp]?.lastSeen ?: 0,
-                    hasGameSession = hasGameSession
+                    hasNewestSession = hasGameSession
                 )
             }
         }
@@ -94,7 +94,7 @@ class ElectionService(
     private fun conductElection() {
         electionInProgress = true
 
-        val winner = candidates.values.filter { it.hasGameSession }.maxByOrNull { it.networkNumber }
+        val winner = candidates.values.filter { it.hasNewestSession }.maxByOrNull { it.networkNumber }
             ?: candidates.values.maxByOrNull { it.networkNumber }
             ?: run {
                 electionInProgress = false
@@ -120,14 +120,16 @@ class ElectionService(
             ElectionMessage(
                 senderIp = ip,
                 hostIp = candidates.values.find { it.isHost }?.ipAddress,
-                hasGameSession = currentHasGameSession
+                hasGameSession = currentHasSession,
+                lastSessionUpdate = currentLastUpdate
             )
         )
         connectionManager.broadcastMessage(port = 60000, msg = message)
     }
 
-    fun setHasGameSession(hasGameSession: Boolean) {
-        currentHasGameSession = hasGameSession
+    fun setHasSession(hasGameSession: Boolean, lastUpdate: Long) {
+        currentHasSession = hasGameSession
+        currentLastUpdate = lastUpdate
     }
 
     suspend fun clearHost() {
@@ -140,12 +142,13 @@ data class DeviceCandidate(
     val networkNumber: Int,
     val isHost: Boolean,
     val lastSeen: Long,
-    val hasGameSession: Boolean
+    val hasNewestSession: Boolean
 )
 
 @Serializable
 data class ElectionMessage(
     val senderIp: String,
     val hostIp: String? = null,
-    val hasGameSession: Boolean
+    val hasGameSession: Boolean,
+    val lastSessionUpdate: Long? = null
 )
