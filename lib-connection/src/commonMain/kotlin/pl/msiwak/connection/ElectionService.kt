@@ -30,7 +30,7 @@ class ElectionService(
     val hostIp: SharedFlow<String> = _hostIp.asSharedFlow()
 
     private var currentHasSession = false
-    private var currentLastUpdate: Long? = null // not used yet might be deleted
+    private var currentLastUpdate: Long? = null
 
     private val errorHandler = CoroutineExceptionHandler { _, throwable ->
         println("ElectionService Error: ${throwable.message}")
@@ -77,7 +77,8 @@ class ElectionService(
                 networkNumber = senderIp.substringAfterLast(".").toInt(),
                 isHost = hostIp == senderIp,
                 lastSeen = Clock.System.now().toEpochMilliseconds(),
-                hasNewestSession = hasGameSession
+                hasSession = hasGameSession,
+                lastSessionUpdate = lastSessionUpdate
             )
             if (hostIp != null && hostIp != senderIp) {
                 candidates[hostIp] = DeviceCandidate(
@@ -85,7 +86,8 @@ class ElectionService(
                     networkNumber = hostIp.substringAfterLast(".").toInt(),
                     isHost = true,
                     lastSeen = candidates[hostIp]?.lastSeen ?: 0,
-                    hasNewestSession = hasGameSession
+                    hasSession = hasGameSession,
+                    lastSessionUpdate = lastSessionUpdate
                 )
             }
         }
@@ -94,7 +96,8 @@ class ElectionService(
     private fun conductElection() {
         electionInProgress = true
 
-        val winner = candidates.values.filter { it.hasNewestSession }.maxByOrNull { it.networkNumber }
+        val winner = candidates.values.filter { it.hasSession && it.lastSessionUpdate != null }
+            .maxByOrNull { it.lastSessionUpdate ?: 0 }
             ?: candidates.values.maxByOrNull { it.networkNumber }
             ?: run {
                 electionInProgress = false
@@ -133,6 +136,9 @@ class ElectionService(
     }
 
     suspend fun clearHost() {
+        candidates.forEach { (key, candidate) ->
+            candidates[key] = candidate.copy(isHost = false)
+        }
         _hostIp.emit("")
     }
 }
@@ -142,7 +148,8 @@ data class DeviceCandidate(
     val networkNumber: Int,
     val isHost: Boolean,
     val lastSeen: Long,
-    val hasNewestSession: Boolean
+    val hasSession: Boolean,
+    val lastSessionUpdate: Long? = null
 )
 
 @Serializable

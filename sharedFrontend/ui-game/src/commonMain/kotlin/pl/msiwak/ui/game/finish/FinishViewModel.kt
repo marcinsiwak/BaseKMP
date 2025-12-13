@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import pl.msiwak.destination.NavDestination
-import pl.msiwak.domain.game.FinishGameUseCase
 import pl.msiwak.domain.game.ObserveGameSessionUseCase
 import pl.msiwak.domain.game.PlayAgainUseCase
 import pl.msiwak.navigator.Navigator

@@ -57,7 +57,7 @@ class MyConnectionImpl(
         .shareIn(
             scope = scope,
             started = SharingStarted.Eagerly,
-            replay = 1
+            replay = 0
         )
 
     override val clientMessages: SharedFlow<WebSocketEvent> = ktorClient.webSocketEvent
@@ -65,7 +65,7 @@ class MyConnectionImpl(
         .shareIn(
             scope = scope,
             started = SharingStarted.Eagerly,
-            replay = 1
+            replay = 0
         )
 
     init {

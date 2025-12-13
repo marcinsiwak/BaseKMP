@@ -37,13 +37,12 @@ class GameManagerImpl(
                     delay(1000)
                     _currentGameSession.update { it?.copy(gameState = GameState.FINISHED) }
                     delay(1000)
-                    currentGameSession.value?.let {
-                        _currentGameSession.value =
-                            GameSession(
-                                gameId = Uuid.random().toString(),
-                                adminId = it.adminId,
-                                gameServerIpAddress = it.gameServerIpAddress
-                            )
+                    with(currentGameSession.value) {
+                        _currentGameSession.value = GameSession(
+                            gameId = Uuid.random().toString(),
+                            adminId = this?.adminId,
+                            gameServerIpAddress = this?.gameServerIpAddress
+                        )
                     }
                 }
             }
@@ -162,6 +161,7 @@ class GameManagerImpl(
                 player
             }
         } ?: emptyList()
+        val minPlayers = remoteConfig.getMinPlayers()
         val counts = currentGameSession.value?.teams?.map { it.playerIds.size }
         val min = counts?.min() ?: 0
         val max = counts?.max() ?: 0
@@ -169,7 +169,7 @@ class GameManagerImpl(
             it?.copy(
                 players = updatedPlayers,
                 gameState = if (
-                    updatedPlayers.size >= remoteConfig.getMinPlayers() &&
+                    updatedPlayers.size >= minPlayers &&
                     updatedPlayers.all { player -> player.isReady } &&
                     max - min <= 1
                 ) {

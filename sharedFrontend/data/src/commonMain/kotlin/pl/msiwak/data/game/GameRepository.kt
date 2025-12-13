@@ -29,15 +29,14 @@ class GameRepository(
     val currentGameSession: StateFlow<GameSession?> = _currentGameSession.asStateFlow()
 
     init {
-        CoroutineScope(Dispatchers.IO).launch First@{
+        CoroutineScope(Dispatchers.IO).launch ParentLaunch@{
             launch { observeClientMessages() }
             launch {
                 myConnection.serverMessages.filterIsInstance(ServerActions.ServerStarted::class)
                     .collectLatest { event ->
-                        println("?????: $event")
-                        when(event) {
+                        when (event) {
                             ServerActions.ServerStarted -> serverManager.start(
-                                this@First,
+                                this@ParentLaunch,
                                 currentGameSession.value
                             )
                         }
@@ -92,4 +91,8 @@ class GameRepository(
 
 
     suspend fun sendClientEvent(webSocketEvent: WebSocketEvent) = myConnection.sendFromClient(webSocketEvent)
+
+    fun clearGame() {
+        _currentGameSession.value = null
+    }
 }
