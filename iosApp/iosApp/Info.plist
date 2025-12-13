@@ -60,9 +60,9 @@
     <key>NSLocalNetworkUsageDescription</key>
     <string>This app needs access to devices on your local network to send messages.</string>
 
-<!--    <key>NSBonjourServices</key>-->
-<!--    <array>-->
-<!--        <string>_udp._udp</string> &lt;!&ndash; replace with your actual service type if using Bonjour &ndash;&gt;-->
-<!--    </array>-->
+    <key>NSBonjourServices</key>
+    <array>
+        <string>_udp._udp</string> <!-- replace with your actual service type if using Bonjour -->
+    </array>
 </dict>
 </plist>

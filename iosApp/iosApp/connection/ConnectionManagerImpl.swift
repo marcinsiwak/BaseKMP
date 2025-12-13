@@ -85,79 +85,121 @@ class ConnectionManagerImpl: ConnectionManager {
     }
 
     func broadcastMessage(msg: String, port: Int32) async throws {
-        let data = msg.data(using: .utf8)!
         if(networkIp == nil) {
             networkIp = getLocalIpAddress()
         }
         let hostIp = networkIp?.split(separator: ".").dropLast().joined(separator: ".") ?? ""
         let broadcastIp = getBroadcastAddress() ?? hostIp + ".255"
-        let host = NWEndpoint.Host(broadcastIp)
-        let remotePort = NWEndpoint.Port(integerLiteral: UInt16(port))
         
-        let parameters = NWParameters.udp
-           
-           // Critical: Enable broadcast and set interface
-           parameters.allowLocalEndpointReuse = true
-           parameters.requiredInterfaceType = .wifi
-
-           // Set SO_BROADCAST option
-           let udpOptions = NWProtocolUDP.Options()
-           parameters.defaultProtocolStack.transportProtocol = udpOptions
-
-           if let ipOptions = parameters.defaultProtocolStack.internetProtocol as? NWProtocolIP.Options {
-               ipOptions.version = .v4
-           }
-           
-        
-        let connection = NWConnection(
-            host: host,
-            port: remotePort,
-            using: parameters
-        )
-
-
-        connection.start(queue: .global())
-
-        connection.stateUpdateHandler = { newState in
-            switch newState {
-            case .ready:
-                connection.send(content: data, completion: .contentProcessed { error in
-                    if let error = error {
-                        print("❌ Error sending UDP message: \(error)")
-                        Analytics.logEvent("test_connection", parameters: ["UDP_SEND": "error: \(error)"])
-
-                        let error = NSError(domain: "app.error", code: 0, userInfo: [NSLocalizedDescriptionKey: "UDP_SEND error"])
-
-                        // FirebaseCrashlytics.Crashlytics.crashlytics().record(error: error)
-
-                    } else {
-                        // print("✅ Message sent: \"\(msg)\"")
-                    }
-                    connection.cancel()
-                })
-
-            case .failed(let error):
-                print("❌ Connection failed with error: \(error)")
-                Analytics.logEvent("test_connection", parameters: ["UDP_SEND": "connection failed: \(error)"])
-                
-                
-                let error = NSError(domain: "app.error", code: 0, userInfo: [NSLocalizedDescriptionKey: "UDP_SEND failed"])
-
-                // FirebaseCrashlytics.Crashlytics.crashlytics().record(error: error)
-
-                connection.cancel()
-
-            case .cancelled:
-               // Analytics.logEvent("test_connection", parameters: ["UDP_SEND": "connection cancelled"])
-
-                ""
-                // print("Connection closed.")
-
-            default:
-                break
-            }
+        guard port >= 0 && port <= 65535 else {
+            throw NSError(domain: "Invalid port", code: 0)
         }
+        let portUInt16 = UInt16(port)  // ✅ convert Int32 to UInt16
+
+        let sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)
+        guard sock >= 0 else { throw NSError(domain: "socket error", code: 0) }
+
+        // Enable broadcast
+        var broadcastEnable: Int32 = 1
+        setsockopt(sock, SOL_SOCKET, SO_BROADCAST, &broadcastEnable, socklen_t(MemoryLayout.size(ofValue: broadcastEnable)))
+
+        // Setup broadcast address
+        var addr = sockaddr_in()
+        addr.sin_family = sa_family_t(AF_INET)
+        addr.sin_port = htons(portUInt16) // ✅ use UInt16
+        addr.sin_addr.s_addr = inet_addr(broadcastIp) // your subnet broadcast
+
+        let data = [UInt8](msg.utf8)
+        let sent = withUnsafePointer(to: &addr) { ptr -> Int in
+            let addrPtr = UnsafeRawPointer(ptr).assumingMemoryBound(to: sockaddr.self)
+            return sendto(sock, data, data.count, 0, addrPtr, socklen_t(MemoryLayout<sockaddr_in>.size))
+        }
+
+        if sent < 0 {
+            perror("sendto")
+        }
+
+        close(sock)
     }
+    
+    func htons(_ value: UInt16) -> UInt16 {
+        return (value << 8) | (value >> 8)
+    }
+
+    // func broadcastMessage(msg: String, port: Int32) async throws {
+    //     let data = msg.data(using: .utf8)!
+    //     if(networkIp == nil) {
+    //         networkIp = getLocalIpAddress()
+    //     }
+    //     let hostIp = networkIp?.split(separator: ".").dropLast().joined(separator: ".") ?? ""
+    //     let broadcastIp = getBroadcastAddress() ?? hostIp + ".255"
+    //     let host = NWEndpoint.Host(broadcastIp)
+    //     let remotePort = NWEndpoint.Port(integerLiteral: UInt16(port))
+    //
+    //     let parameters = NWParameters.udp
+    //
+    //        // Critical: Enable broadcast and set interface
+    //        parameters.allowLocalEndpointReuse = true
+    //        parameters.requiredInterfaceType = .wifi
+    //
+    //        // Set SO_BROADCAST option
+    //        let udpOptions = NWProtocolUDP.Options()
+    //        parameters.defaultProtocolStack.transportProtocol = udpOptions
+    //
+    //        if let ipOptions = parameters.defaultProtocolStack.internetProtocol as? NWProtocolIP.Options {
+    //            ipOptions.version = .v4
+    //        }
+    //
+    //
+    //     let connection = NWConnection(
+    //         host: host,
+    //         port: remotePort,
+    //         using: parameters
+    //     )
+    //
+    //
+    //     connection.start(queue: .global())
+    //
+    //     connection.stateUpdateHandler = { newState in
+    //         switch newState {
+    //         case .ready:
+    //             connection.send(content: data, completion: .contentProcessed { error in
+    //                 if let error = error {
+    //                     print("❌ Error sending UDP message: \(error)")
+    //                     Analytics.logEvent("test_connection", parameters: ["UDP_SEND": "error: \(error)"])
+    //
+    //                     let error = NSError(domain: "app.error", code: 0, userInfo: [NSLocalizedDescriptionKey: "UDP_SEND error"])
+    //
+    //                     // FirebaseCrashlytics.Crashlytics.crashlytics().record(error: error)
+    //
+    //                 } else {
+    //                     // print("✅ Message sent: \"\(msg)\"")
+    //                 }
+    //                 connection.cancel()
+    //             })
+    //
+    //         case .failed(let error):
+    //             print("❌ Connection failed with error: \(error)")
+    //             Analytics.logEvent("test_connection", parameters: ["UDP_SEND": "connection failed: \(error)"])
+    //
+    //
+    //             let error = NSError(domain: "app.error", code: 0, userInfo: [NSLocalizedDescriptionKey: "UDP_SEND failed"])
+    //
+    //             // FirebaseCrashlytics.Crashlytics.crashlytics().record(error: error)
+    //
+    //             connection.cancel()
+    //
+    //         case .cancelled:
+    //            // Analytics.logEvent("test_connection", parameters: ["UDP_SEND": "connection cancelled"])
+    //
+    //             ""
+    //             // print("Connection closed.")
+    //
+    //         default:
+    //             break
+    //         }
+    //     }
+    // }
 
     func startUdpListener(port: Int32) -> any Kotlinx_coroutines_coreFlow {
         let params = NWParameters.udp
