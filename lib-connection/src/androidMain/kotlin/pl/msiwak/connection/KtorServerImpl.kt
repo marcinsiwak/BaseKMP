@@ -17,14 +17,11 @@ import io.ktor.websocket.WebSocketSession
 import io.ktor.websocket.close
 import io.ktor.websocket.readText
 import io.ktor.websocket.send
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -74,8 +71,8 @@ class KtorServerImpl : KtorServer {
                 activeSessions[userId] = this
 
                 runCatching {
-                    while (isActive) {
-                        when (val frame = incoming.receive()) {
+                    for (frame in incoming) {
+                        when (frame) {
                             is Frame.Text -> {
                                 val receivedText = frame.readText()
                                 println("OUTPUT: KtorServerImpl Received text: $receivedText")
