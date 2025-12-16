@@ -34,6 +34,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.dp
 import cardsthegame.sharedfrontend.common_resources.generated.resources.Res
+import cardsthegame.sharedfrontend.common_resources.generated.resources.card_idea_placeholder
+import cardsthegame.sharedfrontend.common_resources.generated.resources.cards_count
 import cardsthegame.sharedfrontend.common_resources.generated.resources.img_send_button
 import cardsthegame.sharedfrontend.common_resources.generated.resources.img_send_button_pressed
 import io.github.alexzhirkevich.compottie.LottieCompositionSpec
@@ -46,8 +48,6 @@ import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
-import cardsthegame.sharedfrontend.common_resources.generated.resources.card_idea_placeholder
-import cardsthegame.sharedfrontend.common_resources.generated.resources.cards_count
 import pl.msiwak.ui.game.component.CustomClickButton
 import pl.msiwak.ui.game.component.InputField
 
@@ -132,7 +132,7 @@ fun CardsPreparationScreen(viewModel: CardsPreparationViewModel = koinInject()) 
                     horizontalArrangement = Arrangement.SpaceAround
                 ) {
                     InputField(
-                        modifier = Modifier.focusRequester(focusRequester),
+                        modifier = Modifier.weight(1f).focusRequester(focusRequester),
                         value = viewState.text,
                         onValueChange = { viewModel.onUiAction(CardsPreparationUiAction.OnTextInput(it)) },
                         placeholder = stringResource(Res.string.card_idea_placeholder),
