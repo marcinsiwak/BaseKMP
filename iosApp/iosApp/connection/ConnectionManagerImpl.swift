@@ -29,7 +29,6 @@ class ConnectionManagerImpl: ConnectionManager {
             }
             let state = (path.status == .satisfied && path.usesInterfaceType(.wifi)) ? WifiState.connected : WifiState.disconnected
             print("OUTPUT: \(state)")
-            Analytics.logEvent("test_connection", parameters: ["wifiState": state.name])
             DispatchQueue.main.async {
                 self.wifiStateSubject.send(state)
             }
@@ -78,8 +77,6 @@ class ConnectionManagerImpl: ConnectionManager {
         }
         
         let error = NSError(domain: "app.error", code: 0, userInfo: [NSLocalizedDescriptionKey: "Address not found"])
-
-        // FirebaseCrashlytics.Crashlytics.crashlytics().record(error: error)
     
         return nil
     }
@@ -126,81 +123,6 @@ class ConnectionManagerImpl: ConnectionManager {
         return (value << 8) | (value >> 8)
     }
 
-    // func broadcastMessage(msg: String, port: Int32) async throws {
-    //     let data = msg.data(using: .utf8)!
-    //     if(networkIp == nil) {
-    //         networkIp = getLocalIpAddress()
-    //     }
-    //     let hostIp = networkIp?.split(separator: ".").dropLast().joined(separator: ".") ?? ""
-    //     let broadcastIp = getBroadcastAddress() ?? hostIp + ".255"
-    //     let host = NWEndpoint.Host(broadcastIp)
-    //     let remotePort = NWEndpoint.Port(integerLiteral: UInt16(port))
-    //
-    //     let parameters = NWParameters.udp
-    //
-    //        // Critical: Enable broadcast and set interface
-    //        parameters.allowLocalEndpointReuse = true
-    //        parameters.requiredInterfaceType = .wifi
-    //
-    //        // Set SO_BROADCAST option
-    //        let udpOptions = NWProtocolUDP.Options()
-    //        parameters.defaultProtocolStack.transportProtocol = udpOptions
-    //
-    //        if let ipOptions = parameters.defaultProtocolStack.internetProtocol as? NWProtocolIP.Options {
-    //            ipOptions.version = .v4
-    //        }
-    //
-    //
-    //     let connection = NWConnection(
-    //         host: host,
-    //         port: remotePort,
-    //         using: parameters
-    //     )
-    //
-    //
-    //     connection.start(queue: .global())
-    //
-    //     connection.stateUpdateHandler = { newState in
-    //         switch newState {
-    //         case .ready:
-    //             connection.send(content: data, completion: .contentProcessed { error in
-    //                 if let error = error {
-    //                     print("❌ Error sending UDP message: \(error)")
-    //                     Analytics.logEvent("test_connection", parameters: ["UDP_SEND": "error: \(error)"])
-    //
-    //                     let error = NSError(domain: "app.error", code: 0, userInfo: [NSLocalizedDescriptionKey: "UDP_SEND error"])
-    //
-    //                     // FirebaseCrashlytics.Crashlytics.crashlytics().record(error: error)
-    //
-    //                 } else {
-    //                     // print("✅ Message sent: \"\(msg)\"")
-    //                 }
-    //                 connection.cancel()
-    //             })
-    //
-    //         case .failed(let error):
-    //             print("❌ Connection failed with error: \(error)")
-    //             Analytics.logEvent("test_connection", parameters: ["UDP_SEND": "connection failed: \(error)"])
-    //
-    //
-    //             let error = NSError(domain: "app.error", code: 0, userInfo: [NSLocalizedDescriptionKey: "UDP_SEND failed"])
-    //
-    //             // FirebaseCrashlytics.Crashlytics.crashlytics().record(error: error)
-    //
-    //             connection.cancel()
-    //
-    //         case .cancelled:
-    //            // Analytics.logEvent("test_connection", parameters: ["UDP_SEND": "connection cancelled"])
-    //
-    //             ""
-    //             // print("Connection closed.")
-    //
-    //         default:
-    //             break
-    //         }
-    //     }
-    // }
-
     func startUdpListener(port: Int32) -> any Kotlinx_coroutines_coreFlow {
         let params = NWParameters.udp
         params.allowLocalEndpointReuse = true
@@ -209,10 +131,7 @@ class ConnectionManagerImpl: ConnectionManager {
             print("❌ Invalid port: \(port)")
             Analytics.logEvent("test_connection", parameters: ["UDP_LISTEN": "invalid port"])
             
-            
             let error = NSError(domain: "app.error", code: 0, userInfo: [NSLocalizedDescriptionKey: "UDP_LISTEN INVALID PORT"])
-
-            // FirebaseCrashlytics.Crashlytics.crashlytics().record(error: error)
 
             return subject.asFlow()
         }
@@ -231,14 +150,10 @@ class ConnectionManagerImpl: ConnectionManager {
                         
                         let error = NSError(domain: "app.error", code: 0, userInfo: [NSLocalizedDescriptionKey: "UDP_LISTEN RECEIVE ERROR"])
 
-                        // FirebaseCrashlytics.Crashlytics.crashlytics().record(error: error)
-
                         return
                     }
                     if let data = data, let message = String(data: data, encoding: .utf8) {
                         // print("📨 Received: \(message)")
-                        // Analytics.logEvent("test_connection", parameters: ["UDP_LISTEN": "received success"])
-
                         self.subject.send(message)
                     }
                 }
@@ -252,8 +167,6 @@ class ConnectionManagerImpl: ConnectionManager {
             Analytics.logEvent("test_connection", parameters: ["UDP_LISTEN": "listener failed"])
             
             let error = NSError(domain: "app.error", code: 0, userInfo: [NSLocalizedDescriptionKey: "UDP_LISTEN LISTENER FAILED"])
-
-            // FirebaseCrashlytics.Crashlytics.crashlytics().record(error: error)
 
             print("❌ Failed to start UDP listener on port \(port): \(error)")
         }
@@ -365,12 +278,7 @@ class ConnectionManagerImpl: ConnectionManager {
             }
             freeifaddrs(ifaddr)
         }
-        Analytics.logEvent("test_connection", parameters: ["LOCAL_ADDRESS": address])
-        
-        
         let error = NSError(domain: "app.error", code: 0, userInfo: [NSLocalizedDescriptionKey: "LOCAL IP \(String(describing: address))"])
-
-        // FirebaseCrashlytics.Crashlytics.crashlytics().record(error: error)
 
         networkIp = address
         return address

@@ -22,24 +22,6 @@ val versionCode = 1_000_000 * versionMajor + 10_000 * versionMinor + 100 * versi
 val appVersionCode: Int = Integer.valueOf(versionCode)
 
 kotlin {
-//    cocoapods {
-//        baseSetup()
-//        podfile = project.file("../iosApp/Podfile")
-//        framework {
-//            baseName = "ComposeApp"
-//            linkerOpts("-ObjC")
-//
-////            export(projects.sharedFrontend.network)
-//            export(projects.sharedFrontend.commonModel)
-//            export(projects.libConnection)
-//        }
-//
-////        pod("FirebaseCore", linkOnly = true)
-////        pod("FirebaseCrashlytics", linkOnly = true)
-////        pod("FirebaseRemoteConfig", linkOnly = true)
-////        pod("FirebaseAnalytics", linkOnly = true)
-//    }
-
     listOf(
         iosX64(),
         iosArm64(),
