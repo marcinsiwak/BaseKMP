@@ -23,6 +23,8 @@ import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.selects.select
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -73,18 +75,34 @@ class KtorServerImpl : KtorServer {
                 activeSessions[userId] = this
 
                 runCatching {
-                    incoming.consumeEach { frame ->
-                        when (frame) {
-                            is Frame.Text -> {
-                                val receivedText = frame.readText()
-                                println("OUTPUT: KtorServerImpl Received text: $receivedText")
-                                _messages.emit(receivedText)
-                                sendMessageToAll(receivedText)
-                            }
+                    while (coroutineContext.isActive) {
+                        select {
+                            incoming.onReceive { frame ->
+                                when (frame) {
+                                    is Frame.Text -> {
+                                        val receivedText = frame.readText()
+                                        println("OUTPUT: KtorServerImpl Received text: $receivedText")
+                                        _messages.emit(receivedText)
+                                        sendMessageToAll(receivedText)
+                                    }
 
-                            else -> println("OUTPUT: Received non-text frame: $frame")
+                                    else -> println("OUTPUT: Received non-text frame: $frame")
+                                }
+                            }
                         }
                     }
+//                    incoming.consumeEach { frame ->
+//                        when (frame) {
+//                            is Frame.Text -> {
+//                                val receivedText = frame.readText()
+//                                println("OUTPUT: KtorServerImpl Received text: $receivedText")
+//                                _messages.emit(receivedText)
+//                                sendMessageToAll(receivedText)
+//                            }
+//
+//                            else -> println("OUTPUT: Received non-text frame: $frame")
+//                        }
+//                    }
                 }.onFailure { exception ->
                     Log.e("OUTPUT", "OUTPUT - KtorServerImpl: $exception")
                     withContext(NonCancellable) {
