@@ -265,21 +265,28 @@ class GameManagerImpl(
 
         _currentGameSession.update {
             if (it?.cards?.all { card -> !card.isAvailable } == true) {
+                val playerId = it.nextPlayer()
                 it.copy(
-                    currentPlayerId = it.nextPlayer(),
+                    currentPlayerId = playerId,
                     cards = it.cards.map { card -> card.copy(isAvailable = true) },
                     gameState = nextGameState,
                     currentRoundStartDate = Clock.System.now().toLocalDateTime(TimeZone.UTC),
-                    lastUpdateTimestamp = time
+                    lastUpdateTimestamp = time,
+                    players = it.players.map { player ->
+                        if (player.id == playerId) player.copy(hasPlayedThisRound = true) else player
+                    }
                 )
-
             } else {
+                val playerId = if (fallbackGameState == GameState.SUMMARY) null else it?.nextPlayer()
                 it?.copy(
-                    currentPlayerId = if (fallbackGameState == GameState.SUMMARY) null else it.nextPlayer(),
+                    currentPlayerId = playerId,
                     gameState = fallbackGameState,
                     teams = if (fallbackGameState == GameState.SUMMARY) it.teams.sortedByDescending { team -> team.score } else it.teams,
                     currentRoundStartDate = Clock.System.now().toLocalDateTime(TimeZone.UTC),
-                    lastUpdateTimestamp = time
+                    lastUpdateTimestamp = time,
+                    players = it.players.map { player ->
+                        if (player.id == playerId) player.copy(hasPlayedThisRound = true) else player
+                    }
                 )
             }
         }
@@ -354,6 +361,7 @@ class GameManagerImpl(
 
         val next =
             currentTeam.playerIds.firstNotNullOfOrNull { id -> players.find { it.id == id && !it.hasPlayedThisRound } }
+        println("OUTPUT: Next player: $next")
 
         if (next != null) {
             return next.id

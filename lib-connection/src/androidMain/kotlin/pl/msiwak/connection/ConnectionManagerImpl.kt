@@ -113,7 +113,7 @@ class ConnectionManagerImpl : ConnectionManager {
                         socket.receive(packet)
                         val sender = packet.address.hostAddress
                         val message = String(packet.data, 0, packet.length)
-                        println("[UDP] Received from $sender: \"$message\"")
+//                        println("[UDP] Received from $sender: \"$message\"")
                         if (!sender.isNullOrBlank()) {
                             trySend(message)
                         }

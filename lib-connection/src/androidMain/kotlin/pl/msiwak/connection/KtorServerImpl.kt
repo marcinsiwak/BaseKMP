@@ -19,12 +19,14 @@ import io.ktor.websocket.readText
 import io.ktor.websocket.send
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
 class KtorServerImpl : KtorServer {
@@ -42,7 +44,7 @@ class KtorServerImpl : KtorServer {
         _messages.emit("Server started")
         server = embeddedServer(CIO, port = port, host = host) {
             configureServer()
-        }.start(wait = true)
+        }.startSuspend(wait = true)
     }
 
     override suspend fun stopServer() {
@@ -56,7 +58,7 @@ class KtorServerImpl : KtorServer {
     private fun Application.configureServer() {
         install(WebSockets) {
             pingPeriod = 15.seconds
-            timeout = 30.seconds
+            timeout = 1.minutes
         }
 
         routing {
@@ -71,7 +73,7 @@ class KtorServerImpl : KtorServer {
                 activeSessions[userId] = this
 
                 runCatching {
-                    for (frame in incoming) {
+                    incoming.consumeEach { frame ->
                         when (frame) {
                             is Frame.Text -> {
                                 val receivedText = frame.readText()
@@ -89,12 +91,12 @@ class KtorServerImpl : KtorServer {
                         activeSessions[userId]?.close(
                             CloseReason(
                                 CloseReason.Codes.NORMAL,
-                                "Another session opened"
+                                "Connection failed"
                             )
                         )
                         activeSessions.remove(userId)
                         _messages.emit("Client disconnected: $userId")
-                        cancel()
+//                        cancel()
                     }
                 }
             }

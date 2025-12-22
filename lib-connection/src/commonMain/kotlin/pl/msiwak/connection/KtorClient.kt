@@ -3,10 +3,12 @@ package pl.msiwak.connection
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.websocket.DefaultClientWebSocketSession
 import io.ktor.client.plugins.websocket.WebSockets
+import io.ktor.client.plugins.websocket.pingInterval
 import io.ktor.client.plugins.websocket.webSocket
 import io.ktor.http.HttpMethod
 import io.ktor.websocket.CloseReason
 import io.ktor.websocket.Frame
+import io.ktor.websocket.readBytes
 import io.ktor.websocket.readText
 import io.ktor.websocket.send
 import kotlinx.coroutines.CancellationException
@@ -27,6 +29,8 @@ import pl.msiwak.connection.Json.json
 import pl.msiwak.connection.engine.EngineProvider
 import pl.msiwak.connection.model.ClientActions
 import pl.msiwak.connection.model.WebSocketEvent
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 class KtorClient(engine: EngineProvider) {
     private var scope = CoroutineScope(Dispatchers.Main)
@@ -40,7 +44,9 @@ class KtorClient(engine: EngineProvider) {
     private val webSocketClientEvent: SharedFlow<WebSocketEvent> = _webSocketClientEvent.asSharedFlow()
 
     private val client = HttpClient(engine.getEngine()) {
-        install(WebSockets)
+        install(WebSockets) {
+            pingInterval = 15.seconds
+        }
     }
 
     suspend fun connect(host: String, port: Int, id: String) {

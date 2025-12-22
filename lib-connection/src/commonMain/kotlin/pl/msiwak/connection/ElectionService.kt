@@ -45,7 +45,10 @@ class ElectionService(
                 connectionManager.startUdpListener(port = 60000).collectLatest { message ->
                     handleElectionMessage(message)
                     val host = candidates.values.find { it.isHost }?.ipAddress
-                    host?.let { _hostIp.emit(it) }
+                    host?.let {
+                        println("Host is :$it")
+                        _hostIp.emit(it)
+                    }
 //                        ?: globalLoaderManager.showLoading(GlobalLoaderMessageType.MISSING_HOST)
 //                    println("Candidates: ${candidates.mapValues { it.value }}")
                 }
