@@ -63,7 +63,7 @@ class FinishViewModel(
     }
 
     private fun startCountdownTimer() {
-        val timeToPlayAgain = 5
+        val timeToPlayAgain = 8
 
         viewModelScope.launch {
             repeat(timeToPlayAgain) { i ->

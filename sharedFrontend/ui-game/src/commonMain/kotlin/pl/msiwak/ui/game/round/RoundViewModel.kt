@@ -51,11 +51,6 @@ class RoundViewModel(
             is RoundUiAction.OnCorrectClick -> {
                 viewModelScope.launch {
                     currentCard?.text?.let { setCorrectAnswerUseCase(it) }
-                    _uiState.update {
-                        it.copy(
-                            currentCard = getRandomCard()
-                        )
-                    }
                 }
             }
 
