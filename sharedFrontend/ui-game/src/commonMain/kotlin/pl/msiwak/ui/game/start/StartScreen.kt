@@ -27,8 +27,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import cardsthegame.sharedfrontend.common_resources.generated.resources.Res
+import cardsthegame.sharedfrontend.common_resources.generated.resources.error_message
 import cardsthegame.sharedfrontend.common_resources.generated.resources.game_title
 import cardsthegame.sharedfrontend.common_resources.generated.resources.join
+import cardsthegame.sharedfrontend.common_resources.generated.resources.ok
 import cardsthegame.sharedfrontend.common_resources.generated.resources.player_name
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
@@ -96,14 +98,14 @@ fun StartScreen(
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(
-                            text = "Something went wrong. Please try again",
+                            text = stringResource(Res.string.error_message),
                         )
                         Button(
                             onClick = {
                                 viewModel.onUiAction(StartUiAction.DismissDialog)
                             }
                         ) {
-                            Text(text = "OK")
+                            Text(text = stringResource(Res.string.ok))
                         }
                     }
                 }

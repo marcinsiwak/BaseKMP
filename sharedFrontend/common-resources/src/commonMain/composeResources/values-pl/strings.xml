@@ -7,7 +7,7 @@
     <string name="not_ready">Nie gotowy</string>
 
     <!-- StartScreen -->
-    <string name="game_title">Gra w Karty</string>
+    <string name="game_title">Karteczki</string>
     <string name="player_name">Nazwa gracza...</string>
     <string name="join">Dołącz</string>
 
@@ -33,4 +33,19 @@
     <!-- RoundInfoScreen -->
     <string name="next_player">Następny gracz: %1$s</string>
     <string name="start">Start</string>
+
+    <!-- LobbyScreen - Additional -->
+    <string name="minimum_players_message">Potrzebujesz co najmniej 4 graczy, aby rozpocząć. Drużyny powinny być równe lub różnić się o mjednego gracza</string>
+
+    <!-- StartScreen - Error Dialog -->
+    <string name="error_message">Coś poszło nie tak. Spróbuj ponownie</string>
+    <string name="ok">OK</string>
+
+    <!-- App - Wifi Dialog -->
+    <string name="turn_on_wifi">Włącz WiFi</string>
+    <string name="done">Gotowe</string>
+
+    <!-- App - Local IP Error Dialog -->
+    <string name="local_ip_error">Problem z uzyskaniem lokalnego adresu IP. Sprawdź połączenie internetowe i spróbuj ponownie</string>
+    <string name="try_again">Spróbuj ponownie</string>
 </resources>

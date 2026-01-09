@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import cardsthegame.sharedfrontend.common_resources.generated.resources.Res
 import cardsthegame.sharedfrontend.common_resources.generated.resources.choose_team
+import cardsthegame.sharedfrontend.common_resources.generated.resources.minimum_players_message
 import cardsthegame.sharedfrontend.common_resources.generated.resources.not_ready
 import cardsthegame.sharedfrontend.common_resources.generated.resources.ready
 import cardsthegame.sharedfrontend.common_resources.generated.resources.wait_for_players
@@ -55,7 +56,7 @@ fun LobbyScreen(
 
             Text(
                 modifier = Modifier.padding(16.dp),
-                text = "You need at least 4 players to start. Teams should be equal or differ by one player",
+                text = stringResource(Res.string.minimum_players_message),
                 color = GameColors.OnPrimary
             )
 

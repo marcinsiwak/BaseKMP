@@ -25,8 +25,13 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.compose.rememberNavController
 import cardsthegame.sharedfrontend.common_resources.generated.resources.Res
+import cardsthegame.sharedfrontend.common_resources.generated.resources.done
 import cardsthegame.sharedfrontend.common_resources.generated.resources.img_background
+import cardsthegame.sharedfrontend.common_resources.generated.resources.local_ip_error
+import cardsthegame.sharedfrontend.common_resources.generated.resources.try_again
+import cardsthegame.sharedfrontend.common_resources.generated.resources.turn_on_wifi
 import kotlinx.coroutines.flow.collectLatest
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.koinInject
@@ -84,14 +89,14 @@ fun App(
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(
-                            text = "Turn on Wifi",
+                            text = stringResource(Res.string.turn_on_wifi),
                         )
                         Button(
                             onClick = {
                                 viewModel.onUIAction(MainAction.OnDialogConfirm)
                             }
                         ) {
-                            Text(text = "Done")
+                            Text(text = stringResource(Res.string.done))
                         }
                     }
                 }
@@ -107,14 +112,14 @@ fun App(
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(
-                            text = "Issue with getting local IP address. Please check your internet connection and try again",
+                            text = stringResource(Res.string.local_ip_error),
                         )
                         Button(
                             onClick = {
                                 viewModel.onUIAction(MainAction.OnLocalIPErrorDialogConfirm)
                             }
                         ) {
-                            Text(text = "Try again")
+                            Text(text = stringResource(Res.string.try_again))
                         }
                     }
                 }

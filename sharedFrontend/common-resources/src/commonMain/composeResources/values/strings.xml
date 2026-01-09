@@ -33,4 +33,19 @@
     <!-- RoundInfoScreen -->
     <string name="next_player">Next player: %1$s</string>
     <string name="start">Start</string>
+
+    <!-- LobbyScreen - Additional -->
+    <string name="minimum_players_message">You need at least 4 players to start. Teams should be equal or differ by one player</string>
+
+    <!-- StartScreen - Error Dialog -->
+    <string name="error_message">Something went wrong. Please try again</string>
+    <string name="ok">OK</string>
+
+    <!-- App - Wifi Dialog -->
+    <string name="turn_on_wifi">Turn on Wifi</string>
+    <string name="done">Done</string>
+
+    <!-- App - Local IP Error Dialog -->
+    <string name="local_ip_error">Issue with getting local IP address. Please check your internet connection and try again</string>
+    <string name="try_again">Try again</string>
 </resources>

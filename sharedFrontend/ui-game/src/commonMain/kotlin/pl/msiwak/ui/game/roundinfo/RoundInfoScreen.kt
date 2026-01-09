@@ -60,7 +60,7 @@ fun RoundInfoScreen(viewModel: RoundInfoViewModel = koinInject()) {
 
             Text(
                 modifier = Modifier,
-                text = "Next player: ${viewState.currentPlayerName}",
+                text = stringResource(Res.string.next_player, viewState.currentPlayerName),
                 color = GameColors.OnPrimary
             )
 
@@ -69,7 +69,7 @@ fun RoundInfoScreen(viewModel: RoundInfoViewModel = koinInject()) {
             if (viewState.isPlayerRound) {
                 CustomButton(
                     modifier = Modifier.padding(vertical = 24.dp, horizontal = 16.dp),
-                    text = "Start",
+                    text = stringResource(Res.string.start),
                     onClick = {
                         viewModel.onUiAction(RoundInfoUiAction.OnStartRoundClick)
                     }
