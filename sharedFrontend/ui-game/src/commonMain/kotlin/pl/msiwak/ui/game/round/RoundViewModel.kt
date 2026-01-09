@@ -38,6 +38,7 @@ class RoundViewModel(
 
     private var availableCards = listOf<Card>()
     private var currentCard: Card? = null
+    private var checkedCards = mutableSetOf<Card>()
     private var timerJob: Job? = null
 
     init {
@@ -99,14 +100,38 @@ class RoundViewModel(
     }
 
     private fun getRandomCard(): Card? {
-        return if (availableCards.isNotEmpty()) {
-            availableCards.random()
-        } else {
-            null
+        // If all available cards have been checked, reset the checked cards set
+        if (checkedCards.size >= availableCards.size - 1 && currentCard != null) {
+            checkedCards.clear()
+        }
+
+        // Get cards that haven't been checked yet and are not the current card
+        val uncheckedCards = availableCards.filter { card ->
+            card != currentCard && !checkedCards.contains(card)
+        }
+
+        return when {
+            uncheckedCards.isNotEmpty() -> {
+                uncheckedCards.random().also { newCard ->
+                    currentCard?.let { checkedCards.add(it) }
+                    currentCard = newCard
+                }
+            }
+
+            availableCards.isNotEmpty() -> {
+                // Fallback: if no unchecked cards available but we have cards, pick any except current
+                availableCards.filter { it != currentCard }.randomOrNull()?.also { newCard ->
+                    currentCard = newCard
+                }
+            }
+
+            else -> null
+
         }.also {
             currentCard = it
         }
     }
+
 
     @OptIn(ExperimentalTime::class)
     private fun startCountdownTimer(currentRoundStartDate: LocalDateTime?) {
