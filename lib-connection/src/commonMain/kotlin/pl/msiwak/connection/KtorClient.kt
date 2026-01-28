@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.selects.select
 import kotlinx.coroutines.withContext
 import pl.msiwak.connection.Json.json
 import pl.msiwak.connection.engine.EngineProvider
@@ -93,16 +94,20 @@ class KtorClient(engine: EngineProvider) {
 
     private suspend fun DefaultClientWebSocketSession.listenForResponse() {
         runCatching {
-            while (isActive) {
-                when (val frame = incoming.receive()) {
-                    is Frame.Text -> {
-                        val text = frame.readText()
-                        println("OUTPUT: Received text: $text")
-                        val event = json.decodeFromString<WebSocketEvent>(text)
-                        _webSocketEvent.emit(event)
-                    }
+            while (coroutineContext.isActive) {
+                select {
+                    incoming.onReceive { frame ->
+                        when (frame) {
+                            is Frame.Text -> {
+                                val text = frame.readText()
+                                println("OUTPUT: Received text: $text")
+                                val event = json.decodeFromString<WebSocketEvent>(text)
+                                _webSocketEvent.emit(event)
+                            }
 
-                    else -> println("OUTPUT: Received non-text frame: $frame")
+                            else -> println("OUTPUT: Received non-text frame: $frame")
+                        }
+                    }
                 }
             }
         }.onFailure {

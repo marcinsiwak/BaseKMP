@@ -75,9 +75,9 @@ class ConnectionManagerImpl: ConnectionManager {
                 }
             }
         }
-        
+
         let error = NSError(domain: "app.error", code: 0, userInfo: [NSLocalizedDescriptionKey: "Address not found"])
-    
+
         return nil
     }
 
@@ -87,7 +87,7 @@ class ConnectionManagerImpl: ConnectionManager {
         }
         let hostIp = networkIp?.split(separator: ".").dropLast().joined(separator: ".") ?? ""
         let broadcastIp = getBroadcastAddress() ?? hostIp + ".255"
-        
+
         guard port >= 0 && port <= 65535 else {
             throw NSError(domain: "Invalid port", code: 0)
         }
@@ -118,19 +118,18 @@ class ConnectionManagerImpl: ConnectionManager {
 
         close(sock)
     }
-    
+
     func htons(_ value: UInt16) -> UInt16 {
         return (value << 8) | (value >> 8)
     }
 
     func startUdpListener(port: Int32) -> any Kotlinx_coroutines_coreFlow {
         let params = NWParameters.udp
-        params.allowLocalEndpointReuse = true
 
         guard let portValue = NWEndpoint.Port(rawValue: UInt16(port)) else {
             print("❌ Invalid port: \(port)")
             Analytics.logEvent("test_connection", parameters: ["UDP_LISTEN": "invalid port"])
-            
+
             let error = NSError(domain: "app.error", code: 0, userInfo: [NSLocalizedDescriptionKey: "UDP_LISTEN INVALID PORT"])
 
             return subject.asFlow()
@@ -144,16 +143,16 @@ class ConnectionManagerImpl: ConnectionManager {
                 connection.start(queue: .global())
 
                 connection.receiveMessage { data, _, _, error in
+                    defer {
+                        connection.cancel()
+                    }
+
                     if let error = error {
                         print("UDP receive error: \(error)")
-                        Analytics.logEvent("test_connection", parameters: ["UDP_LISTEN": "receive error"])
-                        
-                        let error = NSError(domain: "app.error", code: 0, userInfo: [NSLocalizedDescriptionKey: "UDP_LISTEN RECEIVE ERROR"])
-
                         return
                     }
-                    if let data = data, let message = String(data: data, encoding: .utf8) {
-                        // print("📨 Received: \(message)")
+
+                    if let data, let message = String(data: data, encoding: .utf8) {
                         self.subject.send(message)
                     }
                 }
@@ -165,7 +164,7 @@ class ConnectionManagerImpl: ConnectionManager {
 
         } catch {
             Analytics.logEvent("test_connection", parameters: ["UDP_LISTEN": "listener failed"])
-            
+
             let error = NSError(domain: "app.error", code: 0, userInfo: [NSLocalizedDescriptionKey: "UDP_LISTEN LISTENER FAILED"])
 
             print("❌ Failed to start UDP listener on port \(port): \(error)")

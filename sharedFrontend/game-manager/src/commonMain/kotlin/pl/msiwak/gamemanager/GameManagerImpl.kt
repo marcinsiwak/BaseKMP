@@ -216,7 +216,8 @@ class GameManagerImpl(
                 it?.copy(
                     gameState = GameState.TABOO,
                     currentRoundStartDate = Clock.System.now().toLocalDateTime(TimeZone.UTC),
-                    lastUpdateTimestamp = time
+                    lastUpdateTimestamp = time,
+                    currentPlayerId = if (it.currentPlayerId == null) gameSession.teams.first().playerIds.first() else it.currentPlayerId
                 )
             }
 
@@ -264,28 +265,57 @@ class GameManagerImpl(
         val time = Clock.System.now().toEpochMilliseconds()
 
         _currentGameSession.update {
-            if (it?.cards?.all { card -> !card.isAvailable } == true) {
-                val playerId = it.nextPlayer()
-                it.copy(
+            it ?: return@update null
+
+            var newSession = it!!
+
+            val teamA = it.teams[0]
+            val teamB = it.teams[1]
+
+            val nextTeam = when (it.currentPlayerId) {
+                null -> teamA
+                in teamA.playerIds -> teamB
+                in teamB.playerIds -> teamA
+                else -> teamA
+            }
+
+            val playerId = nextTeam.playerIds
+                .firstOrNull { id ->
+                    it.players.any { player -> player.id == id && !player.hasPlayedThisRound }
+                } ?: nextTeam.playerIds.first().also {
+                newSession = newSession.copy(
+                    players = newSession.players.map { player ->
+                        if (nextTeam.playerIds.contains(player.id)) {
+                            player.copy(hasPlayedThisRound = false)
+                        } else {
+                            player
+                        }
+                    }
+                )
+            }
+
+
+            if (it.cards.all { card -> !card.isAvailable }) {
+                newSession.copy(
                     currentPlayerId = playerId,
-                    cards = it.cards.map { card -> card.copy(isAvailable = true) },
+                    cards = newSession.cards.map { card -> card.copy(isAvailable = true) },
                     gameState = nextGameState,
                     currentRoundStartDate = Clock.System.now().toLocalDateTime(TimeZone.UTC),
                     lastUpdateTimestamp = time,
-                    players = it.players.map { player ->
-                        if (player.id == playerId) player.copy(hasPlayedThisRound = true) else player
+                    players = newSession.players.map { player ->
+                        if (player.id == it.currentPlayerId) player.copy(hasPlayedThisRound = true) else player
                     }
                 )
             } else {
-                val playerId = if (fallbackGameState == GameState.SUMMARY) null else it?.nextPlayer()
-                it?.copy(
+                val playerId = if (fallbackGameState == GameState.SUMMARY) null else playerId
+                newSession.copy(
                     currentPlayerId = playerId,
                     gameState = fallbackGameState,
-                    teams = if (fallbackGameState == GameState.SUMMARY) it.teams.sortedByDescending { team -> team.score } else it.teams,
+                    teams = if (fallbackGameState == GameState.SUMMARY) newSession.teams.sortedByDescending { team -> team.score } else newSession.teams,
                     currentRoundStartDate = Clock.System.now().toLocalDateTime(TimeZone.UTC),
                     lastUpdateTimestamp = time,
-                    players = it.players.map { player ->
-                        if (player.id == playerId) player.copy(hasPlayedThisRound = true) else player
+                    players = newSession.players.map { player ->
+                        if (player.id == it.currentPlayerId) player.copy(hasPlayedThisRound = true) else player
                     }
                 )
             }
@@ -352,24 +382,16 @@ class GameManagerImpl(
         val teamA = teams[0]
         val teamB = teams[1]
 
-        val currentTeam = when (currentPlayerId) {
+        val nextTeam = when (currentPlayerId) {
             null -> teamA
             in teamA.playerIds -> teamB
             in teamB.playerIds -> teamA
             else -> teamA
         }
 
-        val next =
-            currentTeam.playerIds.firstNotNullOfOrNull { id -> players.find { it.id == id && !it.hasPlayedThisRound } }
-        println("OUTPUT: Next player: $next")
-
-        if (next != null) {
-            return next.id
-        }
-
-        val resetPlayers = players.map { it.copy(hasPlayedThisRound = false) }
-        val resetSession = copy(players = resetPlayers)
-
-        return resetSession.nextPlayer()
+        return nextTeam.playerIds
+            .firstOrNull { id ->
+                players.any { it.id == id && !it.hasPlayedThisRound }
+            } ?: nextTeam.playerIds.first()
     }
 }
