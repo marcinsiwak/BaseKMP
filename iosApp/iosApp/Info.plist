@@ -17,9 +17,9 @@
 	<key>CFBundlePackageType</key>
 	<string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0</string>
+	<string>1.0.1</string>
 	<key>CFBundleVersion</key>
-	<string>1</string>
+	<string>1000100</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UIApplicationSceneManifest</key>
@@ -57,12 +57,11 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-    <key>NSLocalNetworkUsageDescription</key>
-    <string>This app needs access to devices on your local network to send messages.</string>
-
-    <key>NSBonjourServices</key>
-    <array>
-        <string>_udp._udp</string> <!-- replace with your actual service type if using Bonjour -->
-    </array>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>This app needs access to devices on your local network to send messages.</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_udp._udp</string>
+	</array>
 </dict>
 </plist>
