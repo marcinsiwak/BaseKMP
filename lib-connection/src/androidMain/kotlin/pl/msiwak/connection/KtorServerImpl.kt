@@ -18,8 +18,6 @@ import io.ktor.websocket.close
 import io.ktor.websocket.readText
 import io.ktor.websocket.send
 import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -32,7 +30,6 @@ import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
 class KtorServerImpl : KtorServer {
-    private var server: EmbeddedServer<*, *>? = null
     private val _messages = MutableSharedFlow<String>()
     override val messages: Flow<String> = _messages.asSharedFlow()
 
@@ -40,19 +37,31 @@ class KtorServerImpl : KtorServer {
 
     private val mutex = Mutex()
 
+    private var server: EmbeddedServer<*, *>? = null
+    private val serverMutex = Mutex()
+
     override suspend fun startServer(host: String, port: Int) {
-        if (server != null) return
-        println("OUTPUT: Server started")
-        _messages.emit("Server started")
-        server = embeddedServer(CIO, port = port, host = host) {
-            configureServer()
-        }.startSuspend(wait = true)
+        serverMutex.withLock {
+            if (server != null) {
+                println("OUTPUT: Server already running")
+                return
+            }
+            println("OUTPUT: Server starting on $host:$port")
+            _messages.emit("Server started")
+
+            server = embeddedServer(CIO, port = port, host = host) {
+                configureServer()
+            }.startSuspend(wait = false)
+        }
     }
 
     override suspend fun stopServer() {
-        server?.stopSuspend(1000, 1000)
-        server = null
-        println("OUTPUT: Server stopped")
+        serverMutex.withLock {
+            server?.stop(1000, 1000)
+            server = null
+            println("OUTPUT: Server stopped")
+            _messages.emit("Server stopped")
+        }
     }
 
     override fun isRunning(): Boolean = server != null

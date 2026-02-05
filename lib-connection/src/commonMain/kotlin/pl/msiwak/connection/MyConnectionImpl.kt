@@ -1,5 +1,6 @@
 package pl.msiwak.connection
 
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -50,6 +51,8 @@ class MyConnectionImpl(
     private var currentHostIp: String? = null
 
     private val scope = CoroutineScope(Dispatchers.IO)
+
+    private val errorHandler = CoroutineExceptionHandler { _, throwable ->}
 
     override val serverMessages: SharedFlow<WebSocketEvent> = ktorServer.messages
         .map(::mapMessage)
@@ -132,7 +135,7 @@ class MyConnectionImpl(
         job = CoroutineScope(Dispatchers.IO).launch {
             val ipAddress = connectionManager.getLocalIpAddress() ?: throw Exception("Cannot get local IP address")
             if (serverJob?.isActive != true) {
-                serverJob = launch { ktorServer.startServer(ipAddress, PORT) }
+                serverJob = launch(errorHandler) { ktorServer.startServer(ipAddress, PORT) }
             }
         }
     }
@@ -165,6 +168,7 @@ class MyConnectionImpl(
         return when {
             message.startsWith("Client disconnected: ") -> ClientActions.UserDisconnected(message.substringAfter("Client disconnected: "))
             message.contains("Server started") -> ServerActions.ServerStarted
+            message.contains("Server stopped") -> ClientActions.ServerDownDetected
             else -> json.decodeFromString<WebSocketEvent>(message)
         }
     }

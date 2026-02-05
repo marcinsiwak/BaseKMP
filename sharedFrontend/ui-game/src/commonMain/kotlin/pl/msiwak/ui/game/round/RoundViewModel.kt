@@ -7,7 +7,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.collectIndexed
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -52,6 +52,7 @@ class RoundViewModel(
             is RoundUiAction.OnCorrectClick -> {
                 viewModelScope.launch {
                     currentCard?.text?.let { setCorrectAnswerUseCase(it) }
+                    _uiState.update { it.copy(currentCard = getRandomCard()) }
                 }
             }
 
@@ -59,7 +60,7 @@ class RoundViewModel(
                 viewModelScope.launch {
                     _uiState.update {
                         it.copy(
-                            currentCard = getRandomCard(),
+                            currentCard = getRandomCard() ?: it.currentCard,
                         )
                     }
                 }
@@ -74,13 +75,13 @@ class RoundViewModel(
     }
 
     private suspend fun observeGameSession() {
-        observeGameSessionUseCase().filterNotNull().collectLatest { gameSession ->
+        observeGameSessionUseCase().filterNotNull().collectIndexed { index, gameSession ->
             with(gameSession) {
                 availableCards = cards.filter { it.isAvailable }
                 _uiState.update {
                     it.copy(
                         isPlayerRound = gameSession.currentPlayerId == getUserIdUseCase(),
-                        currentCard = getRandomCard(),
+                        currentCard = if (index == 0) getRandomCard() ?: getRandomCard() else it.currentCard,
                         currentPlayerName = players.find { player -> player.id == currentPlayerId }?.name ?: "",
                         isRoundFinished = availableCards.isEmpty().also { isEmpty ->
                             if (isEmpty) timerJob?.cancel() else startCountdownTimer(currentRoundStartDate)

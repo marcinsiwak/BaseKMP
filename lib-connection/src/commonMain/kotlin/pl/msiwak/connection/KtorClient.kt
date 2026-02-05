@@ -8,7 +8,6 @@ import io.ktor.client.plugins.websocket.webSocket
 import io.ktor.http.HttpMethod
 import io.ktor.websocket.CloseReason
 import io.ktor.websocket.Frame
-import io.ktor.websocket.readBytes
 import io.ktor.websocket.readText
 import io.ktor.websocket.send
 import kotlinx.coroutines.CancellationException
@@ -30,7 +29,6 @@ import pl.msiwak.connection.Json.json
 import pl.msiwak.connection.engine.EngineProvider
 import pl.msiwak.connection.model.ClientActions
 import pl.msiwak.connection.model.WebSocketEvent
-import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 class KtorClient(engine: EngineProvider) {
@@ -86,10 +84,8 @@ class KtorClient(engine: EngineProvider) {
         }
     }
 
-    fun send(webSocketEvent: WebSocketEvent) {
-        scope.launch {
-            _webSocketClientEvent.emit(webSocketEvent)
-        }
+    suspend fun send(webSocketEvent: WebSocketEvent) {
+        _webSocketClientEvent.emit(webSocketEvent)
     }
 
     private suspend fun DefaultClientWebSocketSession.listenForResponse() {
