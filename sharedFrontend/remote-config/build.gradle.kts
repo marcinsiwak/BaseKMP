@@ -31,5 +31,5 @@ kotlin {
 }
 
 android {
-    namespace = "pl.msiwak.cardsthegame.remoteconfig"
+    namespace = "pl.msiwak.basekmp.remoteconfig"
 }

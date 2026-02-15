@@ -17,7 +17,7 @@ fun AppNavHost(
     NavHost(
         modifier = Modifier.navigationBarsPadding(),
         navController = navController,
-        startDestination = NavDestination.GameDestination.Graph
+        startDestination = NavDestination.ExampleDestination.Graph
     ) {
         navigationGraphs.fastForEach {
             it.create(this@NavHost)

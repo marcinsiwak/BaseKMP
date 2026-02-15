@@ -1,4 +1,4 @@
-package pl.msiwak.cardsthegame.common.resources
+package pl.msiwak.basekmp.common.resources
 
 import androidx.compose.ui.graphics.Color
 

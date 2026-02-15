@@ -39,5 +39,5 @@ kotlin {
 }
 
 android {
-    namespace = "pl.msiwak.cardsthegame.ui.aiGenerated"
+    namespace = "pl.msiwak.basekmp.ui.aiGenerated"
 }

@@ -38,5 +38,5 @@ kotlin {
 }
 
 android {
-    namespace = "pl.msiwak.cardsthegame.common.model"
+    namespace = "pl.msiwak.basekmp.common.model"
 }

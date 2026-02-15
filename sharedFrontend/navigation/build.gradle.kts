@@ -26,5 +26,5 @@ kotlin {
 }
 
 android {
-    namespace = "pl.msiwak.cardsthegame.navigation"
+    namespace = "pl.msiwak.basekmp.navigation"
 }

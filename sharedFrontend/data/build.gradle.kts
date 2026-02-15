@@ -28,5 +28,5 @@ kotlin {
 }
 
 android {
-    namespace = "pl.msiwak.cardsthegame.data"
+    namespace = "pl.msiwak.basekmp.data"
 }

@@ -11,7 +11,6 @@
 		058557D9273AAEEB004C7B11 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 058557D8273AAEEB004C7B11 /* Preview Assets.xcassets */; };
 		2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2152FB032600AC8F00CF470E /* iOSApp.swift */; };
 		7023796D005F29E5E87DFF87 /* _internal_linkage_SwiftPMImport in Frameworks */ = {isa = PBXBuildFile; productRef = 8C8FC4737523EEAEABEE50E5 /* _internal_linkage_SwiftPMImport */; };
-		713FBE042E5B179400B48463 /* Telegraph in Frameworks */ = {isa = PBXBuildFile; productRef = 713FBE032E5B179400B48463 /* Telegraph */; };
 		71424B5C2EE0F70500371A52 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 71424B5B2EE0F70500371A52 /* FirebaseCore */; };
 		71424B5E2EE0F70500371A52 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 71424B5D2EE0F70500371A52 /* FirebaseCrashlytics */; };
 		71424B602EE0F70500371A52 /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = 71424B5F2EE0F70500371A52 /* FirebaseRemoteConfig */; };
@@ -56,7 +55,6 @@
 				719BAE142EE0EF95006F552A /* FirebaseAnalytics in Frameworks */,
 				71424B5E2EE0F70500371A52 /* FirebaseCrashlytics in Frameworks */,
 				71424B5C2EE0F70500371A52 /* FirebaseCore in Frameworks */,
-				713FBE042E5B179400B48463 /* Telegraph in Frameworks */,
 				71424B602EE0F70500371A52 /* FirebaseRemoteConfig in Frameworks */,
 				7023796D005F29E5E87DFF87 /* _internal_linkage_SwiftPMImport in Frameworks */,
 			);
@@ -175,7 +173,6 @@
 			);
 			mainGroup = 7555FF72242A565900829871;
 			packageReferences = (
-				713FBE022E5B179400B48463 /* XCRemoteSwiftPackageReference "Telegraph" */,
 				719BAE122EE0EF95006F552A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				19D4B38A772159C01CC78C2A /* XCLocalSwiftPackageReference "_internal_linkage_SwiftPMImport" */,
 			);
@@ -222,7 +219,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\"\n";
+			shellScript = "#\"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\"\n";
 		};
 		71CFB3BB2ED76C7F00D09A7F /* Set Google services path */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -282,7 +279,7 @@
 			baseConfigurationReference = AB3632DC29227652001CCB65 /* Config.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				APP_NAME = "debug cardsthegame";
+				APP_NAME = "debug basekmp";
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -365,7 +362,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = pl.msiwak.cardsthegame.ios.debug;
+				PRODUCT_BUNDLE_IDENTIFIER = pl.msiwak.basekmp.ios.debug;
 				PRODUCT_MODULE_NAME = "$(PRODUCT_NAME:c99extidentifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -459,7 +456,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = pl.msiwak.cardsthegame.ios;
+				PRODUCT_BUNDLE_IDENTIFIER = pl.msiwak.basekmp.ios;
 				PRODUCT_MODULE_NAME = "$(PRODUCT_NAME:c99extidentifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -503,14 +500,6 @@
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		713FBE022E5B179400B48463 /* XCRemoteSwiftPackageReference "Telegraph" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/Building42/Telegraph.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.40.0;
-			};
-		};
 		719BAE122EE0EF95006F552A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk.git";
@@ -522,11 +511,6 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		713FBE032E5B179400B48463 /* Telegraph */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 713FBE022E5B179400B48463 /* XCRemoteSwiftPackageReference "Telegraph" */;
-			productName = Telegraph;
-		};
 		71424B5B2EE0F70500371A52 /* FirebaseCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 719BAE122EE0EF95006F552A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;

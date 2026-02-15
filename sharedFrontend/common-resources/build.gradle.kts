@@ -36,5 +36,5 @@ compose.resources {
 }
 
 android {
-    namespace = "pl.msiwak.cardsthegame.common.resources"
+    namespace = "pl.msiwak.basekmp.common.resources"
 }

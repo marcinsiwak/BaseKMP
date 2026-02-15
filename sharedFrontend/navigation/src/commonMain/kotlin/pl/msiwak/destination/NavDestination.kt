@@ -39,28 +39,4 @@ sealed class NavDestination {
         @Serializable
         data object Screen : AiGeneratedDestination()
     }
-
-    @Serializable
-    sealed class GameDestination : NavDestination() {
-        @Serializable
-        data object Graph : GameDestination()
-
-        @Serializable
-        data object StartScreen : GameDestination()
-
-        @Serializable
-        data object LobbyScreen : GameDestination()
-
-        @Serializable
-        data object CardsPreparationScreen : GameDestination()
-
-        @Serializable
-        data object RoundInfoScreen : GameDestination()
-
-        @Serializable
-        data object RoundScreen : GameDestination()
-
-        @Serializable
-        data object FinishScreen : GameDestination()
-    }
 }

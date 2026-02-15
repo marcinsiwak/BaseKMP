@@ -1,15 +1,15 @@
 {
   "project_info": {
     "project_number": "865241316319",
-    "project_id": "cardsthegame-bcbc0",
-    "storage_bucket": "cardsthegame-bcbc0.firebasestorage.app"
+    "project_id": "basekmp-bcbc0",
+    "storage_bucket": "basekmp-bcbc0.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
         "mobilesdk_app_id": "1:865241316319:android:8135a04fd2a1d92b2ba26a",
         "android_client_info": {
-          "package_name": "pl.msiwak.cardsthegame"
+          "package_name": "pl.msiwak.basekmp"
         }
       },
       "oauth_client": [],
@@ -28,7 +28,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:865241316319:android:082e0965fc02448b2ba26a",
         "android_client_info": {
-          "package_name": "pl.msiwak.cardsthegame.android"
+          "package_name": "pl.msiwak.basekmp.android"
         }
       },
       "oauth_client": [],
@@ -47,7 +47,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:865241316319:android:2fe8ccf230e5db2a2ba26a",
         "android_client_info": {
-          "package_name": "pl.msiwak.cardsthegame.android.debug"
+          "package_name": "pl.msiwak.basekmp.android.debug"
         }
       },
       "oauth_client": [],
@@ -66,7 +66,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:865241316319:android:ee24f1e95f8a9af52ba26a",
         "android_client_info": {
-          "package_name": "pl.msiwak.cardsthegame.debug"
+          "package_name": "pl.msiwak.basekmp.debug"
         }
       },
       "oauth_client": [],

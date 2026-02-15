@@ -10,8 +10,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         IOSAppKt.doInitKoin()
-        MyConnectionDI().doInitKoin()
-        FirebaseApp.configure()
+//        FirebaseApp.configure()
 
         return true
     }

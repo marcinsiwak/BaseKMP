@@ -50,5 +50,5 @@ kotlin {
 }
 
 android {
-    namespace = "pl.msiwak.cardsthegame.network"
+    namespace = "pl.msiwak.basekmp.network"
 }

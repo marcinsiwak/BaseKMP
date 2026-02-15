@@ -33,5 +33,5 @@ kotlin {
 }
 
 android {
-    namespace = "pl.msiwak.cardsthegame.globalloadermanager"
+    namespace = "pl.msiwak.basekmp.globalloadermanager"
 }

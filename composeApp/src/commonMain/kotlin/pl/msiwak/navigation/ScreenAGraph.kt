@@ -15,8 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import cardsthegame.sharedfrontend.common_resources.generated.resources.Res
-import cardsthegame.sharedfrontend.common_resources.generated.resources.compose_multiplatform
+import basekmp.sharedfrontend.common_resources.generated.resources.Res
+import basekmp.sharedfrontend.common_resources.generated.resources.compose_multiplatform
 import org.jetbrains.compose.resources.painterResource
 import pl.msiwak.Greeting
 import pl.msiwak.destination.NavDestination
