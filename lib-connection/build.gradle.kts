@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.serialization)
+    id("io.github.ttypic.swiftklib") version "0.6.4"
 }
 
 kotlin {
@@ -62,5 +63,16 @@ kotlin {
                 implementation(libs.ktor.ios)
             }
         }
+    }
+
+    swiftPMDependencies {
+        localPackage(
+            path = projectDir.resolve("TelegraphWrapper"),
+            products = listOf(product("TelegraphObjCWrapper", platforms = setOf(iOS())))
+        )
+        localPackage(
+            path = projectDir.resolve("NetworkWrapper"),
+            products = listOf(product("NetworkWrapper", platforms = setOf(iOS())))
+        )
     }
 }

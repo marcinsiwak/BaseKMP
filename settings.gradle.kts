@@ -11,6 +11,7 @@ pluginManagement {
                 includeGroupAndSubgroups("com.google")
             }
         }
+        maven("https://packages.jetbrains.team/maven/p/kt/dev")
         mavenCentral()
         gradlePluginPortal()
     }
@@ -25,6 +26,7 @@ dependencyResolutionManagement {
                 includeGroupAndSubgroups("com.google")
             }
         }
+        maven("https://packages.jetbrains.team/maven/p/kt/dev")
         mavenCentral()
     }
 }

@@ -54,3 +54,9 @@ subprojects {
 dependencyLocking {
     lockAllConfigurations()
 }
+
+buildscript {
+    dependencies.constraints {
+        "classpath"("org.jetbrains.kotlin:kotlin-gradle-plugin:2.2.21-titan-211!!")
+    }
+}

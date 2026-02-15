@@ -149,33 +149,6 @@ class ConnectionManagerImpl : ConnectionManager {
         }
     }
 
-    @RequiresPermission(Manifest.permission.ACCESS_NETWORK_STATE)
-    override suspend fun findGame(port: Int): String? {
-        val ownIp = getLocalIpAddress() ?: throw Exception("Connect to network")
-        val subnet = ownIp.substringBeforeLast(".")
-
-        Log.d("NetworkScan", "Starting network scan for port $port on subnet $subnet.x")
-
-        return coroutineScope {
-            val scanTasks = (1..254).map { i ->
-                async {
-                    val host = "$subnet.$i"
-                    scanHost(host, port)
-                }
-            }
-            for (task in scanTasks) {
-                val result = task.await()
-                if (result != null) {
-                    Log.d("NetworkScan", "Game found at $result, cancelling remaining scans")
-                    scanTasks.forEach { if (it != task) it.cancel() }
-                    return@coroutineScope result
-                }
-            }
-            Log.d("NetworkScan", "No game server found on subnet $subnet.x")
-            null
-        }
-    }
-
     private suspend fun scanHost(host: String, port: Int): String? {
         return withTimeoutOrNull(1000) { // 1 second timeout per host
             runCatching {
