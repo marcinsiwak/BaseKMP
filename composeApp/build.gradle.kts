@@ -32,7 +32,6 @@ kotlin {
             isStatic = true
 
             export(projects.sharedFrontend.commonModel)
-            export(projects.libConnection)
         }
     }
 
@@ -46,16 +45,13 @@ kotlin {
             implementation(projects.sharedFrontend.navigation)
             implementation(projects.sharedFrontend.uiExample)
             implementation(projects.sharedFrontend.uiAiGenerated)
-            implementation(projects.sharedFrontend.uiGame)
             implementation(projects.sharedFrontend.commonResources)
             implementation(projects.sharedFrontend.commonModel)
             implementation(projects.sharedFrontend.data)
             implementation(projects.sharedFrontend.domain)
             implementation(projects.sharedFrontend.domainImpl)
-            implementation(projects.sharedFrontend.gameManager)
             implementation(projects.sharedFrontend.globalLoaderManager)
             implementation(projects.sharedFrontend.remoteConfig)
-            implementation(projects.libConnection)
             api(projects.sharedFrontend.network)
 
             implementation(libs.koin.core)
@@ -110,7 +106,7 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            signingConfig = signingConfigs.getByName("release")
+//            signingConfig = signingConfigs.getByName("release")
 
         }
         debug {

@@ -21,8 +21,6 @@ kotlin {
             implementation(projects.sharedFrontend.network)
             implementation(projects.sharedFrontend.commonModel)
             implementation(projects.sharedFrontend.globalLoaderManager)
-            implementation(projects.sharedFrontend.gameManager)
-            implementation(projects.libConnection)
 
             implementation(libs.kotlinx.coroutines)
         }

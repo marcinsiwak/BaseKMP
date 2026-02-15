@@ -21,7 +21,6 @@ kotlin {
             implementation(projects.sharedFrontend.commonModel)
             implementation(projects.sharedFrontend.domain)
             implementation(projects.sharedFrontend.data)
-            implementation(projects.libConnection)
             implementation(libs.kotlinx.coroutines)
         }
     }

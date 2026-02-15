@@ -32,9 +32,7 @@ kotlin {
             }
             commonMain.dependencies {
                 implementation(projects.sharedFrontend.commonModel)
-                implementation(projects.sharedFrontend.gameManager)
                 implementation(projects.sharedFrontend.globalLoaderManager)
-                implementation(projects.libConnection)
 
                 implementation(libs.koin.core)
                 implementation(libs.ktor.core)

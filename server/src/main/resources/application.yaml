@@ -1,0 +1,7 @@
+ktor:
+    application:
+        modules:
+          - pl.msiwak.ApplicationKt.module
+    development: false
+    deployment:
+       port: 8080

@@ -1,4 +1,4 @@
-rootProject.name = "CardsTheGame"
+rootProject.name = "BaseKMP"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
@@ -37,14 +37,11 @@ include(":sharedFrontend:buildConfig")
 include(":sharedFrontend:navigation")
 include(":sharedFrontend:ui-example")
 include(":sharedFrontend:ui-ai-generated")
-include(":sharedFrontend:ui-game")
 include(":sharedFrontend:common-model")
 include(":sharedFrontend:common-resources")
 include(":sharedFrontend:network")
 include(":sharedFrontend:data")
 include(":sharedFrontend:domain")
 include(":sharedFrontend:domain-impl")
-include(":sharedFrontend:game-manager")
 include(":sharedFrontend:global-loader-manager")
 include(":sharedFrontend:remote-config")
-include(":lib-connection")

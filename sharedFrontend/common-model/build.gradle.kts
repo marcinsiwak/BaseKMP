@@ -23,7 +23,6 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(projects.sharedFrontend.navigation)
-            implementation(projects.libConnection)
 
             implementation(compose.runtime)
             implementation(compose.foundation)
